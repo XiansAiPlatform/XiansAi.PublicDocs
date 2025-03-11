@@ -1,0 +1,27 @@
+/* Hide footer */
+.md-footer {
+  display: none;
+}
+
+.md-header__button.md-logo {
+  display: none;
+}
+
+/* Header color */
+.md-header {
+  background-color: #2b2b2b;
+}
+
+.md-header__title {
+  font-size: 1.2rem;
+}
+
+/* Primary color */
+[data-md-color-primary="custom"] {
+  --md-primary-fg-color: rgba(49, 11, 137, 0.759);
+  --md-primary-fg-color--light: #525252;
+  --md-primary-fg-color--dark: #1a1a1a;
+  --md-primary-bg-color: #ffffff;
+  --md-primary-bg-color--light: #ffffff;
+}
+
