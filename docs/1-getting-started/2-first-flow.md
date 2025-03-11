@@ -1,20 +1,20 @@
-# Your First Flow
+# Your First Agent
 
-## Creating a Flow
+## Creating an Agent
 
-To create a new flow, create a class that inherits from `XiansAi.Flow.FlowBase`.
+To create a new agent, create a class that inherits from `XiansAi.Flow.FlowBase`.
 
 !!! note "Tip"
-    This example demonstrates a simple flow. In later sections, we'll explore more complex flows using `Agents` and `Instructions`.
+    This example demonstrates a simple agent. In later sections, we'll explore more complex agents using `Agents` and `Instructions`.
 
-`SimpleFlow.cs >`
+`SimpleAgent.cs >`
 
 ```csharp
 using Temporalio.Workflows;
 using XiansAi.Flow;
 
-[Workflow]
-public class SimpleFlow: FlowBase
+[Workflow]x
+public class SimpleAgent: FlowBase
 {
     [WorkflowRun]
     public async Task<string> Run(string name)
@@ -28,36 +28,36 @@ public class SimpleFlow: FlowBase
 ```
 
 !!! warning "Important"
-    Each workflow name must be unique within your organization. You can view existing workflow definitions in the XiansAI portal. To customize a workflow's name, use the [Workflow] attribute:
+    Each agent name must be unique within your organization. You can view existing agent definitions in the XiansAI portal. To customize an agent's name, use the [Workflow] attribute:
     ```csharp
-    [Workflow("My New Named Flow")]
+    [Workflow("My New Named Agent")]
     public class SimpleFlow: FlowBase
     ```
 
 !!! abstract "Did you know?"
-    Xians.ai supports long-running (persistent) flows. This means your workflow can be paused for days or months and will automatically resume when the delay period ends.
+    Xians.ai supports long-running (persistent) agents. This means your agent can be paused for days or months and will automatically resume when the delay period ends.
 
-## Enabling flow visualization
+## Enabling agent visualization
 
-To enable flow visualization, you need to bundle the flow's source code into the assembly. Add the following XML to your `.csproj` file:
+To enable agent visualization, you need to bundle the agent's source code into the assembly. Add the following XML to your `.csproj` file:
 
 ```xml
   <ItemGroup>
-    <!-- Embed the flow source files -->
-    <EmbeddedResource Include="SimpleFlow.cs">
+    <!-- Embed the agent source files -->
+    <EmbeddedResource Include="SimpleAgent.cs">
         <LogicalName>%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 ```
 
-This configuration embeds the SimpleFlow.cs file as a resource in your assembly.
+This configuration embeds the SimpleAgent.cs file as a resource in your assembly.
 
 !!! note "Tip"
-    If your flow file is in a subdirectory, specify the full path in the Include attribute. For example: Include="MyNamespace/SimpleFlow.cs"
+    If your agent file is in a subdirectory, specify the full path in the Include attribute. For example: Include="MyNamespace/SimpleAgent.cs"
 
 ## Registering the Flow Runner
 
-To register your flow, add it to the Flow Runner in your Program.cs file:
+To register your agent, add it to the Flow Runner in your Program.cs file:
 
 `Program.cs >`
 
@@ -110,26 +110,26 @@ The Flow Runner will now wait for flow execution requests. To start a new flow, 
     ```
     You'll need to install the `DotNetEnv` package. See the [Getting Started](./1-setting-up.md) section for more information.
 
-![Start New Flow](../images/start-new-flow.png)
+![Start New Agent Run](../images/start-new-flow.png)
 
-You can view flow definition details and visualizations in the XiansAI portal.
+You can view agent definition details and visualizations in the XiansAI portal.
 
-![Flow Definition Details](../images/flow-visualization.png)
+![Agent Definition Details](../images/flow-visualization.png)
 
-## Running the Flow
+## Running the Agent
 
-To execute your flow:
+To execute your agent:
 
-1. Navigate to the flow definitions page
+1. Navigate to the agent definitions page
 2. Click the 'Start New' button
-3. Monitor the 'Flow Runs' section to track your flow's execution
+3. Monitor the 'Agent Runs' section to track your agent's execution
 
-Note: It may take a few seconds for your flow run to appear. Refresh the page if needed.
+Note: It may take a few seconds for your agent run to appear. Refresh the page if needed.
 
-![Flow Runs](../images/flow-runs.png)
+![Agent Runs](../images/flow-runs.png)
 
 ## Next Steps
 
-Now that you've created your first flow, learn how to create a Flow with Activities to explore more advanced flow capabilities.
+Now that you've created your first agent, learn how to create a Agent with Activities to explore more advanced agent capabilities.
 
-[Create a Flow with Activities](3-activity-flow.md)
+[Create a Agent with Activities](3-activity-flow.md)

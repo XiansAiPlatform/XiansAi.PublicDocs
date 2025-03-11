@@ -1,4 +1,4 @@
-# Setting Up a Flow Project
+# Setting Up an Agent Project
 
 ## Prerequisites
 
@@ -8,7 +8,7 @@ Before you begin, ensure you have installed:
 
 ## Creating Your Project
 
-Xians.ai flows run as standard .NET applications, which can be executed locally or deployed to any server environment. Let's create a new project:
+Xians.ai agents run as standard .NET applications, which can be executed locally or deployed to any server environment. Let's create a new project:
 
 ```bash
 dotnet new console -n MyNewXiansAiFlow
@@ -37,14 +37,14 @@ The XiansAi platform consists of two main components:
 
 ### App Server
 
-- Manages your flows and instructions
+- Manages your agents and instructions
 - Provides monitoring and visualization
-- Handles flow administration
+- Handles agent administration
 
 ### Flow Server
 
-- Executes your flows
-- Manages workflow state and persistence
+- Executes your agents
+- Manages agent state and persistence
 - Handles distributed execution
 
 ## Configuration Setup
@@ -127,4 +127,4 @@ If no errors occur, your setup is complete. Remember to remove the `TestMe()` ca
 
 ## Next Steps
 
-With your environment configured, you're ready to [create your first flow](2-first-flow.md).
+With your environment configured, you're ready to [create your first Agent](2-first-flow.md).

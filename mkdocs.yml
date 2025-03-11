@@ -29,18 +29,18 @@ nav:
   - Home: index.md
   - Getting Started:
     - Setting Up: 1-getting-started/1-setting-up.md
-    - Your First Flow: 1-getting-started/2-first-flow.md
-    - Flow with Activities: 1-getting-started/3-activity-flow.md
+    - Your First Agent: 1-getting-started/2-first-flow.md
+    - Agent with Activities: 1-getting-started/3-activity-flow.md
   - Instructions:
     - Manage Instructions: 2-instructions/1-manage-instructions.md
-    - Flow Without Instructions: 2-instructions/2-without-instructions.md
+    - Agent Without Instructions: 2-instructions/2-without-instructions.md
     - Using Instructions: 2-instructions/3-using-instructions.md
-  - Agents:
-    - What are Agents: 3-agents/1-agent-types.md
-    - Using Agents:
-      - Package Agents: 3-agents/2-using-agents/1-package-agents.md
-      - Docker Agents: 3-agents/2-using-agents/2-docker-agents.md
-      - Custom Agents: 3-agents/2-using-agents/3-custom-agents.md
+  - Agent Tools:
+    - What are Agent Tools: 3-agents/1-agent-types.md
+    - Using Agent Tools:
+      - Package Agent Tools: 3-agents/2-using-agents/1-package-agents.md
+      - Docker Agent Tools: 3-agents/2-using-agents/2-docker-agents.md
+      - Custom Agent Tools: 3-agents/2-using-agents/3-custom-agents.md
 
 markdown_extensions:
   - tables

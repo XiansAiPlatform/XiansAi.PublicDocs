@@ -4,11 +4,11 @@ Welcome to the official documentation for Xians.ai. Here you'll find everything 
 
 ## Quick Navigation
 
-- **[Getting Started](1-getting-started/1-setting-up.md)** - Set up and create your first flow
+- **[Getting Started](1-getting-started/1-setting-up.md)** - Set up and create your first agent
 
 - **[Instructions](2-instructions/1-manage-instructions.md)** - Working with instructions
 
-- **[Agents](3-agents/1-agent-types.md)** - Using agents
+- **[Agent Tools](3-agents/1-agent-types.md)** - Using agent tools
 
 ## Code Samples
 
