@@ -31,7 +31,7 @@ nav:
     - Setting Up: 1-getting-started/1-setting-up.md
     - Your First Agent: 1-getting-started/2-first-flow.md
     - Agent with Activities: 1-getting-started/3-activity-flow.md
-  - Knowledge:
+  - Agent Knowledge:
     - Manage Knowledge: 2-knowledge/1-manage-knowledge.md
     - Agent Without Knowledge: 2-knowledge/2-without-knowledge.md
     - Using Knowledge: 2-knowledge/3-using-knowledge.md
@@ -41,6 +41,9 @@ nav:
       - Package Agent Tools: 3-tools/2-using-tools/1-package-tools.md
       - Docker Agent Tools: 3-tools/2-using-tools/2-docker-tools.md
       - Custom Agent Tools: 3-tools/2-using-tools/3-custom-tools.md
+  - Encyclopedia:
+    - Multi-flow Agents: 4-encyclopedia/multi-flow-agents.md
+
 
 markdown_extensions:
   - tables
