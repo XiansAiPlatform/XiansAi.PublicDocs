@@ -33,7 +33,7 @@ Send a signal to a running Agent workflow to provide data or instructions.
 
 ```json
 {
-  "workflowInstanceId": "string",  // ID of the running workflow
+  "workflowId": "string",  // ID of the running workflow
   "signalName": "string",          // Name of the signal to send
   "payload": {                     // Optional data payload to send with the signal
     // Any JSON object
