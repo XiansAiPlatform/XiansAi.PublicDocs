@@ -9,15 +9,18 @@ Activities are the fundamental building blocks of a flow that handle external in
 - Calling external services
 - File system operations
 
-## Understanding Flow Architecture
+## Understanding Agent Architecture
 
-### The Flow Class
+Agent can have one or mode Flows. Each flow can have one or more Activities.
 
-The `Flow` class serves as the orchestrator and defines the sequence of activities to be executed. While powerful in coordinating activities, the Flow class itself:
+### The Flow
 
+The `Flow` serves as the orchestrator and defines the sequence of activities to be executed. While powerful in coordinating activities, the Flow class itself:
+
+- Implemented as a class that inherits from `FlowBase`
 - Cannot perform direct IO operations
 - Should only contain workflow logic and activity coordination
-- Acts as a configuration layer using the full power of C#
+- Acts as a orchestrator using the full power of a programming language
 
 ### Activities
 

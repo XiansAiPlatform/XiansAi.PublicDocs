@@ -43,6 +43,7 @@ nav:
       - Custom Agent Tools: 3-tools/2-using-tools/3-custom-tools.md
   - Encyclopedia:
     - Multi-flow Agents: 4-encyclopedia/multi-flow-agents.md
+    - Signaling Agent Workflows: 4-encyclopedia/signaling-agent-workflows.md
 
 
 markdown_extensions:
