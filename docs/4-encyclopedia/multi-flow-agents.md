@@ -1,6 +1,6 @@
-# Creating Multi-Flow Agents with XiansAi.Flow
+# Creating Multi-Flow Agents
 
-This guide explains how to create an agent with multiple flows using the XiansAi.Flow framework.
+This guide explains how to create an agent with multiple flows using the XiansAi framework.
 
 ## Overview
 
