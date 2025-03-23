@@ -37,7 +37,7 @@ The XiansAi platform consists of two main components:
 
 ### App Server
 
-- Manages your agents and instructions
+- Manages your agents and knowledge
 - Provides monitoring and visualization
 - Handles agent administration
 
@@ -75,7 +75,7 @@ The XiansAi platform consists of two main components:
     // Register the flow (see the next section for more details)
     ```
 
-    !!! tip "Using Environment Files"
+    !!! tip "Using Environment Files" (RECOMMENDED)
         For better security and maintainability, use a .env file to manage your configuration:
         You can use a package like [DotNetEnv](https://github.com/tonerdo/dotnet-env) to load the environment variables from the `.env` file without hardcoding them in your code.
 
@@ -89,6 +89,10 @@ The XiansAi platform consists of two main components:
 
         APP_SERVER_URL=https://api.xians.ai
         APP_SERVER_API_KEY=12fsd-0fidsfdsfkjsdfnsdfdskdsbf...
+        ```
+        Install the DotNetEnv package:
+        ```bash
+        dotnet add package DotNetEnv
         ```
         Update your Program.cs:
         `Program.cs >`
@@ -120,7 +124,6 @@ If no errors occur, your setup is complete. Remember to remove the `TestMe()` ca
 
 !!! warning "Troubleshooting"
     Common issues include:
-
     - Incorrect certificate paths
     - Missing environment variables
     - Invalid credentials

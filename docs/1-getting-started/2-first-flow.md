@@ -5,7 +5,7 @@
 To create a new agent, create a class that inherits from `XiansAi.Flow.FlowBase`.
 
 !!! note "Tip"
-    This example demonstrates a simple agent. In later sections, we'll explore more complex agents using `Agents` and `Instructions`.
+    This example demonstrates a simple agent. In later sections, we'll explore more complex agents using `Agents` and `Knowledge`.
 
 `SimpleAgent.cs >`
 
@@ -13,7 +13,7 @@ To create a new agent, create a class that inherits from `XiansAi.Flow.FlowBase`
 using Temporalio.Workflows;
 using XiansAi.Flow;
 
-[Workflow]x
+[Workflow]
 public class SimpleAgent: FlowBase
 {
     [WorkflowRun]
@@ -27,13 +27,23 @@ public class SimpleAgent: FlowBase
 }
 ```
 
-!!! warning "Important"
-    Each agent name must be unique within your organization. You can view existing agent definitions in the XiansAI portal. To customize an agent's name, use the [Workflow] attribute:
+## Agent Naming
+
+To customize an agent's name, use the [Workflow] attribute.
+    Format: `<Agent Name>: <Flow Name>`
+    If your Agent only has a single flow, you can skip the `: <Flow Name>` part.
     ```csharp
-    [Workflow("My New Named Agent")]
+    [Workflow("My First Agent")]
+    public class SimpleFlow: FlowBase
+    ```
+    If your Agent has multiple flows, you can specify the flow name.
+    ```csharp
+    [Workflow("My First Agent: Simple Flow")]
     public class SimpleFlow: FlowBase
     ```
 
+!!! warning "Important"
+    Each agent name must be unique within your organization. You can view existing agent definitions in the XiansAI portal. 
 !!! abstract "Did you know?"
     Xians.ai supports long-running (persistent) agents. This means your agent can be paused for days or months and will automatically resume when the delay period ends.
 
@@ -127,6 +137,28 @@ To execute your agent:
 Note: It may take a few seconds for your agent run to appear. Refresh the page if needed.
 
 ![Agent Runs](../images/flow-runs.png)
+
+## Configure Logging
+
+To configure logging for your agent, you can use the `FlowRunnerService.SetLoggerFactory` method.
+
+```csharp
+using XiansAi.Flow;
+using DotNetEnv;
+using Microsoft.Extensions.Logging;
+
+// Load environment configuration
+Env.Load();
+
+// Configure logging
+FlowRunnerService.SetLoggerFactory(LoggerFactory.Create(builder => 
+    builder
+        .SetMinimumLevel(LogLevel.Debug)
+        .AddConsole()
+));
+
+...
+```
 
 ## Next Steps
 

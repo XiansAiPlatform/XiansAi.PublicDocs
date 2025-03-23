@@ -17,7 +17,7 @@ dotnet add package <package-name>
 Add the `Agent` attribute to your activity interface to enable proper integration with the Xians.ai Portal:
 
 ```csharp
-[Agent("XiansAi.Agent.GoogleSearch", AgentType.Package)]
+[AgentTool("XiansAi.Agent.GoogleSearch", AgentToolType.Package)]
 public interface IUrlSearchActivity
 {
     [Activity]
@@ -25,12 +25,12 @@ public interface IUrlSearchActivity
 }
 ```
 
-The `Agent` attribute requires two parameters:
+The `AgentTool` attribute requires two parameters:
 
-- `agentName`: The fully qualified name of the agent package
-- `agentType`: Set to `AgentType.Package` for package agents
+- `Name`: The fully qualified name of the package (Only used for information in the Xians.ai Portal)
+- `Type`: Set to `AgentToolType.Package` for package tools
 
-In the case of a package agent, this only serves information to the Xians.ai Portal. This attribute has no impact on the runtime of the workflow.
+In the case of a package tool, this only serves information to the Xians.ai Portal. This attribute has no impact on the runtime of the workflow.
 
 ### 2. Implement the Activity
 

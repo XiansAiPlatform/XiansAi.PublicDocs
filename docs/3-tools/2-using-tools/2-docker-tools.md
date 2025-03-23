@@ -11,22 +11,22 @@ Docker agents are containerized applications that run within a Docker environmen
 
 ### 1. Define the Activity Interface
 
-Add the `Agent` attribute to your activity interface, specifying the Docker image name and agent type as `AgentType.Docker`:
+Add the `AgentTool` attribute to your activity interface, specifying the Docker image name and agent type as `AgentToolType.Docker`:
 
 ```csharp
-[Agent("xiansai/web-reader-agent", AgentType.Docker)]
+[AgentTool("xiansai/web-reader-agent", AgentToolType.Docker)]
 public interface IWebReaderActivity
 {
     [Activity]
-    [Instructions("How to Read LinkedIn Company Pages")]
+    [Knowledge("How to Read LinkedIn Company Pages")]
     Task<LinkedInCompany?> ReadLinkedInPage(string url);
 }
 ```
 
-The `Agent` attribute requires:
+The `AgentTool` attribute requires:
 
-- `agentName`: The Docker image name (e.g., "xiansai/web-reader-agent")
-- `agentType`: Set to `AgentType.Docker` for Docker agents
+- `Name`: The Docker image name (e.g., "xiansai/web-reader-agent")
+- `Type`: Set to `AgentToolType.Docker` for Docker tools
 
 ### 2. Implement the Activity
 
@@ -39,9 +39,9 @@ public class WebReaderActivity : ActivityBase, IWebReaderActivity
 
     public async Task<LinkedInCompany?> ReadLinkedInPage(string url)
     {
-        // Get instructions from server
+        // Get knowledge from server
         var instructionFilePath = await GetInstructionAsTempFile() 
-            ?? throw new Exception("Failed to get instructions");
+            ?? throw new Exception("Failed to get knowledge");
 
         // Create your docker agent
         var readerAgent = GetDockerAgent();

@@ -230,4 +230,4 @@ dotnet run
 
 ## Next Steps
 
-- [Learn about Instructions](../2-instructions/1-manage-instructions.md)
+- [Learn about Knowledge](../2-knowledge/1-manage-knowledge.md)

@@ -1,11 +1,11 @@
-# Using Instructions
+# Using Knowledge
 
-## Creating Instructions
+## Creating Knowledge
 
 To create a new instruction:
 
 1. Navigate to the [XiansAI Portal](https://xians.ai)
-2. Go to the `Instructions` page
+2. Go to the `Knowledge` page
 3. Click `Create New`
 
 ![Create New Instruction](../images/poem-instruction.png)
@@ -31,11 +31,11 @@ Children aged 10-12 years old.
 Generate an engaging poem (~100 words) that incorporates all provided keywords.
 ```
 
-## Using Instructions in Code
+## Using Knowledge in Code
 
 ### 1. Decorate Activity Methods
 
-Add the `[Instructions]` attribute to methods that should use instructions:
+Add the `[Knowledge]` attribute to methods that should use knowledge:
 
 `> PoetFlow.cs`
 
@@ -43,14 +43,14 @@ Add the `[Instructions]` attribute to methods that should use instructions:
 public interface IComposerActivity
 {
     [Activity]
-    [Instructions("How to Generate a Poem")]
+    [Knowledge("How to Generate a Poem")]
     Task<string?> GeneratePoemAsync(string keywords);
 }
 ```
 
-### 2. Load Instructions in Activity Implementation
+### 2. Load Knowledge in Activity Implementation
 
-Use the `GetInstruction()` helper method to load instructions at runtime:
+Use the `GetInstruction()` helper method to load knowledge at runtime:
 
 `> ComposerActivity.cs`
 
@@ -67,15 +67,15 @@ public class ComposerActivity : ActivityBase, IComposerActivity
 }
 ```
 
-## Working with Multiple Instructions
+## Working with Multiple Knowledge
 
-You can specify multiple instructions for a single method:
+You can specify multiple knowledge for a single method:
 
 ```csharp
-[Instructions("How to Generate a Poem", "How to Generate a Story")]
+[Knowledge("How to Generate a Poem", "How to Generate a Story")]
 ```
 
-Load specific instructions by index (1-based):
+Load specific knowledge by index (1-based):
 
 ```csharp
 // Load first instruction
@@ -86,11 +86,11 @@ var storyInstruction = await GetInstruction(2);
 ```
 
 !!! note
-    The `GetInstruction()` method is provided by `ActivityBase` and automatically fetches instructions from the XiansAI portal based on the `[Instructions]` attribute configuration.
+    The `GetInstruction()` method is provided by `ActivityBase` and automatically fetches knowledge from the XiansAI portal based on the `[Knowledge]` attribute configuration.
 
 
 ## Next Steps
 
-Now we are able to use instructions in our code. Next, we will learn how to use `Agents`' to create more complex workflows.
+Now we are able to use knowledge in our code. Next, we will learn how to use `Agents`' to create more complex workflows.
 
-[Next: Using Agents](../3-agents/1-agent-types.md)
+[Next: Using Agent Tools](../3-tools/1-agent-tool-types.md)

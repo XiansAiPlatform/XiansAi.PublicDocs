@@ -1,8 +1,8 @@
 # Xians.ai Agent Tools
 
-Agents tools are **reusable** software components that perform specific tasks within your business process flows. They serve as building blocks that can be composed together to create complex workflows.
+Agent tools are **reusable** software components that perform specific tasks within your business process flows. They serve as building blocks that can be composed together to create complex workflows.
 
-## Activities vs Agents Tools
+## Activities vs Agent Tools
 
 Activities sit in between the Flow and the Agent Tools. The activity is responsible of following:
 
@@ -10,7 +10,7 @@ Activities sit in between the Flow and the Agent Tools. The activity is responsi
 - Calling the agent and monitoring its progress
 - Collecting and formatting the agent's output to the Flow
 
-## Common Agent Use Cases
+## Common Agent Tool Use Cases
 
 Agent Tools can handle various tasks including:
 

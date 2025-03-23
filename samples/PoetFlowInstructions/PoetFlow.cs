@@ -18,7 +18,7 @@ public class PoetFlow: FlowBase
 public interface IComposerActivity
 {
     [Activity]
-    [Instructions("How to Generate a Poem")]
+    [Knowledge("How to Generate a Poem")]
     Task<string?> GeneratePoemAsync(string keywords);
 }
 

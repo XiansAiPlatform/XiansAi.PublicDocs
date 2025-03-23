@@ -6,10 +6,10 @@ Custom agents are fully custom implementations in your Activity classes. They ar
 
 ### 1. Define the Activity Interface
 
-Add the `Agent` attribute to your activity interface to enable proper integration with the Xians.ai Portal:
+Add the `AgentTool` attribute to your activity interface to enable proper integration with the Xians.ai Portal:
 
 ```csharp
-[Agent("<Give a name to your agent>", AgentType.Custom)]
+[AgentTool("<Give a name to your tool>", AgentToolType.Custom)]
 public interface IUrlSearchActivity
 {
     [Activity]
@@ -17,7 +17,7 @@ public interface IUrlSearchActivity
 }
 ```
 
-The Agent attribute is not required for the activity runtime, but it is required for the Portal to know that this activity is a custom agent.
+The `AgentTool` attribute is not required for the activity runtime, but it is required for the Portal to know that this activity is a custom tool.
 
 ### 2. Implement the Activity
 

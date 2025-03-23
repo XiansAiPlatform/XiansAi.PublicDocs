@@ -10,8 +10,8 @@ public class WebReaderActivity: ActivityBase, IWebReaderActivity
 
     public async Task<LinkedInCompany?> ReadLinkedInPage(string url)
     {
-        // get instructions from server
-        var instructionFilePath = await GetInstructionAsTempFile() ?? throw new Exception("Failed to get instructions");
+        // get knowledge from server
+        var instructionFilePath = await GetInstructionAsTempFile() ?? throw new Exception("Failed to get knowledge");
 
         // Create your docker agent
         var readerAgent = GetDockerAgent();

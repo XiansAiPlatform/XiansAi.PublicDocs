@@ -1,4 +1,4 @@
-# Flow Without Instructions
+# Flow Without Knowledge
 
 This example demonstrates how to create a poetry generation flow using the Gemini API. The flow takes some words as input and returns a generated poem.
 
@@ -211,12 +211,12 @@ dotnet run
 
 ## Instruction - Limitations
 
-The flow we implemented hard codes the instructions to the Gemini API. This is not ideal for a number of reasons.
+The flow we implemented hard codes the knowledge to the Gemini API. This is not ideal for a number of reasons.
 
 - When business requirements change, we need to update the code.
-- Business users are not able to change the instructions.
-- We are not able to track the instructions used in the flow.
+- Business users are not able to change the knowledge.
+- We are not able to track the knowledge used in the flow.
 
-In the next example, we will see how to manage instructions in XiansAI Portal instead of hard coding them in the code.
+In the next example, we will see how to manage knowledge in XiansAI Portal instead of hard coding them in the code.
 
-[Using Instructions](./3-using-instructions.md)
+[Using Knowledge](./3-using-knowledge.md)

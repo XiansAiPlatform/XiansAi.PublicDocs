@@ -32,7 +32,7 @@ public interface IUrlSearchActivity
 public interface IWebReaderActivity
 {
     [Activity]
-    [Instructions("How to Read LinkedIn Company Pages")]
+    [Knowledge("How to Read LinkedIn Company Pages")]
     Task<LinkedInCompany?> ReadLinkedInPage(string url);
 }
 
