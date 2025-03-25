@@ -44,6 +44,7 @@ nav:
   - Encyclopedia:
     - Multi-flow Agents: 4-encyclopedia/multi-flow-agents.md
     - Signaling Agent Workflows: 4-encyclopedia/signaling-agent-workflows.md
+    - Unit Testing Activities: 4-encyclopedia/unit-testing-activities.md
 
 
 markdown_extensions:
