@@ -45,6 +45,8 @@ nav:
     - Multi-flow Agents: 4-encyclopedia/multi-flow-agents.md
     - Signaling Agent Workflows: 4-encyclopedia/signaling-agent-workflows.md
     - Unit Testing Activities: 4-encyclopedia/unit-testing-activities.md
+    - Priority Queues: 4-encyclopedia/priority-queues.md
+    - Workflow Best Practices: 4-encyclopedia/wf-best-practices.md
 
 
 markdown_extensions:
