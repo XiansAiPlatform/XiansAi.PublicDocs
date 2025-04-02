@@ -10,6 +10,8 @@ Welcome to the official documentation for Xians.ai. Here you'll find everything 
 
 - **[Agent Tools](3-tools/1-agent-tool-types.md)** - Using agent tools
 
+- **[Encyclopedia](4-encyclopedia/multi-flow-agents.md)** - Learn deeper about Xians.ai
+
 ## Code Samples
 
 - [All Samples](https://github.com/XiansAiPlatform/XiansAi.PublicDocs/tree/main/samples)
