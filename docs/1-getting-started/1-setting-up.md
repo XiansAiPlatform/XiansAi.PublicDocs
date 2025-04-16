@@ -75,41 +75,48 @@ The XiansAi platform consists of two main components:
     // Register the flow (see the next section for more details)
     ```
 
-    !!! tip "Using Environment Files" (RECOMMENDED)
-        For better security and maintainability, use a .env file to manage your configuration:
-        You can use a package like [DotNetEnv](https://github.com/tonerdo/dotnet-env) to load the environment variables from the `.env` file without hardcoding them in your code.
+3. Alternative: Using Environment Files (RECOMMENDED)
 
-        `.env file >`
-        ``` .env
-        # Platform environment variables
+    For better security and maintainability, use a .env file to manage your configuration:
+    You can use a package like [DotNetEnv](https://github.com/tonerdo/dotnet-env) to load the environment variables from the `.env` file without hardcoding them in your code.
 
-        FLOW_SERVER_URL=tenant-xyz.ozqzb.tmprl.cloud:7233
-        FLOW_SERVER_NAMESPACE=tenant-xyz.ozqzb
-        FLOW_SERVER_API_KEY=12fsd-0fidsfdsfkjsdfnsdfdskdsbf...
+    `.env file >`
 
-        APP_SERVER_URL=https://api.xians.ai
-        APP_SERVER_API_KEY=12fsd-0fidsfdsfkjsdfnsdfdskdsbf...
-        ```
-        Install the DotNetEnv package:
-        ```bash
-        dotnet add package DotNetEnv
-        ```
-        Update your Program.cs:
-        `Program.cs >`
-        ```csharp
-        using XiansAi.Flow;
-        using DotNetEnv;
-        // Load the environment variables from the .env file
-        Env.Load();
-        var flowRunner = new FlowRunnerService();
-        ```
+    ``` .env
+    # Platform environment variables
+
+    FLOW_SERVER_URL=tenant-xyz.ozqzb.tmprl.cloud:7233
+    FLOW_SERVER_NAMESPACE=tenant-xyz.ozqzb
+    FLOW_SERVER_API_KEY=12fsd-0fidsfdsfkjsdfnsdfdskdsbf...
+
+    APP_SERVER_URL=https://api.xians.ai
+    APP_SERVER_API_KEY=12fsd-0fidsfdsfkjsdfnsdfdskdsbf...
+    ```
+
+    Install the DotNetEnv package:
+
+    ```bash
+    dotnet add package DotNetEnv
+    ```
+
+    Update your Program.cs:
+    `Program.cs >`
+
+    ```csharp
+    using XiansAi.Flow;
+    using DotNetEnv;
+    // Load the environment variables from the .env file
+    Env.Load();
+    var flowRunner = new FlowRunnerService();
+    ```
 
 ## Validating Your Setup
 
 Test your configuration:
 
 ```csharp
-...
+using XiansAi.Flow;
+
 var flowRunner = new FlowRunnerService();
 await flowRunner.TestMe(); // temp method to validate the configuration
 ```

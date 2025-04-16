@@ -1,20 +1,23 @@
 # Your First Agent
 
+AI agent could have a multiple workflows. However in this example, we will create a simple agent with a single workflow. If you like to learn more about multiple workflows, please refer to the [Multiple Flow Agents](../4-encyclopedia/multi-flow-agents.md) section.
+
+
 ## Creating an Agent
 
-To create a new agent, create a class that inherits from `XiansAi.Flow.FlowBase`.
+To create a new agent workflow, create a class that inherits from `XiansAi.Flow.FlowBase`.
 
 !!! note "Tip"
     This example demonstrates a simple agent. In later sections, we'll explore more complex agents using `Agents` and `Knowledge`.
 
-`SimpleAgent.cs >`
+`SimpleAgentFlow.cs >`
 
 ```csharp
 using Temporalio.Workflows;
 using XiansAi.Flow;
 
 [Workflow]
-public class SimpleAgent: FlowBase
+public class SimpleAgentFlow: FlowBase
 {
     [WorkflowRun]
     public async Task<string> Run(string name)
@@ -27,23 +30,16 @@ public class SimpleAgent: FlowBase
 }
 ```
 
-## Agent Naming
+## Agent Flow Naming
 
 To customize an agent's name, use the [Workflow] attribute.
-    Format: `<Agent Name>: <Flow Name>`
-    If your Agent only has a single flow, you can skip the `: <Flow Name>` part.
     ```csharp
     [Workflow("My First Agent")]
     public class SimpleFlow: FlowBase
     ```
-    If your Agent has multiple flows, you can specify the flow name.
-    ```csharp
-    [Workflow("My First Agent: Simple Flow")]
-    public class SimpleFlow: FlowBase
-    ```
 
 !!! warning "Important"
-    Each agent name must be unique within your organization. You can view existing agent definitions in the XiansAI portal. 
+    Each agent flow name must be unique within your organization. You can view existing agent definitions in the XiansAI portal.
 !!! abstract "Did you know?"
     Xians.ai supports long-running (persistent) agents. This means your agent can be paused for days or months and will automatically resume when the delay period ends.
 
@@ -54,7 +50,7 @@ To enable agent visualization, you need to bundle the agent's source code into t
 ```xml
   <ItemGroup>
     <!-- Embed the agent source files -->
-    <EmbeddedResource Include="SimpleAgent.cs">
+    <EmbeddedResource Include="SimpleAgentFlow.cs">
         <LogicalName>%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
@@ -79,7 +75,7 @@ using DotNetEnv;
 Env.Load(); // OR Manually set the environment variables
 
 // Define the flow
-var flowInfo = new FlowInfo<SimpleFlow>();
+var flowInfo = new FlowInfo<SimpleAgentFlow>();
 
 // Cancellation token cancelled on ctrl+c
 var tokenSource = new CancellationTokenSource();
