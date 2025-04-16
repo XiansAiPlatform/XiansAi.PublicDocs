@@ -1,14 +1,10 @@
 # Your First Agent
 
-AI agent could have a multiple workflows. However in this example, we will create a simple agent with a single workflow. If you like to learn more about multiple workflows, please refer to the [Multiple Flow Agents](../4-encyclopedia/multi-flow-agents.md) section.
-
+AI agent could have a multiple workflows. However in this example, we will create a simple agent with a single workflow.
 
 ## Creating an Agent
 
 To create a new agent workflow, create a class that inherits from `XiansAi.Flow.FlowBase`.
-
-!!! note "Tip"
-    This example demonstrates a simple agent. In later sections, we'll explore more complex agents using `Agents` and `Knowledge`.
 
 `SimpleAgentFlow.cs >`
 
@@ -40,8 +36,6 @@ To customize an agent's name, use the [Workflow] attribute.
 
 !!! warning "Important"
     Each agent flow name must be unique within your organization. You can view existing agent definitions in the XiansAI portal.
-!!! abstract "Did you know?"
-    Xians.ai supports long-running (persistent) agents. This means your agent can be paused for days or months and will automatically resume when the delay period ends.
 
 ## Enabling agent visualization
 
@@ -155,9 +149,3 @@ FlowRunnerService.SetLoggerFactory(LoggerFactory.Create(builder =>
 
 ...
 ```
-
-## Next Steps
-
-Now that you've created your first agent, learn how to create a Agent with Activities to explore more advanced agent capabilities.
-
-[Create a Agent with Activities](3-activity-flow.md)

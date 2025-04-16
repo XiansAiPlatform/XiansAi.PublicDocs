@@ -18,6 +18,10 @@
   - [ ] Install necessary libraries as the guide says.
   - [ ] Once everything is in place validate the setup as per the guide.
 
-## Step 3: Create Tests Project
+## Step 3: Create a Flow
+
+- [ ] Follow [Creating a Flow](docs/1-getting-started/2-first-flow.md) to create a new flow with the name `{$PROJECT_NAME}Flow.cs` in the `{$PROJECT_NAME}.Src` folder.
+
+## Step 4: Create Tests Project
 
 - [ ] Create the xunit Tests project with the name `{$PROJECT_NAME}.Tests` in the `{$PROJECT_NAME}.Tests` folder.
