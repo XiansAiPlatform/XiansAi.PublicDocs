@@ -6,12 +6,15 @@ This project is a template for generating an agent boilerplate code through a se
 
 Update the environment variables in the [.env](.env) file using the values from Xians.ai platform Settings page.
 
+## Set Variables in the checklist
+
+Set the variables in the checklist file [checklist.md](checklist.md) file.
+
 ## Run checklist tasks
 
 Use the below prompt to run the checklist tasks.
 
 ```text
 Follow the steps in the [checklist](checklist.md) file and perform the tasks one by one.
-Mark the tasks as completed in the checklist file once you have completed the task.
-If any user input is required, ask the user for the input and provide the input to the task.
+IMPORTANT: Before moving to the next task, mark the tasks as completed in the checklist file.
 ```

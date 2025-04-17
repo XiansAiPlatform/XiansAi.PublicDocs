@@ -11,8 +11,8 @@ Before you begin, ensure you have installed:
 Xians.ai agents run as standard .NET applications, which can be executed locally or deployed to any server environment. Let's create a new project:
 
 ```bash
-dotnet new console -n MyNewXiansAiFlow
-cd MyNewXiansAiFlow
+dotnet new console -n <Agent-Name>
+cd <Agent-Name>
 ```
 
 ## Installing the SDK
@@ -44,24 +44,26 @@ The XiansAi platform consists of two main components:
 For better security and maintainability, use a .env file to manage your configuration:
 You can use a package like [DotNetEnv](https://github.com/tonerdo/dotnet-env) to load the environment variables from the `.env` file without hardcoding them in your code.
 
-`.env file >`
-
-``` .env
-# Platform environment variables
-
-FLOW_SERVER_URL=tenant-xyz.ozqzb.tmprl.cloud:7233
-FLOW_SERVER_NAMESPACE=tenant-xyz.ozqzb
-FLOW_SERVER_API_KEY=12fsd-0fidsfdsfkjsdfnsdfdskdsbf...
-
-APP_SERVER_URL=https://api.xians.ai
-APP_SERVER_API_KEY=12fsd-0fidsfdsfkjsdfnsdfdskdsbf...
-```
-
 Install the DotNetEnv package:
 
 ```bash
 dotnet add package DotNetEnv
 ```
+
+Create a `.env` file in the root of your project with the following content:
+
+``` .env
+# Platform environment variables
+
+FLOW_SERVER_URL=
+FLOW_SERVER_NAMESPACE=
+FLOW_SERVER_API_KEY=
+
+APP_SERVER_URL=
+APP_SERVER_API_KEY=
+```
+
+Replace the values with values obtained from the `Settings` page in the Xians.ai portal.
 
 Update your Program.cs:
 `Program.cs >`
@@ -81,24 +83,26 @@ Test your configuration:
 ```csharp
 using XiansAi.Flow;
 
-var flowRunner = new FlowRunnerService();
-await flowRunner.TestMe(); // temp method to validate the configuration
+var runner = new FlowRunnerService();
+
 ```
 
-Run the application:
+Run the application requesting to test the configuration:
 
 ```bash
-dotnet run
+# On macOS/Linux
+TEST_CONFIGURATION=true dotnet run
+
+# On Windows (Command Prompt)
+set TEST_CONFIGURATION=true && dotnet run
+
+# On Windows (PowerShell)
+$env:TEST_CONFIGURATION="true"; dotnet run
 ```
 
-If no errors occur, your setup is complete. Remember to remove the `TestMe()` call after validation.
+If no errors occur, your setup is complete.
 
 !!! warning "Troubleshooting"
     Common issues include:
-    - Incorrect certificate paths
-    - Missing environment variables
+    - Missing environment variable
     - Invalid credentials
-
-## Next Steps
-
-With your environment configured, you're ready to [create your first Agent](2-first-flow.md).
