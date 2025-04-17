@@ -4,4 +4,9 @@ globs:
 alwaysApply: true
 ---
 
-# Your rule content
+# Checklist rules
+
+If you are running a task checklist, always follow the steps sequentially. 
+Do not proceed to the next task unless the current task is completed. 
+Do not perform work other than what is requested or specified in the checklist.
+Ensure you update the checklist by marking task completion, before stepping to the next task. 
