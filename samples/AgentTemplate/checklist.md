@@ -16,10 +16,14 @@
 
 - [ ] Follow [Creating a Flow](docs/1-getting-started/2-first-flow.md) to create a new flow with the name `{$PROJECT_NAME}Flow.cs` in the `{$PROJECT_NAME}.Src` folder.
 
-## Step 3: Create Tests Project
+## Step 3: Create Flow Activities
+
+- [ ] Follow [Creating a Flow](docs/1-getting-started/3-activity-flow.md) to create a new activity with the name `SampleActivity.cs` in the `{$PROJECT_NAME}.Src` folder.
+
+## Step 4: Create Tests Project
 
 - [ ] Create the xunit Tests project with the name `{$PROJECT_NAME}.Tests` in the `{$PROJECT_NAME}.Tests` folder.
 
-## Step 4: Create the README.md file
+## Step 5: Create the README.md file
 
 - [ ] Create the README.md file in the repository root explaining how this project could be run and tested.
