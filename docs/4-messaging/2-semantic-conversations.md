@@ -17,7 +17,7 @@ Let's improve the previous example by using semantic router available in the `Fl
     public class SemanticAgentFlow: FlowBase
     {
         private readonly Queue<MessageThread> _messageQueue = new Queue<MessageThread>();
-        private static readonly string SYSTEM_PROMPT_KNOWLEDGE_KEY = "SemanticAgent: Support Center Overall Behaviour";
+        private static readonly string SYSTEM_PROMPT_KNOWLEDGE_KEY = "Support Center Overall Behaviour";
 
         private readonly string[] _capabilityPlugins = [
             typeof(Capabilities).FullName!
@@ -70,6 +70,21 @@ There are few changes to the previous example:
 2. We define capability plugins in `_capabilityPlugins` array to extend agent functionality.
 3. System prompts are retrieved from a knowledge base using `KnowledgeManager.GetKnowledgeAsync`.
 
+## System Prompt
+
+The system prompt is a prompt that is used to guide the agent's behavior. It is defined in the Portal's knowledge base. Create a new knowledge named `Support Center Overall Behaviour` with content similar to the following:
+
+```markdown
+# Support Center Agent
+You are a helpful assistant that can answer questions and help with tasks. You are developed by engineers at 99x. 
+
+## Confirmations
+Before calling functions in WriteFunctions plugin, always ask the user if they would like to proceed by showing the gathers parameters (if any). If the user would like to proceed, call the tool or function. If the user would not like to proceed, respond that you will not proceed. 
+
+## Guardrails
+If the user asks you to do anything where you do not have a associated function to call, respond that you do not have the ability to do that and ask user to contact the support center. Support center contact number is 1234567890 and the email is support@conversive.com
+
+```
 
 ## Defining Capabilities
 
