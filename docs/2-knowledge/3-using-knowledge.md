@@ -1,22 +1,22 @@
 # Using Knowledge
 
-## Creating Knowledge
+## Creating Knowledge Article
 
-To create a new instruction:
+To create a new knowledge article:
 
 1. Navigate to the [XiansAI Portal](https://xians.ai)
 2. Go to the `Knowledge` page
 3. Click `Create New`
 
-![Create New Instruction](../images/poem-instruction.png)
+![Create New Knowledge](../images/poem-instruction.png)
 
 Fill in the following fields:
 
 - **Name**: A unique identifier (e.g. `How to Generate a Poem`)
 - **Type**: `Markdown`
-- **Instruction**: The actual instruction content in markdown format
+- **Content**: The actual content in markdown format
 
-Example instruction content:
+Example Knowledge Content:
 
 ```markdown
 # How to Generate a Poem
@@ -87,10 +87,3 @@ var storyInstruction = await GetInstruction(2);
 
 !!! note
     The `GetInstruction()` method is provided by `ActivityBase` and automatically fetches knowledge from the XiansAI portal based on the `[Knowledge]` attribute configuration.
-
-
-## Next Steps
-
-Now we are able to use knowledge in our code. Next, we will learn how to use `Agents`' to create more complex workflows.
-
-[Next: Using Agent Tools](../3-tools/1-agent-tool-types.md)

@@ -1,4 +1,4 @@
-# Flow Activities
+# Flow with Activities
 
 ## What are Activities?
 
@@ -17,10 +17,8 @@ Agent can have one or mode Flows. Each flow can have one or more Activities.
 
 The `Flow` serves as the orchestrator and defines the sequence of activities to be executed. While powerful in coordinating activities, the Flow class itself:
 
-- Implemented as a class that inherits from `FlowBase`
 - Cannot perform direct IO operations
-- Should only contain workflow logic and activity coordination
-- Acts as a orchestrator using the full power of a programming language
+- Should only contain orchestration logic and activity calls
 
 ### Activities
 
@@ -48,53 +46,32 @@ Let's create a practical example that demonstrates activity usage by building a 
 
 ### 1. Define the Flow Class
 
-First, create the workflow class that orchestrates the activities:
+First, create/update the workflow class that orchestrates the activities:
 
-`> MovieSuggestionFlow.cs`
+`> SimpleAgentFlow.cs`
 
 ```csharp
 using Temporalio.Workflows;
 using Temporalio.Activities;
 using XiansAi.Flow;
 
+namespace SimpleAgent;
+
 [Workflow("Movie Suggestion Flow")]
-public class MovieSuggestionFlow: FlowBase
+public class SimpleAgentFlow: FlowBase
 {
     [WorkflowRun]
-    public async Task<object[]> Run(string commaSeparatedUserIds)
-    {
-        // Initialize a list to store the results
-        var result = new List<object>();
+    public async Task<string> Run(string userName)
+    {    
+        // Get a movie suggestion from Movie API
+        var movie = await RunActivityAsync(
+                (IMovieActivity a) => a.GetMovieAsync(userName));
 
-        // Split the comma separated user ids into an array of integers
-        var userIds = commaSeparatedUserIds.Split(',').Select(int.Parse).ToArray();
-
-        // Iterate over each user id
-        foreach (var id in userIds)
-        {
-            // Step 1: Fetch user details from JSONPlaceholder
-            var userName = await RunActivityAsync(
-                    (IUserActivity a) => a.GetUserNameAsync(id));
-        
-            // Step 2: Get a movie suggestion from Movie API
-            var movie = await RunActivityAsync(
-                    (IMovieActivity a) => a.GetMovieAsync(userName));
-
-            // Add the result to the list
-            result.Add(new { User = userName, Movie = movie });
-        }
-
-        return result.ToArray();
+        return movie;
     }
 }
 
 // Activity interfaces define the contract for our activities
-public interface IUserActivity
-{
-    [Activity]
-    Task<string?> GetUserNameAsync(int id);
-}
-
 public interface IMovieActivity
 {
     [Activity]
@@ -102,31 +79,7 @@ public interface IMovieActivity
 }
 ```
 
-### 2. Implement the User Activity
-
-Create an activity to fetch user information:
-
-`> UserActivity.cs`
-
-```csharp
-using System.Text.Json;
-using XiansAi.Activity;
-
-public class UserActivity : ActivityBase, IUserActivity
-{
-    private readonly HttpClient _client = new HttpClient();
-    private static string URL = "https://jsonplaceholder.typicode.com/users/{0}";
-
-    public async Task<string?> GetUserNameAsync(int id)
-    {
-        var response = await _client.GetStringAsync(string.Format(URL, id));
-        return JsonSerializer.Deserialize<JsonDocument>(response)?.RootElement
-            .GetProperty("name").GetString();
-    }
-}
-```
-
-### 3. Implement the Movie Activity
+### 2. Implement the Movie Activity
 
 Create an activity to fetch movie suggestions:
 
@@ -136,6 +89,8 @@ Create an activity to fetch movie suggestions:
 using System.Text.Json;
 using XiansAi.Activity;
 
+namespace SimpleAgent;
+
 public class MovieActivity : ActivityBase, IMovieActivity 
 {
     private readonly HttpClient _client = new HttpClient();
@@ -143,8 +98,8 @@ public class MovieActivity : ActivityBase, IMovieActivity
 
     public async Task<string?> GetMovieAsync(string? userName)
     {
-        var randonInt = Random.Shared.Next(1, 10);
-        var response = await _client.GetStringAsync(string.Format(URL, randonInt));
+        var randomInt = Random.Shared.Next(1, 10);
+        var response = await _client.GetStringAsync(string.Format(URL, randomInt));
         var result = JsonSerializer.Deserialize<JsonDocument>(response);
         return result?.RootElement.GetProperty("title").GetString();
     }
@@ -162,15 +117,10 @@ using XiansAi.Flow;
 using DotNetEnv;
 using Microsoft.Extensions.Logging;
 
+namespace SimpleAgent;
+
 // Load environment configuration
 Env.Load();
-
-// Configure logging
-FlowRunnerService.SetLoggerFactory(LoggerFactory.Create(builder => 
-    builder
-        .SetMinimumLevel(LogLevel.Debug)
-        .AddConsole()
-));
 
 // Setup cancellation token for graceful shutdown
 var tokenSource = new CancellationTokenSource();
@@ -179,15 +129,17 @@ Console.CancelKeyPress += (_, eventArgs) =>{
     eventArgs.Cancel = true;
 };
 
-// Configure the flow
-var flowInfo = new FlowInfo<MovieSuggestionFlow>();
-flowInfo.AddActivities<IUserActivity>(new UserActivity());
+// Configure the flow within this agent
+var flowInfo = new FlowInfo<SimpleAgentFlow>();
+// Add the activities to the flow
 flowInfo.AddActivities<IMovieActivity>(new MovieActivity());
 
 try
 {
-    var runner = new FlowRunnerService();
-    await runner.RunFlowAsync(flowInfo, tokenSource.Token);
+    // initiate the runner
+    var runnerTask = new FlowRunnerService().RunFlowAsync(flowInfo, tokenSource.Token);
+    // Wait for the flow to complete
+    await Task.WhenAll(runnerTask);  
 }
 catch (OperationCanceledException)
 {
@@ -195,7 +147,7 @@ catch (OperationCanceledException)
 }
 ```
 
-## Running the Flow
+## Run the Flow
 
 1. Build and run the application:
 
@@ -210,27 +162,5 @@ dotnet run
 
     - Navigate to the XiansAI portal
     - Go to 'Flow Definitions' section
-    - Find your 'MovieSuggestionFlow'
-    - Click 'Start New' to begin execution
-
-## Best Practices
-
-1. **Activity Design**
-
-    - Keep activities focused on a single responsibility
-    - Make activities idempotent when possible
-    - Handle errors appropriately within activities
-
-2. **Flow Design**
-
-    - Use the Flow class for orchestration only
-    - Consider custom retry policies for activities as required
-
-3. **Testing**
-    - Unit test activities independently
-    - Mock external services in tests
-    - Test different failure scenarios
-
-## Next Steps
-
-- [Learn about Knowledge](../2-knowledge/1-manage-knowledge.md)
+    - Find your 'Movie Suggestion Flow'
+    - Click 'Activate' to begin execution

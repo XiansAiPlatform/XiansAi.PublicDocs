@@ -41,12 +41,16 @@ nav:
       - Package Agent Tools: 3-tools/2-using-tools/1-package-tools.md
       - Docker Agent Tools: 3-tools/2-using-tools/2-docker-tools.md
       - Custom Agent Tools: 3-tools/2-using-tools/3-custom-tools.md
+  - Messaging:
+    - Conversation with Agent: 4-messaging/1-agent-conversations.md
+    - Semantic Conversations: 4-messaging/2-semantic-conversations.md
+    - Programmatic Access: 4-messaging/3-programatic-access.md
   - Encyclopedia:
-    - Multi-flow Agents: 4-encyclopedia/multi-flow-agents.md
-    - Signaling Agent Workflows: 4-encyclopedia/signaling-agent-workflows.md
-    - Unit Testing Activities: 4-encyclopedia/unit-testing-activities.md
-    - Priority Queues: 4-encyclopedia/priority-queues.md
-    - Workflow Best Practices: 4-encyclopedia/wf-best-practices.md
+    - Multi-flow Agents: n-encyclopedia/multi-flow-agents.md
+    - Signaling Agent Workflows: n-encyclopedia/signaling-agent-workflows.md
+    - Unit Testing Activities: n-encyclopedia/unit-testing-activities.md
+    - Priority Queues: n-encyclopedia/priority-queues.md
+    - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
 
 
 markdown_extensions:

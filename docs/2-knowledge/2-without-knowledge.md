@@ -157,11 +157,6 @@ using Microsoft.Extensions.Logging;
 // Env config via DotNetEnv
 Env.Load(); // OR Manually set the environment variables
 
-FlowRunnerService.SetLoggerFactory(LoggerFactory.Create(builder => 
-    builder
-        .SetMinimumLevel(LogLevel.Debug)
-        .AddConsole()
-));
 
 // Cancellation token cancelled on ctrl+c
 var tokenSource = new CancellationTokenSource();
@@ -209,7 +204,7 @@ dotnet run
     - Select your flow execution
     - View results and details
 
-## Instruction - Limitations
+## Limitations
 
 The flow we implemented hard codes the knowledge to the Gemini API. This is not ideal for a number of reasons.
 
@@ -219,4 +214,3 @@ The flow we implemented hard codes the knowledge to the Gemini API. This is not 
 
 In the next example, we will see how to manage knowledge in XiansAI Portal instead of hard coding them in the code.
 
-[Using Knowledge](./3-using-knowledge.md)

@@ -11,8 +11,8 @@ Before you begin, ensure you have installed:
 Xians.ai agents run as standard .NET applications, which can be executed locally or deployed to any server environment. Let's create a new project:
 
 ```bash
-dotnet new console -n MyNewXiansAiFlow
-cd MyNewXiansAiFlow
+dotnet new console -n <Agent-Name>
+cd <Agent-Name>
 ```
 
 ## Installing the SDK
@@ -22,14 +22,6 @@ Add the Xians.ai SDK to your project:
 ```bash
 dotnet add package XiansAi.Lib
 ```
-
-!!! tip "Local Development"
-    If you're working with a local copy of the XiansAi.Lib repository, add it as a project reference in your .csproj file:
-    ```xml
-    <ItemGroup>
-        <ProjectReference Include="..\XiansAi.Lib\XiansAi.Lib.csproj" />
-    </ItemGroup>
-    ```
 
 ## Understanding the Platform
 
@@ -49,92 +41,61 @@ The XiansAi platform consists of two main components:
 
 ## Configuration Setup
 
-1. Get API Keys
+For better security and maintainability, use a .env file to manage your configuration:
+You can use a package like [DotNetEnv](https://github.com/tonerdo/dotnet-env) to load the environment variables from the `.env` file without hardcoding them in your code.
 
-    First, visit the XiansAi portal's Settings section to copy your App Server and Flow Server API Keys:
+Install the DotNetEnv package:
 
-    ![Settings](../images/portal-settings.png)
+```bash
+dotnet add package DotNetEnv
+```
 
-2. Configure Environment Variables
+Create a `.env` file in the root of your project with the following content:
 
-    Add the following configuration to your Program.cs file to configure the `FlowRunnerService` with XiansAi platform.
+``` .env
+# Platform environment variables
 
-    `Program.cs >`
+FLOW_SERVER_URL=
+FLOW_SERVER_NAMESPACE=
+FLOW_SERVER_API_KEY=
 
-    ```csharp
-    using XiansAi.Flow;
+APP_SERVER_URL=
+APP_SERVER_API_KEY=
+```
 
-    Environment.SetEnvironmentVariable("APP_SERVER_URL", "<your-app-server-url>");
-    Environment.SetEnvironmentVariable("APP_SERVER_API_KEY", "<your-app-server-api-key>");
-    Environment.SetEnvironmentVariable("FLOW_SERVER_URL", "<your-flow-server-url>");
-    Environment.SetEnvironmentVariable("FLOW_SERVER_NAMESPACE", "<your-flow-server-namespace>");
-    Environment.SetEnvironmentVariable("FLOW_SERVER_API_KEY", "<your-flow-server-api-key>");
+Replace the values with values obtained from the `Settings` page in the Xians.ai portal.
 
-    var flowRunner = new FlowRunnerService();
-
-    // Register the flow (see the next section for more details)
-    ```
-
-3. Alternative: Using Environment Files (RECOMMENDED)
-
-    For better security and maintainability, use a .env file to manage your configuration:
-    You can use a package like [DotNetEnv](https://github.com/tonerdo/dotnet-env) to load the environment variables from the `.env` file without hardcoding them in your code.
-
-    `.env file >`
-
-    ``` .env
-    # Platform environment variables
-
-    FLOW_SERVER_URL=tenant-xyz.ozqzb.tmprl.cloud:7233
-    FLOW_SERVER_NAMESPACE=tenant-xyz.ozqzb
-    FLOW_SERVER_API_KEY=12fsd-0fidsfdsfkjsdfnsdfdskdsbf...
-
-    APP_SERVER_URL=https://api.xians.ai
-    APP_SERVER_API_KEY=12fsd-0fidsfdsfkjsdfnsdfdskdsbf...
-    ```
-
-    Install the DotNetEnv package:
-
-    ```bash
-    dotnet add package DotNetEnv
-    ```
-
-    Update your Program.cs:
-    `Program.cs >`
-
-    ```csharp
-    using XiansAi.Flow;
-    using DotNetEnv;
-    // Load the environment variables from the .env file
-    Env.Load();
-    var flowRunner = new FlowRunnerService();
-    ```
-
-## Validating Your Setup
-
-Test your configuration:
+Update your Program.cs:
+`Program.cs >`
 
 ```csharp
 using XiansAi.Flow;
-
+using DotNetEnv;
+// Load the environment variables from the .env file
+Env.Load();
 var flowRunner = new FlowRunnerService();
-await flowRunner.TestMe(); // temp method to validate the configuration
 ```
 
-Run the application:
+## Validating Your Setup
+
+Run the application requesting to test the configuration:
 
 ```bash
-dotnet run
+# On macOS/Linux
+TEST_CONFIGURATION=true dotnet run
+
+# On Windows (Command Prompt)
+set TEST_CONFIGURATION=true && dotnet run
+
+# On Windows (PowerShell)
+$env:TEST_CONFIGURATION="true"; dotnet run
 ```
 
-If no errors occur, your setup is complete. Remember to remove the `TestMe()` call after validation.
+If no errors occur, your setup is complete.
 
 !!! warning "Troubleshooting"
+
     Common issues include:
-    - Incorrect certificate paths
+    
     - Missing environment variables
     - Invalid credentials
-
-## Next Steps
-
-With your environment configured, you're ready to [create your first Agent](2-first-flow.md).

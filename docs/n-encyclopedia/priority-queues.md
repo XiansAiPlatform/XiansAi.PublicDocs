@@ -21,6 +21,14 @@ By deploying more agent runner instances (containers) to handle high-priority qu
 - Ensure critical workflows are processed faster
 - Better manage system resources based on business priorities
 
+### Versioning
+
+Priority queues can be used to parallel run different versions of an agent. When you create a new version of an agent, run the agent worker on the new version queue and activate some of the agent on the new version queue.
+
+### A/B Testing
+
+Priority queues can be used to run different versions of an agent in parallel. This is useful for A/B testing different versions of an agent.
+
 ## Configuration
 
 ### Setting Up Priority Queues in the Portal

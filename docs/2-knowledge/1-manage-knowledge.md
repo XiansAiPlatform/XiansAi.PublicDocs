@@ -18,7 +18,7 @@ To create new knowledge:
 
 1. Log in to the XiansAI portal
 2. Navigate to the Knowledge section
-3. Click the "Create New Instruction" button
+3. Click the "Create New" button
 
 ![Create Knowledge](../images/create-instruction.png)
 
@@ -45,9 +45,9 @@ Knowledge in XiansAI support versioning, allowing you to:
 
 To create a new version:
 
-1. Open the instruction details page
+1. Open the knowledge details page on side panel
 2. Click the 'Create New Version' button
-3. Make your changes to the instruction content
+3. Make your changes to the content
 4. Save the new version
 
 ![Create New Version](../images/create-new-instruction-version.png)

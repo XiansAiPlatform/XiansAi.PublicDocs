@@ -1,5 +1,6 @@
 using Temporalio.Workflows;
 using XiansAi.Flow;
+using XiansAi.Messaging;
 
 [Workflow("Conversive Flow")]
 public class ConversiveAgentFlow: FlowBase
@@ -8,30 +9,30 @@ public class ConversiveAgentFlow: FlowBase
 
     public ConversiveAgentFlow(): base()
     {
-        GetMessenger().RegisterHandler(HandleMessage);
+        // Register the message handler
+        Messenger.RegisterHandler((MessageThread thread) => {
+            _messageQueue.Enqueue(thread);
+        });
     }
-
-    private Task HandleMessage(MessageThread messageThread)
-    {
-        _messageQueue.Enqueue(messageThread);
-        return Task.CompletedTask;
-    }   
 
     [WorkflowRun]
     public async Task<string> Run()
     {
-        Console.WriteLine("Conversational Agent Flow started");
+
         while (true)
         {
             // Wait for a message to be added to the queue
             await Workflow.WaitConditionAsync(() => _messageQueue.Count > 0);
+
             // Get the message from the queue
             var thread = _messageQueue.Dequeue();
-            // Process the message here
-            Console.WriteLine($"Processing message: {thread.IncomingMessage.Content}");
-            // respond
-            await thread.Respond($"Hello, how can I help you today? Your message {thread.IncomingMessage.Content} has been received.");
+            var message = thread.IncomingMessage.Content;
+
+            // Asynchronously process the message
+            await thread.Respond($"Message received: `{message}`");
+
         }
     }
 
 }
+

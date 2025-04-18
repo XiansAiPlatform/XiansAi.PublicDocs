@@ -1,4 +1,4 @@
-# Flow Activities
+# Flow with Activities
 
 ## What are Activities?
 
@@ -61,18 +61,13 @@ namespace SimpleAgent;
 public class SimpleAgentFlow: FlowBase
 {
     [WorkflowRun]
-    public async Task<object[]> Run(string userName)
-    {
-    
+    public async Task<string> Run(string userName)
+    {    
         // Get a movie suggestion from Movie API
         var movie = await RunActivityAsync(
                 (IMovieActivity a) => a.GetMovieAsync(userName));
 
-        // Add the result to the list
-        result.Add(new { User = userName, Movie = movie });
-        
-
-        return result.ToArray();
+        return movie;
     }
 }
 
@@ -103,8 +98,8 @@ public class MovieActivity : ActivityBase, IMovieActivity
 
     public async Task<string?> GetMovieAsync(string? userName)
     {
-        var randonInt = Random.Shared.Next(1, 10);
-        var response = await _client.GetStringAsync(string.Format(URL, randonInt));
+        var randomInt = Random.Shared.Next(1, 10);
+        var response = await _client.GetStringAsync(string.Format(URL, randomInt));
         var result = JsonSerializer.Deserialize<JsonDocument>(response);
         return result?.RootElement.GetProperty("title").GetString();
     }
@@ -134,30 +129,15 @@ Console.CancelKeyPress += (_, eventArgs) =>{
     eventArgs.Cancel = true;
 };
 
-// Define the AgentInfo (optional)
-var agentInfo = new AgentInfo {
-    Name = "Movie Suggestion Flow",
-    Description = "A simple agent that can help with simple tasks",
-};
-
 // Configure the flow within this agent
-var flowInfo = new FlowInfo<SimpleAgentFlow>(agentInfo);
+var flowInfo = new FlowInfo<SimpleAgentFlow>();
 // Add the activities to the flow
 flowInfo.AddActivities<IMovieActivity>(new MovieActivity());
-
-// Configure runner options
-var options = new FlowRunnerOptions {
-    LoggerFactory = LoggerFactory.Create(builder => 
-        builder
-            .SetMinimumLevel(LogLevel.Debug)
-            .AddConsole()
-    )
-};
 
 try
 {
     // initiate the runner
-    var runnerTask = new FlowRunnerService(options).RunFlowAsync(flowInfo, tokenSource.Token);
+    var runnerTask = new FlowRunnerService().RunFlowAsync(flowInfo, tokenSource.Token);
     // Wait for the flow to complete
     await Task.WhenAll(runnerTask);  
 }
@@ -200,4 +180,3 @@ dotnet run
 
 3. **Testing**
     - Unit test activities independently
-

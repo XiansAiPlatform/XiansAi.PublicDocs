@@ -10,7 +10,9 @@ Welcome to the official documentation for Xians.ai. Here you'll find everything 
 
 - **[Agent Tools](3-tools/1-agent-tool-types.md)** - Using agent tools
 
-- **[Encyclopedia](4-encyclopedia/multi-flow-agents.md)** - Learn deeper about Xians.ai
+- **[Messaging](4-messaging/1-agent-conversations.md)** - Handling conversations with agents
+
+- **[Encyclopedia](n-encyclopedia/multi-flow-agents.md)** - Learn deeper about Xians.ai
 
 ## Code Samples
 

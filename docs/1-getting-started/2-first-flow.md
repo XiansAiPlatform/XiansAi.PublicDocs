@@ -1,14 +1,10 @@
-# Your First Agent
+# Your First Agent Flow
 
-AI agent could have a multiple workflows. However in this example, we will create a simple agent with a single workflow. If you like to learn more about multiple workflows, please refer to the [Multiple Flow Agents](../4-encyclopedia/multi-flow-agents.md) section.
+AI agent could have a multiple workflows. However in this example, we will create a simple agent with a single workflow.
 
-
-## Creating an Agent
+## Creating an Agent Flow
 
 To create a new agent workflow, create a class that inherits from `XiansAi.Flow.FlowBase`.
-
-!!! note "Tip"
-    This example demonstrates a simple agent. In later sections, we'll explore more complex agents using `Agents` and `Knowledge`.
 
 `SimpleAgentFlow.cs >`
 
@@ -40,8 +36,6 @@ To customize an agent's name, use the [Workflow] attribute.
 
 !!! warning "Important"
     Each agent flow name must be unique within your organization. You can view existing agent definitions in the XiansAI portal.
-!!! abstract "Did you know?"
-    Xians.ai supports long-running (persistent) agents. This means your agent can be paused for days or months and will automatically resume when the delay period ends.
 
 ## Enabling agent visualization
 
@@ -109,55 +103,38 @@ The Flow Runner will now wait for flow execution requests. To start a new flow, 
     ```
     You'll need to choose a unique name using the [Workflow] attribute as shown earlier.
 
-!!! bug "'DotNetEnv' could not be found"
-    If you receive this error:
-    ```bash
-    > The type or namespace name 'DotNetEnv' could not be found (are you missing a using directive or an assembly reference?)
-    ```
-    You'll need to install the `DotNetEnv` package. See the [Getting Started](./1-setting-up.md) section for more information.
-
 ![Start New Agent Run](../images/start-new-flow.png)
 
 You can view agent definition details and visualizations in the XiansAI portal.
 
 ![Agent Definition Details](../images/flow-visualization.png)
 
-## Running the Agent
+## Activating the Agent
 
-To execute your agent:
+To activate your agent:
 
 1. Navigate to the agent definitions page
-2. Click the 'Start New' button
+2. Click the 'Activate' button
 3. Monitor the 'Agent Runs' section to track your agent's execution
 
 Note: It may take a few seconds for your agent run to appear. Refresh the page if needed.
 
 ![Agent Runs](../images/flow-runs.png)
 
-## Configure Logging
+## Configure Logging (optional)
 
-To configure logging for your agent, you can use the `FlowRunnerService.SetLoggerFactory` method.
+To configure logging for your agent, you can use the `FlowRunnerService` options. This allows you to consistently log messgaes from your workflow, activities as well as from systems messages from `Xians.Lib`.
 
 ```csharp
-using XiansAi.Flow;
-using DotNetEnv;
-using Microsoft.Extensions.Logging;
-
-// Load environment configuration
-Env.Load();
-
-// Configure logging
-FlowRunnerService.SetLoggerFactory(LoggerFactory.Create(builder => 
-    builder
-        .SetMinimumLevel(LogLevel.Debug)
-        .AddConsole()
-));
-
+...
+    var options = new FlowRunnerOptions
+    {
+        LoggerFactory = LoggerFactory.Create(builder =>
+        builder
+            .SetMinimumLevel(LogLevel.Debug)
+            .AddConsole())
+    };
+    // Run the flow 
+    await new FlowRunnerService(options).RunFlowAsync(flowInfo, tokenSource.Token);
 ...
 ```
-
-## Next Steps
-
-Now that you've created your first agent, learn how to create a Agent with Activities to explore more advanced agent capabilities.
-
-[Create a Agent with Activities](3-activity-flow.md)
