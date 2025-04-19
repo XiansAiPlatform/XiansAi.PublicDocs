@@ -71,14 +71,10 @@ Env.Load(); // OR Manually set the environment variables
 // Define the flow
 var flowInfo = new FlowInfo<SimpleAgentFlow>();
 
-// Cancellation token cancelled on ctrl+c
-var tokenSource = new CancellationTokenSource();
-Console.CancelKeyPress += (_, eventArgs) =>{ tokenSource.Cancel(); eventArgs.Cancel = true;};
-
 try
 {
     // Run the flow by passing the flow info to the FlowRunnerService
-    await new FlowRunnerService().RunFlowAsync(flowInfo, tokenSource.Token);
+    await new FlowRunnerService().RunFlowAsync(flowInfo);
 }
 catch (OperationCanceledException)
 {
@@ -137,4 +133,17 @@ To configure logging for your agent, you can use the `FlowRunnerService` options
     // Run the flow 
     await new FlowRunnerService(options).RunFlowAsync(flowInfo, tokenSource.Token);
 ...
+```
+
+## Override Cancellation Token
+
+To override the cancellation token, you can pass a new token to the `RunFlowAsync` method. By default, the cancellation token is cancelled on ctrl+c.
+
+```csharp
+// Cancellation token cancelled on ctrl+c
+var tokenSource = new CancellationTokenSource();
+Console.CancelKeyPress += (_, eventArgs) =>{ tokenSource.Cancel(); eventArgs.Cancel = true;};
+
+// Run the flow
+await new FlowRunnerService().RunFlowAsync(flowInfo, tokenSource.Token);
 ```

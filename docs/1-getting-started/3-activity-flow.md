@@ -122,13 +122,6 @@ namespace SimpleAgent;
 // Load environment configuration
 Env.Load();
 
-// Setup cancellation token for graceful shutdown
-var tokenSource = new CancellationTokenSource();
-Console.CancelKeyPress += (_, eventArgs) =>{ 
-    tokenSource.Cancel(); 
-    eventArgs.Cancel = true;
-};
-
 // Configure the flow within this agent
 var flowInfo = new FlowInfo<SimpleAgentFlow>();
 // Add the activities to the flow
@@ -137,7 +130,7 @@ flowInfo.AddActivities<IMovieActivity>(new MovieActivity());
 try
 {
     // initiate the runner
-    var runnerTask = new FlowRunnerService().RunFlowAsync(flowInfo, tokenSource.Token);
+    var runnerTask = new FlowRunnerService().RunFlowAsync(flowInfo);
     // Wait for the flow to complete
     await Task.WhenAll(runnerTask);  
 }

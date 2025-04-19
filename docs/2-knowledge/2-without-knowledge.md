@@ -157,11 +157,6 @@ using Microsoft.Extensions.Logging;
 // Env config via DotNetEnv
 Env.Load(); // OR Manually set the environment variables
 
-
-// Cancellation token cancelled on ctrl+c
-var tokenSource = new CancellationTokenSource();
-Console.CancelKeyPress += (_, eventArgs) =>{ tokenSource.Cancel(); eventArgs.Cancel = true;};
-
 // Define the flow
 var flowInfo = new FlowInfo<PoetFlow>();
 flowInfo.AddActivities<IComposerActivity>(new ComposerActivity());
@@ -170,7 +165,7 @@ try
 {
     var runner = new FlowRunnerService();
     // Run the flow by passing the flow info to the FlowRunnerService
-    await runner.RunFlowAsync(flowInfo, tokenSource.Token);
+    await runner.RunFlowAsync(flowInfo);
 }
 catch (OperationCanceledException)
 {
@@ -213,4 +208,3 @@ The flow we implemented hard codes the knowledge to the Gemini API. This is not 
 - We are not able to track the knowledge used in the flow.
 
 In the next example, we will see how to manage knowledge in XiansAI Portal instead of hard coding them in the code.
-

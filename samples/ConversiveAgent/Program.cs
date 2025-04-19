@@ -4,26 +4,23 @@ using Microsoft.Extensions.Logging;
 
 Env.Load();
 
+var agentInfo = new AgentInfo
+{
+    Name = "Conversive Agent",
+    Description = "A conversational agent that can help with broadband issues.",
+};
+
 // Define the flow
-var flowInfo = new FlowInfo<ConversiveAgentFlow>();
-
-// Cancellation token cancelled on ctrl+c
-var tokenSource = new CancellationTokenSource();
-Console.CancelKeyPress += (_, eventArgs) => { tokenSource.Cancel(); eventArgs.Cancel = true; };
-
-
+var conversiveFlowInfo = new FlowInfo<ConversiveAgentFlow>();
+var semanticFlowInfo = new FlowInfo<SemanticAgentFlow>();
 
 try
 {
-    var options = new FlowRunnerOptions
-    {
-        LoggerFactory = LoggerFactory.Create(builder =>
-        builder
-            .SetMinimumLevel(LogLevel.Debug)
-            .AddConsole())
-    };
     // Run the flow 
-    await new FlowRunnerService(options).RunFlowAsync(flowInfo, tokenSource.Token);
+    Task conversiveFlow = new FlowRunnerService().RunFlowAsync(conversiveFlowInfo);
+    Task semanticFlow = new FlowRunnerService().RunFlowAsync(semanticFlowInfo);
+
+    await Task.WhenAll(conversiveFlow, semanticFlow);
 }
 catch (OperationCanceledException)
 {
