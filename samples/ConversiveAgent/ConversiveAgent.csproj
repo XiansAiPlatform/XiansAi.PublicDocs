@@ -15,8 +15,14 @@
 
   <ItemGroup>
     <!-- Embed the agent source files -->
-    <EmbeddedResource Include="ConversiveAgentFlow.cs">
-        <LogicalName>%(Filename)%(Extension)</LogicalName>
-    </EmbeddedResource>
+      <EmbeddedResource Include="ConversingFlow.cs">
+          <LogicalName>%(Filename)%(Extension)</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Subflows\NewConnectionFlow.cs">
+          <LogicalName>%(Filename)%(Extension)</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Subflows\SupportTicketFlow.cs">
+          <LogicalName>%(Filename)%(Extension)</LogicalName>
+      </EmbeddedResource>
   </ItemGroup>
 </Project>

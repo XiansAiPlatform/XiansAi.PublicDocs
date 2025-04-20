@@ -6,21 +6,23 @@ Env.Load();
 
 var agentInfo = new AgentInfo
 {
-    Name = "Conversive Agent",
-    Description = "A conversational agent that can help with broadband issues.",
+    Name = "Customer Support Agent",
+    Description = "A conversational agent that can help customers on broadband connection services.",
 };
 
 // Define the flow
-var conversiveFlowInfo = new FlowInfo<ConversiveAgentFlow>();
-var semanticFlowInfo = new FlowInfo<SemanticAgentFlow>();
+var newConnectionFlowInfo = new FlowInfo<NewConnectionFlow>(agentInfo);
+var supportTicketFlowInfo = new FlowInfo<SupportTicketFlow>(agentInfo);
+var conversingFlowInfo = new FlowInfo<ConversingFlow>(agentInfo);
+
+// Run the flow 
+Task newConnectionFlow = new FlowRunnerService().RunFlowAsync(newConnectionFlowInfo);
+Task supportTicketFlow = new FlowRunnerService().RunFlowAsync(supportTicketFlowInfo);
+Task conversingFlow = new FlowRunnerService().RunFlowAsync(conversingFlowInfo);
 
 try
 {
-    // Run the flow 
-    Task conversiveFlow = new FlowRunnerService().RunFlowAsync(conversiveFlowInfo);
-    Task semanticFlow = new FlowRunnerService().RunFlowAsync(semanticFlowInfo);
-
-    await Task.WhenAll(conversiveFlow, semanticFlow);
+    await Task.WhenAll(newConnectionFlow, supportTicketFlow, conversingFlow);
 }
 catch (OperationCanceledException)
 {

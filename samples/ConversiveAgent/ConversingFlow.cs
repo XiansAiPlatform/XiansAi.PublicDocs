@@ -3,18 +3,17 @@
     using ConversiveAgent;
     using XiansAi.Messaging;
 
-
-    [Workflow("Semantic Agent Flow")]
-    public class SemanticAgentFlow: FlowBase
+    [Workflow("Conversing Flow")]
+    public class ConversingFlow: FlowBase
     {
         private readonly Queue<MessageThread> _messageQueue = new Queue<MessageThread>();
-        private static readonly string SYSTEM_PROMPT_KNOWLEDGE_KEY = "SemanticAgent: Support Center Overall Behaviour";
+        private static readonly string SYSTEM_PROMPT_KNOWLEDGE_KEY = "Support Center Agent's System Behaviour";
 
         private readonly string[] _capabilityPlugins = [
             typeof(Capabilities).FullName!
         ];
 
-        public SemanticAgentFlow(): base()
+        public ConversingFlow(): base()
         {
             // Register the message handler
             Messenger.RegisterHandler(_messageQueue.Enqueue);
@@ -23,7 +22,7 @@
         [WorkflowRun]
         public async Task<string> Run()
         {
-            Console.WriteLine("Semantic Agent Flow started");
+            Console.WriteLine("Conversing Flow started");
 
             while (true)
             {

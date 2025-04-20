@@ -1,76 +1,105 @@
+using Microsoft.Extensions.Logging;
+using XiansAi.Messaging;
 using XiansAi.Router.Plugins;
 
 namespace ConversiveAgent;
-public static class Capabilities 
+public class Capabilities
 {
-
-    [Capability("Create a new broadband connection.")]
-    [Parameter("customerName", "Customer's full name")]
-    [Parameter("customerEmail", "Customer Email")]
-    [Parameter("address", "Installation address")]
-    [Parameter("planType", "Preferred plan type")]
-    [Parameter("contactNumber", "Contact number")]
-    [Parameter("preferredDate", "Preferred installation date")]
-    [Returns("status message")]
-    public static async Task<string> StartNewBroadbandConnectionWorkflow(string customerName, string customerEmail, string address, string planType, string contactNumber, DateTime preferredDate)
+    private MessageThread _messageThread;
+    private ILogger<Capabilities> _logger;
+    public Capabilities(MessageThread messageThread)
     {
-        Console.WriteLine("Starting New Broadband Connection Workflow..., date: " + preferredDate.ToString("yyyy/MM/dd"));
-
-        var inputs = new object[] { customerName, customerEmail, address, planType, contactNumber, preferredDate };
-        Console.WriteLine(string.Join(", ", inputs));
-        //await new CapabilityBase().StartWorkflowAsync("New Broadband Connection Workflow", "New Broadband Connection Workflow", inputs);
-        await Task.CompletedTask;
-        return "New broadband connection request initiated.";
+        _messageThread = messageThread;
+        _logger = Globals.LogFactory.CreateLogger<Capabilities>();
     }
 
-    [Capability("Start a billing issue resolution workflow.")]
-    [Parameter("customerEmail", "Customer Email")]
-    [Parameter("billMonth", "Billing month")]
-    [Parameter("issueType", "Issue type (e.g., overcharge, missing discount)")]
-    [Parameter("notes", "Additional notes")]
-    [Returns("status message")]
-    public static async Task<string> StartBillingIssueWorkflow(string customerEmail, string billMonth, string issueType, string notes)
+    [Capability("Create a new broadband connection for a customer by initiating the installation process.")]
+    [Parameter("customerName", "Customer's full name (first and last name)")]
+    [Parameter("customerEmail", "Customer's email address in valid format (e.g., name@domain.com)")]
+    [Parameter("planType", "Preferred broadband plan type (Basic, Standard, Premium, or Ultimate)")]
+    [Parameter("contactNumber", "Customer's contact phone number with country code if applicable")]
+    [Returns("Confirmation message indicating that the broadband connection request has been initiated")]
+    public async Task<string> OrderNewBroadbandConnection(string customerName, string customerEmail, string planType, string contactNumber)
     {
-        Console.WriteLine("Starting Billing Issue Workflow...");
-        var inputs = new string[] { customerEmail, billMonth, issueType, notes };
-
-        //await new CapabilityBase().StartWorkflowAsync("Billing Workflow", "Billing Workflow", inputs);
-        await Task.CompletedTask;
-        return "New Billing issue ticket created.";
-    }
-
-    [Capability("Start technical support troubleshooting workflow.")]
-    [Parameter("customerEmail", "Customer Email")]
-    [Parameter("deviceType", "Device type: Modem, Router, Sim")]
-    [Parameter("symptoms", "Issue symptoms")]
-    [Returns("status message")]
-    public static async Task<string> StartTechnicalSupportWorkflow(string customerEmail, string deviceType, string symptoms)
-    {
-        Console.WriteLine("Starting Technical Support Workflow...");
-        var inputs = new string[] { customerEmail, deviceType, symptoms };
-
-        //await new CapabilityBase().StartWorkflowAsync("Maintainence Workflow", "Maintainence Workflow", inputs);
-        await Task.CompletedTask;
-
-        return "A new Technical support ticket created.";
-    }
-
-    [Capability("Get available broadband plans.")]
-    [Parameter("planType", "Plan type")]
-    [Returns("status message")]
-    public static Task<string[]> GetAvailableBroadbandPlans(string planType)
-    {
-        Console.WriteLine("Fetching available broadband plans...");
-
-        // Mock data for broadband plans
-        var plans = new string[]
+        try
         {
-            "Basic Plan: 50 Mbps, $30/month",
-            "Standard Plan: 100 Mbps, $50/month",
-            "Premium Plan: 200 Mbps, $70/month",
-            "Ultimate Plan: 500 Mbps, $100/month"
-        };
+            Console.WriteLine("Handling over to New Connection Workflow...");
+            var newConnectionRequest = new
+            {
+                CustomerName = customerName,
+                CustomerEmail = customerEmail,
+                PlanType = planType,
+                ContactNumber = contactNumber,
+                MessageContent = _messageThread.IncomingMessage.Content
+            };
 
-        return Task.FromResult(plans);
+            await _messageThread.Handover(
+                $"99xio:CustomerSupportAgent:NewConnectionFlow",
+                "Initiate New Connection",
+                _messageThread.ParticipantId,
+                newConnectionRequest);
+            return "New broadband connection request has been initiated. Our team will process your request.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in OrderNewBroadbandConnection");
+            throw;
+        }
+    }
+
+
+    [Capability("Initiate technical support ticket to resolve connectivity or device issues.")]
+    [Parameter("customerEmail", "Customer's registered email address for account identification")]
+    [Parameter("deviceType", "Type of device experiencing issues: Phone, Internet, or TV")]
+    [Parameter("issues", "Summary of the technical issues being experienced")]
+    [Returns("Confirmation message indicating that a technical support ticket creation has been initiated")]
+    public async Task<string> RaiseTechnicalSupportTicket(string customerEmail, string deviceType, string issues)
+    {
+        try
+        {
+            Console.WriteLine("Handling over to Technical Support Workflow...");
+            var ticketRequest = new
+            {
+                CustomerEmail = customerEmail,
+                DeviceType = deviceType,
+                Issues = issues,
+                MessageContent = _messageThread.IncomingMessage.Content
+            };
+
+            var ticketId = Guid.NewGuid().ToString();
+
+            await _messageThread.StartAndHandover(
+                "Support Ticket Flow",
+                "Initiate Support Ticket",
+                _messageThread.ParticipantId,
+                ticketRequest);
+            return "Technical support ticket creation process has been initiated.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in RaiseTechnicalSupportTicket");
+            throw;
+        }
+    }
+
+    [Capability("Retrieve detailed information about available broadband plans based on specified type.")]
+    [Parameter("planType", "The specific broadband plan category to query (Basic, Standard, Premium, or Ultimate)")]
+    [Returns("Array of plan details including bandwidth and pricing information")]
+    public Task<string[]> GetAvailablePlans(string planType)
+    {
+        Console.WriteLine("Fetching available broadband plans... Incoming Message: " + _messageThread.IncomingMessage.Content);
+
+        switch (planType)
+        {
+            case "Basic":
+                return Task.FromResult(new string[] { "Bandwidth: 50 Mbps, Price: $30/month" });
+            case "Standard":
+                return Task.FromResult(new string[] { "Bandwidth: 100 Mbps, Price: $50/month" });
+            case "Premium":
+                return Task.FromResult(new string[] { "Bandwidth: 200 Mbps, Price: $70/month" });
+            case "Ultimate":
+                return Task.FromResult(new string[] { "Bandwidth: 500 Mbps, Price: $100/month" });
+        }
+        return Task.FromResult(new string[] { "Invalid plan type" });
     }
 }
