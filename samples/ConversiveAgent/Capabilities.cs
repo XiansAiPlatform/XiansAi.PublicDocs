@@ -21,6 +21,7 @@ public class Capabilities
     [Returns("Confirmation message indicating that the broadband connection request has been initiated")]
     public async Task<string> OrderNewBroadbandConnection(string customerName, string customerEmail, string planType, string contactNumber)
     {
+        var workflowId = "99xio:CustomerSupportAgent:NewConnectionFlow";
         try
         {
             Console.WriteLine("Handling over to New Connection Workflow...");
@@ -34,7 +35,7 @@ public class Capabilities
             };
 
             await _messageThread.Handover(
-                $"99xio:CustomerSupportAgent:NewConnectionFlow",
+                workflowId,
                 "Initiate New Connection",
                 _messageThread.ParticipantId,
                 newConnectionRequest);
@@ -57,7 +58,7 @@ public class Capabilities
     {
         try
         {
-            Console.WriteLine("Handling over to Technical Support Workflow...");
+            var workflowType = "Support Ticket Flow";
             var ticketRequest = new
             {
                 CustomerEmail = customerEmail,
@@ -69,7 +70,7 @@ public class Capabilities
             var ticketId = Guid.NewGuid().ToString();
 
             await _messageThread.StartAndHandover(
-                "Support Ticket Flow",
+                workflowType,
                 "Initiate Support Ticket",
                 _messageThread.ParticipantId,
                 ticketRequest);
