@@ -67,8 +67,8 @@ Note that the `MessageThread` instance is passed to the capability class as a co
 
 There are two ways to handover a conversation to another agent flow:
 
-1. **Handover to an existing flow**: Transfer control to an already running workflow instance
-2. **Start and handover**: Create a new workflow instance and transfer control to it
+1. **Handover to an already running flow**: Transfer control to an already running workflow instance. Requires the flow ID of the target workflow.
+2. **Start and handover**: Create a new workflow instance and transfer control to it. Requires the workflow type name.
 
 ### Method 1: Handing Over to Already Running Flow
 
