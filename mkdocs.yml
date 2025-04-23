@@ -41,6 +41,7 @@ nav:
       - Package Agent Tools: 3-tools/2-using-tools/1-package-tools.md
       - Docker Agent Tools: 3-tools/2-using-tools/2-docker-tools.md
       - Custom Agent Tools: 3-tools/2-using-tools/3-custom-tools.md
+      - LLM Package Agent Tools: 3-tools/2-using-tools/4-llm-package-tools.md
   - Messaging:
     - Conversation with Agent: 4-messaging/1-agent-conversations.md
     - Semantic Conversations: 4-messaging/2-semantic-conversations.md
