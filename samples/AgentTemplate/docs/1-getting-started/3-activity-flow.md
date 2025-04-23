@@ -11,7 +11,7 @@ Activities are the fundamental building blocks of a flow that handle external in
 
 ## Understanding Agent Architecture
 
-Agent can have one or mode Flows. Each flow can have one or more Activities.
+Agent can have one or more Flows. Each flow can have one or more Activities.
 
 ### The Flow
 
