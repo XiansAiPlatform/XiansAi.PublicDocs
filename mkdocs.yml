@@ -49,6 +49,7 @@ nav:
   - Encyclopedia:
     - Multi-flow Agents: n-encyclopedia/multi-flow-agents.md
     - Signaling Agent Workflows: n-encyclopedia/signaling-agent-workflows.md
+    - Sending and Receiving Events: n-encyclopedia/sending-and-receiving-events.md
     - Unit Testing Activities: n-encyclopedia/unit-testing-activities.md
     - Priority Queues: n-encyclopedia/priority-queues.md
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
