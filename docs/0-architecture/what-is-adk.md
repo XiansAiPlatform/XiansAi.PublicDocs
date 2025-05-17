@@ -4,10 +4,9 @@ Xians Agent Development Kit (ADK) is a powerful, flexible framework for creating
 
 ## Get Started
 
-- [Setting up](1-getting-started/1-setting-up.md)
-- [First Agent](1-getting-started/2-first-agent.md)
-
-Xians ADK is a platform-agnostic framework for building AI agents. It provides a set of tools and libraries for building agents, as well as a management platform for deploying and monitoring agents.
+```bash
+dotnet add package XiansAi.Lib
+```
 
 ## Core Features
 
@@ -15,50 +14,58 @@ Xians ADK is a platform-agnostic framework for building AI agents. It provides a
 
 Xians ADK leverages temporal.io workflow engine to execute agent activities, making your applications fault-tolerant, scalable, and capable of managing long-running processes that can operate for months or years. Combine generative orchestration with deterministic workflows to create applications that are both adaptive and produce consistent, reliable results.
 
+[Learn about workflows →](../)
+
 ### **Intuitive Agent Architecture**
 
 Design agents using familiar software development patterns. Our structured approach makes agent creation more predictable and maintainable while supporting both assistive and autonomous execution modes to suit your business requirements.
+
+[Learn about the agent architecture →](../)
 
 ### **Composable Multi-Agent Systems**
 
 Build sophisticated systems by combining specialized agents in collaborative structures (not just hierarchical). Coordinate complex tasks through explicit workflows or emergent agent cooperation. Xians enables peer-to-peer agent handoffs and team-based collaboration where agents are aware of each other's capabilities.
 
+[Explore multi-agent systems →](../)
+
 ### **Event-Driven Agent Communication**
 
 Agents communicate seamlessly among themselves and within internal subprocesses through sophisticated event mechanisms, enabling complex coordination without tight coupling.
+
+[Discover agent communication →](../)
 
 ### **Comprehensive Tooling Framework**
 
 Extend agent capabilities with our extensive tool ecosystem. Integrate with pre-built utilities, create custom tools, leverage third-party libraries, or use other agents as tools to create powerful composable solutions.
 
+[Discover available tools →](../)
+
 ### **Complete Management Platform**
 
 Xians ADK includes a full-featured Agent Management Portal and built-in Agent run UI, providing total visibility into agent definitions, processes, activities, logs, and a knowledge management portal for agent use. This comprehensive platform approach eliminates the need to build custom interfaces for agent management.
+
+[Explore the management platform →](../)
 
 ### **Multi-Tenant Architecture**
 
 Built from the ground up for multi-tenancy, Xians ADK is the most suitable platform for sophisticated product development and enterprise deployments where isolation and customization per tenant are critical requirements.
 
+[Learn about multi-tenancy →](..)
+
 ### **Simplified Deployment**
 
 Deploy your agents anywhere with our flexible deployment options. Run locally during development, scale in cloud environments, or integrate into existing infrastructure with container support and standardized interfaces. Xians ADK ensures no vendor lock-in, whether to a specific LLM model, provider, or cloud platform.
+
+[Deployment options →](..)
 
 ### **Built-in Observability**
 
 Monitor and debug your agents with comprehensive tracing, logging, and evaluation capabilities.
 
+[Agent evaluation →](../)
+
 ### **Enterprise-Ready Security**
 
 Build agents that meet organizational requirements with our security-first design. Implement fine-grained permissions, input validation, and output filtering to create trustworthy AI systems.
 
-## Code Samples
-
-- [All Samples](https://github.com/XiansAiPlatform/XiansAi.PublicDocs/tree/main/samples)
-
-## GitHub
-
-- Visit our [GitHub repository](https://github.com/XiansAiPlatform)
-
-## Latest Updates
-
-Stay tuned for the latest updates and features. Follow our [changelog](https://github.com/XiansAiPlatform/XiansAi.Lib/releases) for detailed release information.
+[Security best practices →](../)

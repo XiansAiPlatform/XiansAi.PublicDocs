@@ -15,6 +15,6 @@ Complete each task and then start fresh with the next one.
 
 ## Tasks
 
-- [ ] [Task 1 - Create a New Project](task-1.md)
-- [ ] [Task 2 - Create a Flow](task-2.md)
-- [ ] [Task 3 - Create Flow Activities](task-3.md)
+- [x] [Task 1](task-1.md)
+- [x] [Task 2](task-2.md)
+- [] [Task 3](task-3.md) 
