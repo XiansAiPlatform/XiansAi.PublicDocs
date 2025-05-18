@@ -26,11 +26,15 @@ extra_css:
   - stylesheets/extra.css
 
 nav:
-  - Home: 
-    - Introduction: index.md
+  - Quick Start: 
+    - Introduction: 1-getting-started/0-index.md
     - Setting Up: 1-getting-started/1-setting-up.md
-    - Your First Agent: 1-getting-started/2-first-agent.md
-    - Agent with Activities: 1-getting-started/3-activity-flow.md
+    - Non-Deterministic:
+      - Conversational Flow: 1-getting-started/2-first-agent.md
+      - Adding Capabilities: 1-getting-started/3-adding-capabilities.md
+    - Deterministic:
+      - Business Process Flow: 1-getting-started/4-new-business-process.md
+      - Adding Activities: 1-getting-started/5-adding-activities.md
   - Agent Knowledge:
     - Manage Knowledge: 2-knowledge/1-manage-knowledge.md
     - Agent Without Knowledge: 2-knowledge/2-without-knowledge.md

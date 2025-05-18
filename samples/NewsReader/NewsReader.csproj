@@ -18,6 +18,9 @@
     <EmbeddedResource Include="NewsReaderBot.cs">
         <LogicalName>%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="NewsReportFlow.cs">
+        <LogicalName>%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

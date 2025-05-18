@@ -7,6 +7,15 @@ Env.Load();
 // name your agent
 var agentInfo = new AgentInfo("News Reader Agent");
 
-// create a new runner for the agent
+// create a new runner for the conversation bot
 var newsReaderBot = new Runner<NewsReaderBot>(agentInfo);
-await newsReaderBot.RunAsync();
+newsReaderBot.AddBotCapabilities(typeof(Capabilities));
+
+// Create a new runner for the news report flow
+var newsReportFlow = new Runner<NewsReportFlow>(agentInfo);
+
+// Wait for both bots to finish
+await Task.WhenAll(
+    newsReportFlow.RunAsync(),
+    newsReaderBot.RunAsync()
+);

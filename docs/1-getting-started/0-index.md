@@ -2,11 +2,6 @@
 
 Xians Agent Development Kit (ADK) is a powerful, flexible framework for creating, deploying, and orchestrating AI agents. Our platform-agnostic approach lets you build sophisticated agent systems while remaining model-independent and infrastructure-flexible. Xians ADK bridges the gap between traditional software development and AI agent creation, enabling developers to construct everything from simple task-oriented agents to complex multi-agent systems with enterprise-grade reliability.
 
-## Get Started
-
-- [Setting up](1-getting-started/1-setting-up.md)
-- [First Agent](1-getting-started/2-first-agent.md)
-
 Xians ADK is a platform-agnostic framework for building AI agents. It provides a set of tools and libraries for building agents, as well as a management platform for deploying and monitoring agents.
 
 ## Core Features
@@ -62,3 +57,7 @@ Build agents that meet organizational requirements with our security-first desig
 ## Latest Updates
 
 Stay tuned for the latest updates and features. Follow our [changelog](https://github.com/XiansAiPlatform/XiansAi.Lib/releases) for detailed release information.
+
+## Next Steps
+
+- [Setting up](1-setting-up.md)

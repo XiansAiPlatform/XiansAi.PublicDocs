@@ -1,149 +1,128 @@
-# Your First Agent Flow
+# Your First Agent Flow (Non-Deterministic)
 
-AI agent could have a multiple workflows. However in this example, we will create a simple agent with a single workflow.
+AI agent could have a multiple workflows. However in this example, we will create a simple agent with a single Flow which is a conversation bot.
 
-## Creating an Agent Flow
+## What is a Non-Deterministic Flow?
 
-To create a new agent workflow, create a class that inherits from `XiansAi.Flow.FlowBase`.
+Non-deterministic flows don't follow a predefined path that executes the same way each time. Instead, the flow's execution is determined at runtime, leveraging AI models and available data to make decisions about next steps.
+Unlike deterministic processes where every step must be explicitly modeled beforehand, non-deterministic flows adapt dynamically. This approach offers several advantages:
 
-`SimpleAgentFlow.cs >`
+- Faster development: Reduced need for extensive process design and testing
+- Improved accessibility: Business users can automate processes without deep technical expertise
+- Enhanced personalization: Flows can adapt to individual user needs and contexts
+- Greater flexibility: The system can handle complex scenarios that would be difficult to model explicitly
 
-```csharp
-using Temporalio.Workflows;
-using XiansAi.Flow;
+In deterministic systems, processes that can't be fully defined in advance typically require human intervention. Non-deterministic flows can increase automation in these scenarios, such as customer support, content generation, or decision-making tasks that traditionally needed human judgment.
 
-[Workflow]
-public class SimpleAgentFlow: FlowBase
-{
-    [WorkflowRun]
-    public async Task<string> Run(string name)
-    {
-        var output = "Hello";
-        await DelayAsync(TimeSpan.FromSeconds(10));
-        output += " World " + name;
-        return await Task.FromResult(output + $" {name}!");
-    }
-}
-```
+However, non-deterministic flows also present challenges, including less predictable behavior, potentially higher execution costs, and more complex auditing requirements. If the business process is well-known and requires repeatable results, then a deterministic flow is a better choice.
 
-## Agent Flow Naming
+## Creating a Conversational Flow
 
-To customize an agent's name, use the [Workflow] attribute.
-    ```csharp
-    [Workflow("My First Agent")]
-    public class SimpleFlow: FlowBase
-    ```
-
-!!! warning "Important"
-    Each agent flow name must be unique within your organization. You can view existing agent definitions in the XiansAI portal.
-
-## Enabling agent visualization
-
-To enable agent visualization, you need to bundle the agent's source code into the assembly. Add the following XML to your `.csproj` file:
-
-```xml
-  <ItemGroup>
-    <!-- Embed the agent source files -->
-    <EmbeddedResource Include="SimpleAgentFlow.cs">
-        <LogicalName>%(Filename)%(Extension)</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
-```
-
-This configuration embeds the SimpleAgent.cs file as a resource in your assembly.
-
-!!! note "Tip"
-    If your agent file is in a subdirectory, specify the full path in the Include attribute. For example: Include="MyNamespace/SimpleAgent.cs"
-
-## Registering the Flow Runner
-
-To register your agent, add it to the Flow Runner in your Program.cs file:
-
+Update your Program.cs:
 `Program.cs >`
 
 ```csharp
 using XiansAi.Flow;
 using DotNetEnv;
 
-// Env config via DotNetEnv
-Env.Load(); // OR Manually set the environment variables
+// Load the environment variables from the .env file
+Env.Load();
 
-// Define the flow
-var flowInfo = new FlowInfo<SimpleAgentFlow>();
+// name your agent
+var agentInfo = new AgentInfo("News Reader Agent");
 
-try
+// create a new runner for the conversation bot
+var newsReaderBot = new Runner<NewsReaderBot>(agentInfo);
+await newsReaderBot.RunAsync();
+```
+
+## Add a conversation bot to the agent
+
+Agents can be configured to have multiple workflows (business processes). One type of workflow is a conversation bot. This is a bot that can be used to interact with the users.
+
+To add a conversation bot to the agent, you need to add a new class to the agent project.
+
+`NewsReaderBot.cs>`
+
+```csharp
+using Temporalio.Workflows;
+using XiansAi.Flow;
+
+[Workflow("News Reader Bot")]
+public class NewsReaderBot : FlowBase
 {
-    // Run the flow by passing the flow info to the FlowRunnerService
-    await new FlowRunnerService().RunFlowAsync(flowInfo);
-}
-catch (OperationCanceledException)
-{
-    Console.WriteLine("Application shutdown requested. Shutting down gracefully...");
+
+    [WorkflowRun]
+    public async Task Run()
+    {
+        string sysPrompt = "You are a news reader bot.";
+        await InitUserConversation(sysPrompt);
+    }
 }
 
 ```
 
-To start the flow runner:
+Notes:
+
+- The `[WorkflowRun]` and `[Workflow]` attributes are required to mark the method as the entry points for the workflow. You can see more about the Temporal.io workflow engine [here](https://docs.temporal.io).
+
+- InitUserConversation is a method that initializes the conversation with the user. It is a method that is provided by the XiansAi.Flow library.
+
+## Testing Your Setup
+
+Run the application requesting to test the configuration:
 
 ```bash
-dotnet build    
 dotnet run
 ```
 
-The Flow Runner will now wait for flow execution requests. To start a new flow, visit the 'Flow Definitions' section in the XiansAI portal and click the 'Start New' button for your SimpleFlow.
+If no errors occur, your agent is now deployed to the Xians.ai platform.
 
-!!! bug "Duplicate Name Error"
-    If you receive this error:
-    ```bash
-    > Bad Request: "Another user has already used this flow type name SimpleFlow. Please choose a different flow name."
-    ```
-    You'll need to choose a unique name using the [Workflow] attribute as shown earlier.
+Note: You will have a `Warning` which we will fix in the next step.
 
-![Start New Agent Run](../images/start-new-flow.png)
+Log in to the Xians.ai Manager portal and you will see your agent under `Agent Definitions`.
 
-You can view agent definition details and visualizations in the XiansAI portal.
+![Definitions](./img/1-definition.png)
 
-![Agent Definition Details](../images/flow-visualization.png)
+Click `Activate` and activate a Singleton Flow Run.
 
-## Activating the Agent
+Now in the `Messaging` playground you can start a conversation with your agent.
 
-To activate your agent:
+![Messaging](./img/1-message.png)
 
-1. Navigate to the agent definitions page
-2. Click the 'Activate' button
-3. Monitor the 'Agent Runs' section to track your agent's execution
+You can see the conversation history and the agent's response.
 
-Note: It may take a few seconds for your agent run to appear. Refresh the page if needed.
+## Visualizing the Flow's Logic
 
-![Agent Runs](../images/flow-runs.png)
+You may have noted the `Warning` in the previous step. Also the disabled `Visualize` button in the portal.
 
-## Configure Logging (optional)
+This is because the flow class file is not included in deployed package. Let's fix this.
 
-To configure logging for your agent, you can use the `FlowRunnerService` options. This allows you to consistently log messgaes from your workflow, activities as well as from systems messages from `Xians.Lib`.
+Add the following in your .csproj file:
 
-```csharp
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
 ...
-    var options = new FlowRunnerOptions
-    {
-        LoggerFactory = LoggerFactory.Create(builder =>
-        builder
-            .SetMinimumLevel(LogLevel.Debug)
-            .AddConsole())
-    };
-    // Run the flow 
-    await new FlowRunnerService(options).RunFlowAsync(flowInfo, tokenSource.Token);
-...
+
+  <ItemGroup>
+    <!-- Embed the flow source files -->
+    <EmbeddedResource Include="NewsReaderBot.cs">
+        <LogicalName>%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
+
 ```
 
-## Override Cancellation Token
+Now you can run the agent again and you will see the `Visualize` button enabled in the portal.
 
-To override the cancellation token, you can pass a new token to the `RunFlowAsync` method. By default, the cancellation token is cancelled on ctrl+c.
-
-```csharp
-// Cancellation token cancelled on ctrl+c
-var tokenSource = new CancellationTokenSource();
-Console.CancelKeyPress += (_, eventArgs) =>{ tokenSource.Cancel(); eventArgs.Cancel = true;};
-
-// Run the flow
-await new FlowRunnerService().RunFlowAsync(flowInfo, tokenSource.Token);
+```bash
+dotnet run
 ```
+
+You will see the `Visualize` button enabled in the portal.
+
+![Visualize](./img/1-visualize.png)
+
+Click the `Visualize` button and you will see the flow's logic.
