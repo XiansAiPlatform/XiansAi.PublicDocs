@@ -57,9 +57,3 @@ To create a new version:
 - By default, agents use the latest version of knowledge
 - You can specify a particular version when requesting for knowledge
 - Previous versions are preserved and can be restored if needed
-
-## Next Step
-
-To understand how knowledge work in XiansAI, let's see 2 examples:
-
-[Flow without knowledge](./2-without-knowledge.md)

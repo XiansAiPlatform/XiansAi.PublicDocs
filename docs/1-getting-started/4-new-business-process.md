@@ -121,4 +121,16 @@ Run the application requesting to test the configuration:
 dotnet run
 ```
 
-Your agent will now be deployed to the Xians.ai platform.
+Your agent will now be deployed to the Xians.ai platform. You should be able to Activate this flow from Xians.ai Manager portal.
+
+![Activate](./img/4-activate.png)
+
+Now under the `Runs` tab you should be able to see a completed run.
+
+![Run](./img/4-observe.png)
+
+You can click on the run and see the details.
+
+## Next Steps
+
+- [Adding Activities](5-adding-activities.md)

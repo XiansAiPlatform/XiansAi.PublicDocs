@@ -145,3 +145,8 @@ In a real world implementation, you would use a news API to get the latest news 
 - Include proper documentation using XML comments
 - Implement proper error handling in your capability methods
 - Consider adding validation for input parameters
+
+
+## Next Steps
+
+- [New Business Process](4-new-business-process.md)

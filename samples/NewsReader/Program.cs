@@ -13,6 +13,7 @@ newsReaderBot.AddBotCapabilities(typeof(Capabilities));
 
 // Create a new runner for the news report flow
 var newsReportFlow = new Runner<NewsReportFlow>(agentInfo);
+newsReportFlow.AddFlowActivities<INewsActivities, NewsActivities>();
 
 // Wait for both bots to finish
 await Task.WhenAll(

@@ -64,3 +64,7 @@ APP_SERVER_API_KEY=
 ```
 
 Replace the values with values obtained from the `Settings` page in the Xians.ai portal.
+
+## Next Steps
+
+- [First Agent](2-first-agent.md)

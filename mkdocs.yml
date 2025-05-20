@@ -1,5 +1,5 @@
 # mkdocs.yml
-site_name: Xians.ai Docs
+site_name: Xians.ai Documentation
 theme:
   name: material
   features:
@@ -35,20 +35,17 @@ nav:
     - Deterministic:
       - Business Process Flow: 1-getting-started/4-new-business-process.md
       - Adding Activities: 1-getting-started/5-adding-activities.md
+  - Agent Collaboration:
+    - Events:
+      - Inter-flow Communication: 2-agent-collaboration/1-events.md
+    - Messaging:
+      - Agent Initiated Messaging: 2-agent-collaboration/2-messaging.md
+    - Handoffs:
+      - Handoff to Another Agent: 2-agent-collaboration/3-handoffs.md
   - Agent Knowledge:
-    - Manage Knowledge: 2-knowledge/1-manage-knowledge.md
-    - Agent Without Knowledge: 2-knowledge/2-without-knowledge.md
-    - Using Knowledge: 2-knowledge/3-using-knowledge.md
-  - Agent Tools:
-    - What are Agent Tools: 3-tools/1-agent-tool-types.md
-    - Using Agent Tools:
-      - Package Agent Tools: 3-tools/2-using-tools/1-package-tools.md
-      - Docker Agent Tools: 3-tools/2-using-tools/2-docker-tools.md
-      - Custom Agent Tools: 3-tools/2-using-tools/3-custom-tools.md
-  - Messaging:
-    - Conversation with Agent: 4-messaging/1-agent-conversations.md
-    - Semantic Conversations: 4-messaging/2-semantic-conversations.md
-    - Handing Over Conversations: 4-messaging/3-handing-over-conversations.md
+    - Manage Knowledge: 2-knowledge/1-using-portal.md
+    - Agent Without Knowledge: 2-knowledge/2-capabilities.md
+    - Using Knowledge: 2-knowledge/3-local-dev.md
   - Encyclopedia:
     - Multi-flow Agents: n-encyclopedia/multi-flow-agents.md
     - Signaling Agent Workflows: n-encyclopedia/signaling-agent-workflows.md

@@ -126,3 +126,7 @@ You will see the `Visualize` button enabled in the portal.
 ![Visualize](./img/1-visualize.png)
 
 Click the `Visualize` button and you will see the flow's logic.
+
+## Next Steps
+
+- [Adding Capabilities](3-adding-capabilities.md)
