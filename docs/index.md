@@ -14,6 +14,8 @@ Welcome to the official documentation for Xians.ai. Here you'll find everything 
 
 - **[Encyclopedia](n-encyclopedia/multi-flow-agents.md)** - Learn deeper about Xians.ai
 
+- **[User Guide](5-user-guides/1-simple-conversation-bot.md)** - User guide on how to create different types of agents
+
 ## Code Samples
 
 - [All Samples](https://github.com/XiansAiPlatform/XiansAi.PublicDocs/tree/main/samples)
