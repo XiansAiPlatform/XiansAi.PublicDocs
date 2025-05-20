@@ -43,24 +43,17 @@ nav:
     - Messaging:
       - Agent Initiated Message: 2-agent-collaboration/2-messaging.md
       - Responding to a User: 2-agent-collaboration/4-responding.md
-
   - Agent Knowledge:
-    - Manage Knowledge: 2-knowledge/1-using-portal.md
-    - Agent Without Knowledge: 2-knowledge/2-capabilities.md
-    - Using Knowledge: 2-knowledge/3-local-dev.md
+    - Managing Knowledge: 3-knowledge/1-using-portal.md
+    - Accessing Knowledge: 3-knowledge/2-accessing-knowledge.md
+    - Capabilities as Knowledge: 3-knowledge/3-capabilities.md
+    - Local Development: 3-knowledge/3-local-dev.md
   - Encyclopedia:
     - Multi-flow Agents: n-encyclopedia/multi-flow-agents.md
     - Signaling Agent Workflows: n-encyclopedia/signaling-agent-workflows.md
-    - Sending and Receiving Events: n-encyclopedia/sending-and-receiving-events.md
     - Unit Testing Activities: n-encyclopedia/unit-testing-activities.md
-    - Priority Queues: n-encyclopedia/priority-queues.md
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
-  - User Guide:
-    - Simple Conversation Bot: 5-user-guides/1-simple-conversation-bot.md
-    - Proactive Conversation Bot: 5-user-guides/2-proactive-conversation-bot.md
-    - Multiple Chatbots & Automatic Handover: 5-user-guides/3-multiple-conversation-bots-with-automatic-handover.md
-    - Triggering Events Through Conversations: 5-user-guides/4-triggering-events-through-conversation-bot.md
-
+ 
 markdown_extensions:
   - tables
   - admonition

@@ -12,71 +12,72 @@ Multi-flow agents allow you to split complex functionality into separate workflo
 
 ## Step 1: Define Individual Flows
 
-Each flow should inherit from `FlowBase` and be marked with the `[Workflow]` attribute. The main workflow method should be decorated with `[WorkflowRun]`.
-
-### Example: ChatFlow
+### Example: ConsultationBot
 
 ```csharp
 using Temporalio.Workflows;
 using XiansAi.Flow;
 
-namespace SalesAssistAgent.Workflows.ChatFlow;
+namespace Conversing.Consultation;
 
-[Workflow("Sales Assist Agent: Chat Flow")]
-public class ChatFlow: FlowBase
+[Workflow("Consultation Bot")]
+public class ConsultationBot : FlowBase
 {
     [WorkflowRun]
-    public async Task<string> Run(string name)
+    public async Task Run()
     {
-        // Your chat logic here
+        // Your consultation logic here
     }
 }
 ```
 
-### Example: CalendarFlow
+### Example: MedicineInfoBot
 
 ```csharp
 using Temporalio.Workflows;
 using XiansAi.Flow;
 
-namespace SalesAssistAgent.Workflows.CalendarFlow;
+namespace Conversing.MedicineInfo;
 
-[Workflow("Sales Assist Agent: Calendar Flow")]
-public class CalendarFlow: FlowBase
+[Workflow("Medicine Info Bot")]
+public class MedicineInfoBot : FlowBase
 {
     [WorkflowRun]
-    public async Task Run(string name)
+    public async Task Run()
     {
-        // Your calendar logic here
-        
+        // Your medicine info logic here
     }
 }
 ```
 
 ## Step 2: Configure Agent and Flows
 
-In your `Program.cs`, define a single `AgentInfo` object that all flows will share:
+In your `Program.cs`, define a single `AgentInfo` object that all flows will share and configure each flow with its capabilities:
 
 ```csharp
 using XiansAi.Flow;
 using DotNetEnv;
-using Microsoft.Extensions.Logging;
-using SalesAssistAgent.Workflows.CalendarFlow;
-using SalesAssistAgent.Workflows.ChatFlow;
+using Conversing.Consultation;
+using Conversing.MedicineInfo;
+using Conversing.HealthRecords;
+using Sensing.ConsultantNotes;
 
-...
+// Env config via DotNetEnv
+Env.Load();
 
 // Define the shared AgentInfo for all flows
-var agentInfo = new AgentInfo {
-    Name = "Sales Assist Agent",
-    Description = "A sales assistant that can help with sales tasks",
-};
+var agentInfo = new AgentInfo("Consultation Assist Agent");
 
-// Create FlowInfo objects for each flow, passing the shared agentInfo
-var calendarFlowInfo = new FlowInfo<CalendarFlow>(agentInfo);
-var chatFlowInfo = new FlowInfo<ChatFlow>(agentInfo);
+// Configure Consultation Bot
+var consultationBot = new Runner<ConsultationBot>(agentInfo);
+consultationBot.AddBotCapabilities<UploadCapability>();
+consultationBot.AddBotCapabilities<HandoverCapabilities>();
 
-...
+// Configure Medicine Info Bot
+var medicineInfoBot = new Runner<MedicineInfoBot>(agentInfo);
+medicineInfoBot.AddBotCapabilities<FdaInfoCapabilities>();
+medicineInfoBot.AddBotCapabilities<HandoverCapabilities>();
+
 ```
 
 ## Step 3: Run Multiple Flows Concurrently
@@ -84,76 +85,21 @@ var chatFlowInfo = new FlowInfo<ChatFlow>(agentInfo);
 Start and manage all flows concurrently:
 
 ```csharp
-// Cancellation token for graceful shutdown
-var tokenSource = new CancellationTokenSource();
-Console.CancelKeyPress += (_, eventArgs) => { 
-    tokenSource.Cancel(); 
-    eventArgs.Cancel = true;
-};
 
-try
-{
-    // Create flow runner tasks
-    var calendarTask = new FlowRunnerService().RunFlowAsync(calendarFlowInfo, tokenSource.Token);
-    var chatTask = new FlowRunnerService().RunFlowAsync(chatFlowInfo, tokenSource.Token);
-    
-    // Run all flows concurrently
-    await Task.WhenAll(calendarTask, chatTask);
-}
-catch (OperationCanceledException)
-{
-    Console.WriteLine("Application shutdown requested. Shutting down gracefully...");
-}
+// Run all flows concurrently
+await Task.WhenAll(
+    consultationBot.RunAsync(),
+    medicineInfoBot.RunAsync()
+);
+
 ```
 
 ## Best Practices
 
 1. **Shared Identity**: Use a single `AgentInfo` object for all flows to maintain a consistent agent identity.
 
-2. **Flow Separation**: Design flows to handle distinct functionality (e.g., chat handling vs. calendar operations).
+2. **Flow Separation**: Design flows to handle distinct functionality (e.g., consultation handling vs. medicine information).
 
-3. **Flow Communication**: If flows need to communicate, use activities or signals rather than direct references.
+3. **Flow Communication**: If flows need to communicate, use events rather than direct references.
 
-## Complete Example
-
-```csharp
-using XiansAi.Flow;
-using DotNetEnv;
-using Microsoft.Extensions.Logging;
-using YourNamespace.Workflows.Flow1;
-using YourNamespace.Workflows.Flow2;
-
-// Configuration
-Env.Load();
-FlowRunnerService.SetLoggerFactory(LoggerFactory.Create(builder => 
-    builder.SetMinimumLevel(LogLevel.Debug).AddConsole()));
-
-// Define shared agent identity
-var agentInfo = new AgentInfo {
-    Name = "Multi-Flow Agent",
-    Description = "Agent with multiple specialized workflows",
-};
-
-// Configure flows
-var flow1Info = new FlowInfo<Flow1>(agentInfo);
-var flow2Info = new FlowInfo<Flow2>(agentInfo);
-
-// Setup cancellation
-var tokenSource = new CancellationTokenSource();
-Console.CancelKeyPress += (_, e) => { tokenSource.Cancel(); e.Cancel = true; };
-
-try
-{
-    // Run flows concurrently
-    await Task.WhenAll(
-        new FlowRunnerService().RunFlowAsync(flow1Info, tokenSource.Token),
-        new FlowRunnerService().RunFlowAsync(flow2Info, tokenSource.Token)
-    );
-}
-catch (OperationCanceledException)
-{
-    Console.WriteLine("Shutting down gracefully...");
-}
-```
-
-This architecture allows you to build complex agents with specialized workflows while maintaining a unified agent identity and coordinated lifecycle management.
+This architecture allows you to build complex agents with specialized workflows while maintaining a unified agent identity and coordinated lifecycle management. Each flow can have its own set of capabilities and activities, making the system modular and maintainable.
