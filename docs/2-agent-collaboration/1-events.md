@@ -1,73 +1,222 @@
-# Conversation with Agent
+# Events Between Agent Flows
 
-???+ warning
+Events provide a powerful mechanism for communication between different flows in the XiansAI system. This document explains how to implement event-based communication between flows.
 
-    This page content is outdated. We are working on updating it. Will be updated by 25th May 2025.
+## Overview
 
-Xians AI provides a way to have a conversation with an agent. This is useful for when you want to have a conversation with an agent and get a response. Or even if the agent proactively sends a message to the user.
+Events in XiansAI allow flows to:
 
-## Handling Conversations
+- Send events to other flows
+- Subscribe to and handle events from other flows
+- Pass data between flows asynchronously
 
-To have a conversation with an agent, you can use the `Messenger` class variable in the `FlowBase` class.
+## Sending Events
+
+To send an event from one flow to another, use the `EventHub.Publish` method. Here's how to implement it:
 
 ```csharp
-using Temporalio.Workflows;
-using XiansAi.Flow;
-using XiansAi.Messaging;
-
-[Workflow("Conversive Flow")]
-public class ConversiveAgentFlow: FlowBase
+// Define an event payload class
+public class NewsReportRequest
 {
-    private readonly Queue<MessageThread> _messageQueue = new Queue<MessageThread>();
+    [JsonPropertyName("url")]
+    public required string Url { get; set; }
+    
+    [JsonPropertyName("recipientEmail")]
+    public required string RecipientEmail { get; set; }
+}
 
-    public ConversiveAgentFlow(): base()
+// Send an event
+EventHub.Publish(
+    typeof(NewsReportFlow),  // Target flow type
+    NewsReportFlow.SendSummaryReportEvent,  // Event name
+    new NewsReportRequest {  // Event payload
+        Url = url, 
+        RecipientEmail = recipientEmail 
+    }
+);
+```
+
+## Receiving Events
+
+To receive events in a flow, subscribe to them in the flow's constructor using the `_eventHub.Subscribe` method:
+
+```csharp
+public class NewsReportFlow : FlowBase
+{
+    public const string SendSummaryReportEvent = "SendSummaryReport";
+    Queue<NewsReportRequest> _newsRequests = new();
+
+    public NewsReportFlow()
     {
-        // Register the message handler
-        Messenger.RegisterHandler((MessageThread thread) => {
-            _messageQueue.Enqueue(thread);
+        _eventHub.Subscribe<NewsReportRequest>((metadata, payload) =>
+        {
+            Workflow.Logger.LogInformation("Received News Report Request for URL: {Url}", payload?.Url);
+            if (payload != null)
+            {
+                _newsRequests.Enqueue(payload);
+            }
+        });
+    }
+}
+```
+
+## Complete Example
+
+Here's a complete example showing how two flows can communicate using events:
+
+1. **Sending Flow (Capabilities.cs)**:
+
+```csharp
+[Capability("Send summary report")]
+[Parameter("url", "URL of the news article")]
+[Parameter("recipientEmail", "Email address of the recipient")]
+[Returns("Success message")]
+public static string SendSummaryReport(string url, string recipientEmail)
+{
+    EventHub.Send(
+        typeof(NewsReportFlow), 
+        NewsReportFlow.SendSummaryReportEvent, 
+        new NewsReportRequest { Url = url, RecipientEmail = recipientEmail }
+    );
+    return "Success";
+}
+```
+
+2. **Receiving Flow (NewsReportFlow.cs)**:
+
+```csharp
+[Workflow("News Report Flow")]
+public class NewsReportFlow : FlowBase
+{
+    public const string SendSummaryReportEvent = "SendSummaryReport";
+    Queue<NewsReportRequest> _newsRequests = new();
+
+    public NewsReportFlow()
+    {
+        _eventHub.Subscribe<NewsReportRequest>((metadata, payload) =>
+        {
+            Workflow.Logger.LogInformation("Received News Report Request for URL: {Url}", payload?.Url);
+            if (payload != null)
+            {
+                _newsRequests.Enqueue(payload);
+            }
         });
     }
 
     [WorkflowRun]
     public async Task<string> Run()
     {
-
-        while (true)
-        {
-            // Wait for a message to be added to the queue
-            await Workflow.WaitConditionAsync(() => _messageQueue.Count > 0);
-
-            // Get the message from the queue
-            var thread = _messageQueue.Dequeue();
-            var message = thread.IncomingMessage.Content;
-
-            // TODO: Process the message
-
-            // Respond to the message
-            await thread.Respond($"Message received: `{message}`");
-
-        }
+        // Wait for events to arrive
+        await Workflow.WaitConditionAsync(() => _newsRequests.Count > 0);
+        var request = _newsRequests.Dequeue();
+        
+        // Process the event...
     }
 }
-
 ```
 
-Steps to handle conversations:
+## Event Flow
 
-1. Register a handler for the `MessageThread` event.
-2. Queue the message
-3. In WorkflowRun, wait for the queue to have a message
-4. Dequeue the message
-5. Process and respond to the message
+1. A capability or flow sends an event using `EventHub.Send`
+2. The target flow receives the event through its subscription
+3. The receiving flow processes the event in its workflow
+4. The workflow can wait for events using `Workflow.WaitConditionAsync`
 
-## Testing Conversations
+This event-based communication pattern enables loose coupling between flows while maintaining type safety and reliable message delivery.
 
-To test conversations, you can use the `Messaging` section in the Xians AI portal.
+## SDK Reference
 
-![Messaging](../images/messaging.png)
+### EventHub Class
 
-- select the agent you want to test
-- select the workflow you want to test
-- select the running instance you want to test (you need to have at least one running instance)
-- create a new conversation by sending a message specifying `Participant ID` and `Content`
-- Observe the response from the agent
+The `EventHub` class provides the core functionality for event-based communication between flows.
+
+#### Publishing Events
+
+There are two ways to publish events:
+
+1. **Using Flow Type**:
+
+```csharp
+await EventHub.Publish(
+    typeof(NewsReportFlow),  // Target flow type
+    "EventName",            // Event type
+    payload                 // Optional payload object
+);
+```
+
+2. **Using Workflow ID and Type**:
+
+```csharp
+await EventHub.Publish(
+    "target-workflow-id",   // Target workflow ID
+    "target-workflow-type", // Target workflow type
+    "EventName",           // Event type
+    payload                // Optional payload object
+);
+```
+
+#### Subscribing to Events
+
+The `EventHub` class provides two ways to subscribe to events:
+
+1. **Async Handler**:
+
+```csharp
+_eventHub.Subscribe<NewsReportRequest>(async (metadata, payload) =>
+{
+    // Handle event asynchronously
+    await ProcessEventAsync(metadata, payload);
+});
+```
+
+2. **Sync Handler**:
+
+```csharp
+_eventHub.Subscribe<NewsReportRequest>((metadata, payload) =>
+{
+    // Handle event synchronously
+    ProcessEvent(metadata, payload);
+});
+```
+
+#### Unsubscribing from Events
+
+To remove event handlers:
+
+```csharp
+// Remove async handler
+_eventHub.Unsubscribe<NewsReportRequest>(asyncHandler);
+
+// Remove sync handler
+_eventHub.Unsubscribe<NewsReportRequest>(syncHandler);
+```
+
+### Event Metadata
+
+Each event includes metadata about its source:
+
+```csharp
+public class EventMetadata
+{
+    public required string EventType { get; set; }
+    public required string SourceWorkflowId { get; set; }
+    public required string SourceWorkflowType { get; set; }
+    public required string SourceAgent { get; set; }
+}
+```
+
+### Event Handlers
+
+Two types of event handlers are supported:
+
+1. **Async Handler**:
+
+```csharp
+public delegate Task EventReceivedAsyncHandler<T>(EventMetadata metadata, T? payload);
+```
+
+2. **Sync Handler**:
+
+```csharp
+public delegate void EventReceivedHandler<T>(EventMetadata metadata, T? payload);
+```

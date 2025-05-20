@@ -38,10 +38,12 @@ nav:
   - Agent Collaboration:
     - Events:
       - Inter-flow Communication: 2-agent-collaboration/1-events.md
-    - Messaging:
-      - Agent Initiated Messaging: 2-agent-collaboration/2-messaging.md
     - Handoffs:
       - Handoff to Another Agent: 2-agent-collaboration/3-handoffs.md
+    - Messaging:
+      - Agent Initiated Message: 2-agent-collaboration/2-messaging.md
+      - Responding to a User: 2-agent-collaboration/4-responding.md
+
   - Agent Knowledge:
     - Manage Knowledge: 2-knowledge/1-using-portal.md
     - Agent Without Knowledge: 2-knowledge/2-capabilities.md
