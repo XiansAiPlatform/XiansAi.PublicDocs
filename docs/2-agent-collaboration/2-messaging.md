@@ -1,5 +1,9 @@
 # Semantic Conversations
 
+???+ warning
+
+    This page content is outdated. We are working on updating it. Will be updated by 25th May 2025.
+
 Xians AI provides a way to have a powerful semantic conversation with an agent. This is useful for when you want to have a natural conversation with an agent and execute actions based on the conversation.
 
 ## Handling Semantic Conversations

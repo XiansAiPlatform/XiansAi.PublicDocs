@@ -1,5 +1,9 @@
 # Conversation with Agent
 
+???+ warning
+
+    This page content is outdated. We are working on updating it. Will be updated by 25th May 2025.
+
 Xians AI provides a way to have a conversation with an agent. This is useful for when you want to have a conversation with an agent and get a response. Or even if the agent proactively sends a message to the user.
 
 ## Handling Conversations

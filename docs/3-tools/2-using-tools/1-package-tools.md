@@ -1,5 +1,9 @@
 # Using Package Agents
 
+???+ warning
+
+    This page content is outdated. We are working on updating it. Will be updated by 25th May 2025.
+    
 Package agents are pre-built components distributed as NuGet packages that seamlessly integrate into Xians.ai activities through the .NET SDK interface. They provide ready-to-use functionality that can be easily incorporated into your workflows.
 
 ## Installation

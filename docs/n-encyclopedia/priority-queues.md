@@ -1,5 +1,9 @@
 # Priority Queues
 
+???+ warning
+
+    This page content is outdated. We are working on updating it. Will be updated by 25th May 2025.
+    
 ## Overview
 
 Priority queues in Xians AI enable differentiated processing capabilities for different types of agent runs. This feature allows you to allocate more processing resources to specific queues, ensuring faster processing times for high-priority requests.

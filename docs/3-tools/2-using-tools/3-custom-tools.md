@@ -1,5 +1,9 @@
 # Using Custom Agents
 
+???+ warning
+
+    This page content is outdated. We are working on updating it. Will be updated by 25th May 2025.
+
 Custom agents are fully custom implementations in your Activity classes. They are not distributed as NuGet packages, nor are they containerized. They are simply Activity classes with your own custom logic that are registered in your workflow configuration. It is not recommended to use this unless you have a very specific use case that cannot be met by the other agent types.
 
 ## Implementation Guide

@@ -1,5 +1,9 @@
 # Manage Knowledge
 
+???+ warning
+
+    This page content is outdated. We are working on updating it. Will be updated by 25th May 2025.
+    
 ## What are Knowledge?
 
 Knowledge are essential components that guide how AI agents (or other conventional agents) behave in your activities. Think of knowledge as a set of rules and guidelines that define:

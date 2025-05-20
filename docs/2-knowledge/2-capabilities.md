@@ -1,5 +1,9 @@
 # Flow Without Knowledge
 
+???+ warning
+
+    This page content is outdated. We are working on updating it. Will be updated by 25th May 2025.
+    
 This example demonstrates how to create a poetry generation flow using the Gemini API. The flow takes some words as input and returns a generated poem.
 
 ## Flow Overview
