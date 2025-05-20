@@ -25,7 +25,6 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
-
 nav:
   - Quick Start: 
     - Introduction: 1-getting-started/0-index.md
