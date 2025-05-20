@@ -143,9 +143,6 @@ public async Task<string> RaiseTechnicalSupportTicket(string customerEmail, stri
             MessageContent = _messageThread.IncomingMessage.Content
         };
 
-        // Create a unique ticket ID
-        var ticketId = Guid.NewGuid().ToString();
-
         // Create a new workflow and handover in one operation
         await _messageThread.StartAndHandover(
             workflowType,                   // Workflow type to create
