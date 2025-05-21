@@ -27,7 +27,7 @@ dotnet add package XiansAi.Lib
 
 Your agent needs to be configured with the agent server. This is done by obtaining the required settings from the Xians.ai portal's `Settings` page. You should configure these settings in one of the following 3 ways in your `Program.cs` file:
 
-### Configuration (alternative 1 - hardcode app server url and api key)
+### Configuration alternative 1 (hardcode values)
 
 In your program.cs file, you can configure the platform by setting the following environment variables:
 
@@ -37,11 +37,11 @@ In your program.cs file, you can configure the platform by setting the following
 using XiansAi;
 
 // manually set the app server url and api key
-PlatformConfig.APP_SERVER_URL = `https://api.xians.ai`;
+PlatformConfig.APP_SERVER_URL = "https://api.xians.ai";
 PlatformConfig.APP_SERVER_API_KEY = "your-api-key";
 ```
 
-### Configuration (alternative 2 - using .env file)
+### Configuration alternative 2 (using .env file)
 
 For better security and maintainability, you may use a .env file to manage your configuration:
 You can use a package like [DotNetEnv](https://github.com/tonerdo/dotnet-env) to load the environment variables from the `.env` file without hardcoding them in your code.
