@@ -70,6 +70,16 @@ Notes:
 
 ## Testing Your Setup
 
+!!! Important Note
+    If you get a warning about another user using the same agent/flow name, you should change the agent/flow name to something else.
+    
+    One tenant can have only one agent/flow with the same name. 
+    
+    For example,
+    `News Reader Bot` is already taken, so you should use `News Reader Bot - xyz` or something like that.
+
+    Similarly, `News Reader Agent` could be`News Reader Agent - xyz` or something like that.
+
 Run the application requesting to test the configuration:
 
 ```bash

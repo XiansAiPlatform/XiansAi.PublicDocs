@@ -23,25 +23,27 @@ Add the Xians.ai SDK to your project:
 dotnet add package XiansAi.Lib
 ```
 
-## Understanding the Platform
+## Agent Configuration
 
-The XiansAi platform consists of two main components:
+Your agent needs to be configured with the agent server. This is done by obtaining the required settings from the Xians.ai portal's `Settings` page. You should configure these settings in one of the following 3 ways in your `Program.cs` file:
 
-### App Server
+### Configuration (alternative 1 - hardcode app server url and api key)
 
-- Manages your agents and knowledge
-- Provides monitoring and visualization
-- Handles agent administration
+In your program.cs file, you can configure the platform by setting the following environment variables:
 
-### Flow Server
+`Program.cs >`
 
-- Executes your agents
-- Manages agent state and persistence
-- Handles distributed execution
+```csharp
+using XiansAi;
 
-## Configuration Setup
+// manually set the app server url and api key
+PlatformConfig.APP_SERVER_URL = `https://api.xians.ai`;
+PlatformConfig.APP_SERVER_API_KEY = "your-api-key";
+```
 
-For better security and maintainability, use a .env file to manage your configuration:
+### Configuration (alternative 2 - using .env file)
+
+For better security and maintainability, you may use a .env file to manage your configuration:
 You can use a package like [DotNetEnv](https://github.com/tonerdo/dotnet-env) to load the environment variables from the `.env` file without hardcoding them in your code.
 
 Install the DotNetEnv package:
@@ -54,16 +56,19 @@ Create a `.env` file in the root of your project with the following content:
 
 ``` .env
 # Platform environment variables
-
-FLOW_SERVER_URL=
-FLOW_SERVER_NAMESPACE=
-FLOW_SERVER_API_KEY=
-
-APP_SERVER_URL=
-APP_SERVER_API_KEY=
+APP_SERVER_URL=https://api.xians.ai
+APP_SERVER_API_KEY=your-api-key
 ```
 
-Replace the values with values obtained from the `Settings` page in the Xians.ai portal.
+`Program.cs >`
+
+```csharp
+using DotNetEnv;
+
+// Load the environment variables from the .env file
+Env.Load();
+
+```
 
 ## Next Steps
 

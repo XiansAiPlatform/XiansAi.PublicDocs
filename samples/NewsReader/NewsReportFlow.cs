@@ -11,7 +11,7 @@ public class NewsReportRequest
     public required string RecipientEmail { get; set; }
 }
 
-[Workflow("News Report Flow")]
+[Workflow("News Report Flow - hya")]
 public class NewsReportFlow : FlowBase
 {
     public const string SendSummaryReportEvent = "SendSummaryReport";

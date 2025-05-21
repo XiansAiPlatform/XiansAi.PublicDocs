@@ -5,7 +5,7 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agentInfo = new AgentInfo("News Reader Agent");
+var agentInfo = new AgentInfo("News Reader Agent - hya");
 
 // create a new runner for the conversation bot
 var newsReaderBot = new Runner<NewsReaderBot>(agentInfo);

@@ -12,7 +12,7 @@ public static class Capabilities
     [Returns("Success message")]
     public static string SendSummaryReport(string url, string recipientEmail)
     {
-        EventHub.Send(
+        EventHub.Publish(
             typeof(NewsReportFlow), 
             NewsReportFlow.SendSummaryReportEvent, 
             new NewsReportRequest { Url = url, RecipientEmail = recipientEmail }
