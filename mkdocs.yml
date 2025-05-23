@@ -51,6 +51,7 @@ nav:
   - Encyclopedia:
     - Multi-flow Agents: n-encyclopedia/multi-flow-agents.md
     - Signaling Agent Workflows: n-encyclopedia/signaling-agent-workflows.md
+    - Logging: n-encyclopedia/logging.md
     - Unit Testing Activities: n-encyclopedia/unit-testing-activities.md
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
  
