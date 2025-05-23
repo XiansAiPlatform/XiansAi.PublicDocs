@@ -173,6 +173,20 @@ _logger.LogCritical("Critical workflow failure", exception);
 
 XiansAi provides a comprehensive auditing interface to help you monitor and troubleshoot your workflows through two main components:
 
+### Activity Retry Failures
+
+The Activity Retry Failures section specifically focuses on critical workflow failures:
+
+* Displays workflows that have encountered critical errors
+* Shows detailed error information and stack traces
+* Highlights workflows requiring immediate attention
+* Provides quick access to related logs and context
+* Automatically notifies administrators of critical failures
+
+These auditing tools are directly integrated with the logging system. When you use `LogCritical` in your workflows, these events are automatically surfaced in the Activity Retry Failures section, making it easy to identify and respond to critical issues quickly.
+
+![Auditing Activity Retry Failures Interface](./img/1-auditing.png)
+
 ### Workflow Log Explorer
 
 The Workflow Log Explorer is a powerful tool that allows you to:
@@ -186,18 +200,5 @@ The Workflow Log Explorer is a powerful tool that allows you to:
     * Time range
 * Track the complete execution history of any workflow
 
-![Auditing Explorer Interface](./img/1-auditing.png)
+![Auditing Workflow Log Explorer Interface](./img/2-auditing.png)
 
-### Failed Workflow Runs
-
-The Failed Workflow Runs section specifically focuses on critical workflow failures:
-
-* Displays workflows that have encountered critical errors
-* Shows detailed error information and stack traces
-* Highlights workflows requiring immediate attention
-* Provides quick access to related logs and context
-* Automatically notifies administrators of critical failures
-
-These auditing tools are directly integrated with the logging system. When you use `LogCritical` in your workflows, these events are automatically surfaced in the Failed Workflow Runs section, making it easy to identify and respond to critical issues quickly.
-
-![Auditing Workflow Fail Interface](./img/2-auditing.png)
