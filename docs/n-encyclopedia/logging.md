@@ -169,14 +169,35 @@ _logger.LogCritical("Critical workflow failure", exception);
 - Lazy initialization ensures minimal overhead
 - Context data is collected only when needed
 
-## Implementation Details
+## Auditing and Log Exploration
 
-The logging system uses:
-- Microsoft.Extensions.Logging as the base framework
-- ConcurrentDictionary for thread-safe logger caching
-- Lazy initialization for performance
-- Automatic context detection for workflows and activities
-- Environment variable configuration
-- Console and API logging providers
+XiansAi provides a comprehensive auditing interface to help you monitor and troubleshoot your workflows through two main components:
 
-This architecture allows you to build robust logging into your workflows while maintaining performance and thread safety. Each workflow and activity can have its own logger instance, making the system modular and maintainable.
+### Workflow Log Explorer
+
+The Workflow Log Explorer is a powerful tool that allows you to:
+
+* View and search through all workflow logs across your system
+* Filter logs by various criteria including:
+    * Agent name
+    * Workflow type
+    * Workflow ID
+    * Log Level
+    * Time range
+* Track the complete execution history of any workflow
+
+![Auditing Explorer Interface](./img/1-auditing.png)
+
+### Failed Workflow Runs
+
+The Failed Workflow Runs section specifically focuses on critical workflow failures:
+
+* Displays workflows that have encountered critical errors
+* Shows detailed error information and stack traces
+* Highlights workflows requiring immediate attention
+* Provides quick access to related logs and context
+* Automatically notifies administrators of critical failures
+
+These auditing tools are directly integrated with the logging system. When you use `LogCritical` in your workflows, these events are automatically surfaced in the Failed Workflow Runs section, making it easy to identify and respond to critical issues quickly.
+
+![Auditing Workflow Fail Interface](./img/2-auditing.png)
