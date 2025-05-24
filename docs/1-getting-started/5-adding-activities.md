@@ -86,7 +86,7 @@ public class NewsReportFlow : FlowBase
 {
     private readonly ActivityOptions _activityOptions = new()
     {
-        StartToCloseTimeout = TimeSpan.FromMinutes(5)
+        ScheduleToCloseTimeout = TimeSpan.FromMinutes(5)
     };
 
     [WorkflowRun]
