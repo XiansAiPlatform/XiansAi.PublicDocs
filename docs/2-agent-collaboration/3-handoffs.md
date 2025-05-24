@@ -55,13 +55,19 @@ public class HandoffCapabilities
 To use handoff capabilities, register them with your agent:
 
 ```csharp
-var agentInfo = new AgentInfo("Your Agent Name");
-var runner = new Runner<YourBot>(agentInfo);
+using XiansAi.Flow;
+using DotNetEnv;
 
-// Register the handoff capabilities
-runner.AddBotCapabilities(typeof(HandoffCapabilities));
+// Load the environment variables from the .env file
+Env.Load();
 
-await runner.RunAsync();
+// name your agent
+var agent = new Agent("Your Agent Name");
+
+var bot = agent.AddBot<YourBot>();
+bot.AddCapabilities<HandoffCapabilities>();
+
+await agent.RunAsync();
 ```
 
 ## Best Practices

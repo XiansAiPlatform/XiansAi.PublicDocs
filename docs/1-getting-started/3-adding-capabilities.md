@@ -83,15 +83,12 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agentInfo = new AgentInfo("News Reader Agent");
+var agent = new Agent("News Reader Agent");
 
-// create a new runner for the agent
-var newsReaderBot = new Runner<NewsReaderBot>(agentInfo);
+var bot = agent.AddBot<NewsReaderBot>();
+bot.AddCapabilities(typeof(Capabilities));
 
-// ******add the capabilities to the bot******
-newsReaderBot.AddBotCapabilities(typeof(Capabilities));
-
-await newsReaderBot.RunAsync();
+await agent.RunAsync();
 ```
 
 ## Testing the New Capability
@@ -145,7 +142,6 @@ In a real world implementation, you would use a news API to get the latest news 
 - Include proper documentation using XML comments
 - Implement proper error handling in your capability methods
 - Consider adding validation for input parameters
-
 
 ## Next Steps
 

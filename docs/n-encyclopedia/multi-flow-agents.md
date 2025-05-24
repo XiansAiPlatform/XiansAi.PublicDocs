@@ -52,7 +52,7 @@ public class MedicineInfoBot : FlowBase
 
 ## Step 2: Configure Agent and Flows
 
-In your `Program.cs`, define a single `AgentInfo` object that all flows will share and configure each flow with its capabilities:
+In your `Program.cs`, define a single `Agent` object and configure each flow with its capabilities:
 
 ```csharp
 using XiansAi.Flow;
@@ -65,38 +65,25 @@ using Sensing.ConsultantNotes;
 // Env config via DotNetEnv
 Env.Load();
 
-// Define the shared AgentInfo for all flows
-var agentInfo = new AgentInfo("Consultation Assist Agent");
+// name your agent
+var agent = new Agent("Consultation Assist Agent");
 
 // Configure Consultation Bot
-var consultationBot = new Runner<ConsultationBot>(agentInfo);
-consultationBot.AddBotCapabilities<UploadCapability>();
-consultationBot.AddBotCapabilities<HandoverCapabilities>();
+var consultationBot = agent.AddBot<ConsultationBot>();
+consultationBot.AddCapabilities<UploadCapability>();
+consultationBot.AddCapabilities<HandoverCapabilities>();
 
 // Configure Medicine Info Bot
-var medicineInfoBot = new Runner<MedicineInfoBot>(agentInfo);
-medicineInfoBot.AddBotCapabilities<FdaInfoCapabilities>();
-medicineInfoBot.AddBotCapabilities<HandoverCapabilities>();
+var medicineInfoBot = agent.AddBot<MedicineInfoBot>();
+medicineInfoBot.AddCapabilities<FdaInfoCapabilities>();
+medicineInfoBot.AddCapabilities<HandoverCapabilities>();
 
-```
-
-## Step 3: Run Multiple Flows Concurrently
-
-Start and manage all flows concurrently:
-
-```csharp
-
-// Run all flows concurrently
-await Task.WhenAll(
-    consultationBot.RunAsync(),
-    medicineInfoBot.RunAsync()
-);
-
+await agent.RunAsync();
 ```
 
 ## Best Practices
 
-1. **Shared Identity**: Use a single `AgentInfo` object for all flows to maintain a consistent agent identity.
+1. **Shared Identity**: Use a single `Agent` object for all flows to maintain a consistent agent identity.
 
 2. **Flow Separation**: Design flows to handle distinct functionality (e.g., consultation handling vs. medicine information).
 

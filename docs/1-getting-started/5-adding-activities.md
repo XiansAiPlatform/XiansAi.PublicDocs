@@ -124,17 +124,22 @@ Update `Program.cs` to include the activities:
 `Program.cs >`
 
 ```csharp
+using XiansAi.Flow;
+using DotNetEnv;
 
-...
+// Load the environment variables from the .env file
+Env.Load();
 
-// Create a new runner for the news report flow
-var newsReportFlow = new Runner<NewsReportFlow>(agentInfo);
+// name your agent
+var agent = new Agent("News Reader Agent");
 
-// ****** Add the activities to the flow ******
-newsReportFlow.AddFlowActivities<INewsActivities, NewsActivities>();
+var flow = agent.AddFlow<NewsReportFlow>();
+flow.AddActivities<INewsActivities, NewsActivities>();
 
-...
+var bot = agent.AddBot<NewsReaderBot>();
+bot.AddCapabilities(typeof(Capabilities));
 
+await agent.RunAsync();
 ```
 
 ## Running the Flow

@@ -47,21 +47,14 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agentInfo = new AgentInfo("News Reader Agent");
+var agent = new Agent("News Reader Agent");
 
-// create a new runner for the conversation bot
-var newsReaderBot = new Runner<NewsReaderBot>(agentInfo);
-newsReaderBot.AddBotCapabilities(typeof(Capabilities));
+var flow = agent.AddFlow<NewsReportFlow>();
 
-// Create a new runner for the news report flow
-var newsReportFlow = new Runner<NewsReportFlow>(agentInfo);
+var bot = agent.AddBot<NewsReaderBot>();
+bot.AddCapabilities<Capabilities>();
 
-// Wait for both bots to finish
-await Task.WhenAll(
-    newsReportFlow.RunAsync(),
-    newsReaderBot.RunAsync()
-);
-
+await agent.RunAsync();
 ```
 
 ## Add the new business process flow

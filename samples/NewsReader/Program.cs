@@ -5,18 +5,12 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agentInfo = new AgentInfo("News Reader Agent - hya");
+var agent = new Agent("My News Reader 2");
 
-// create a new runner for the conversation bot
-var newsReaderBot = new Runner<NewsReaderBot>(agentInfo);
-newsReaderBot.AddBotCapabilities(typeof(Capabilities));
+var flow = agent.AddFlow<NewsReportFlow>();
+flow.AddActivities<INewsActivities, NewsActivities>();
 
-// Create a new runner for the news report flow
-var newsReportFlow = new Runner<NewsReportFlow>(agentInfo);
-newsReportFlow.AddFlowActivities<INewsActivities, NewsActivities>();
+var bot = agent.AddBot<NewsReaderBot>();
+bot.AddCapabilities<CapabilitiesInstance>();
 
-// Wait for both bots to finish
-await Task.WhenAll(
-    newsReportFlow.RunAsync(),
-    newsReaderBot.RunAsync()
-);
+await agent.RunAsync();

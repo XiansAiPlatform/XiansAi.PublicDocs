@@ -29,11 +29,11 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agentInfo = new AgentInfo("News Reader Agent");
+var agent = new Agent("News Reader Agent");
 
-// create a new runner for the conversation bot
-var newsReaderBot = new Runner<NewsReaderBot>(agentInfo);
-await newsReaderBot.RunAsync();
+var bot = agent.AddBot<NewsReaderBot>();
+
+await agent.RunAsync();
 ```
 
 ## Add a conversation bot to the agent
@@ -71,14 +71,12 @@ Notes:
 ## Testing Your Setup
 
 !!! Important Note
-    If you get a warning about another user using the same agent/flow name, you should change the agent/flow name to something else.
+    If you get a warning about another user using the same agent, you should change the agent name to something else.
     
-    One tenant can have only one agent/flow with the same name. 
+    One tenant can have only one agent with the same name. 
     
     For example,
-    `News Reader Bot` is already taken, so you should use `News Reader Bot - xyz` or something like that.
-
-    Similarly, `News Reader Agent` could be`News Reader Agent - xyz` or something like that.
+    `News Reader Agent` is already taken, so you should use `News Reader Agent - xyz` or something like that.
 
 Run the application requesting to test the configuration:
 

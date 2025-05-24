@@ -9,9 +9,11 @@ public class NewsReportRequest
     public required string Url { get; set; }
     [JsonPropertyName("recipientEmail")]
     public required string RecipientEmail { get; set; }
+    [JsonPropertyName("processKey")]
+    public string? ProcessKey { get; set; }
 }
 
-[Workflow("News Report Flow - hya")]
+[Workflow("My News Reader 2:Report Flow")]
 public class NewsReportFlow : FlowBase
 {
     public const string SendSummaryReportEvent = "SendSummaryReport";
