@@ -31,10 +31,10 @@ This is a WebSocket client implementation for the Xians AI chat system using Sig
    - **Websocket URL**: Your server's WebSocket endpoint (e.g., `http://localhost:5000/ws/chat`)
    - **Secret Key**: The secret key configured in server's `appsettings.json`
    - **Tenant ID**: Your tenant identifier
-   - **Agent**: (Optional) Agent identifier
-   - **Workflow Type**: (Optional) Type of workflow
-   - **Workflow ID**: (Optional) Workflow identifier
-   - **Participant ID**: (Optional) Participant identifier
+   - **Agent**: (Required) Agent identifier
+   - **Workflow Type**: Type of workflow
+   - **Workflow ID**: (Required) Workflow identifier
+   - **Participant ID**: (Required) Participant identifier
 
 ## Connection Flow
 
