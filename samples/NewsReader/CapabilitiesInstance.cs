@@ -19,13 +19,11 @@ public class CapabilitiesInstance
     [Returns("Success message")]
     public string SendSummaryReport(string url, string recipientEmail)
     {
-        var processKey = Guid.NewGuid().ToString();
-        _thread.Respond("", processKey);
 
         EventHub.Publish(
             typeof(NewsReportFlow), 
             NewsReportFlow.SendSummaryReportEvent, 
-            new NewsReportRequest { Url = url, RecipientEmail = recipientEmail, ProcessKey = processKey }
+            new NewsReportRequest { Url = url, RecipientEmail = recipientEmail }
         );
         return "Success";
     }

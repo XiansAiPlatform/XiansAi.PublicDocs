@@ -20,7 +20,7 @@ In this guide, we'll focus on the first approach: adding a capability through a 
 Here's an example of a simple capability class:
 
 ```csharp
-using XiansAi.Router.Plugins;
+using XiansAi.Flow.Router.Plugins;
 
 public static class Capabilities
 {    

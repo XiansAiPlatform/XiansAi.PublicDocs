@@ -29,7 +29,7 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agent = new Agent("News Reader Agent");
+var agent = new Agent("News Agent");
 
 var bot = agent.AddBot<NewsReaderBot>();
 
@@ -48,7 +48,7 @@ To add a conversation bot to the agent, you need to add a new class to the agent
 using Temporalio.Workflows;
 using XiansAi.Flow;
 
-[Workflow("News Reader Bot")]
+[Workflow("News Agent:News Reader Bot")]
 public class NewsReaderBot : FlowBase
 {
 
@@ -62,6 +62,11 @@ public class NewsReaderBot : FlowBase
 
 ```
 
+!!! Important
+    Bot and Flow names must follow the naming convention `<agent-name>:<flow-name>`. 
+    
+    In the example above, `"News Agent:News Reader Bot"` uses the agent name "News Agent" followed by a colon and the specific flow name "News Reader Bot". This ensures proper organization and identification of flows within your agent.
+
 Notes:
 
 - The `[WorkflowRun]` and `[Workflow]` attributes are required to mark the method as the entry points for the workflow. You can see more about the Temporal.io workflow engine [here](https://docs.temporal.io).
@@ -70,13 +75,13 @@ Notes:
 
 ## Testing Your Setup
 
-!!! Important Note
+!!! Important
     If you get a warning about another user using the same agent, you should change the agent name to something else.
     
     One tenant can have only one agent with the same name. 
     
     For example,
-    `News Reader Agent` is already taken, so you should use `News Reader Agent - xyz` or something like that.
+    `News Agent` is already taken, so you should use `News Reader Agent - xyz` or something like that.
 
 Run the application requesting to test the configuration:
 
