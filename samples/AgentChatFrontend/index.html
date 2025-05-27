@@ -6,60 +6,66 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h2>Xians AI Chat</h2>
-    
-    <div class="form-group">
-      <label>Websocket URL:</label>
-      <input type="text" id="url" placeholder="Paste your Websocket URL" />
+  <div class="main-container">
+    <div class="form-container">
+      <div class="container">
+        <h2>Xians AI Chat</h2>
+        
+        <div class="form-group">
+          <label>Websocket URL:</label>
+          <input type="text" id="url" placeholder="Paste your Websocket URL" />
+        </div>
+
+        <div class="form-group">
+          <label>Secret Key</label>
+          <input type="text" id="secret" placeholder="Paste your Secret Key here" />
+        </div>
+
+        <div class="form-group">
+          <label>Tenant ID:</label>
+          <input type="text" id="tenantId" placeholder="Enter tenant ID" />
+        </div>
+
+        <div class="form-group">
+          <label>Thread ID:</label>
+          <input type="text" id="threadId" placeholder="Enter thread ID" />
+        </div>
+
+        <div class="form-group">
+          <label>Agent:</label>
+          <input type="text" id="agent" placeholder="Enter agent ID" />
+        </div>
+
+        <div class="form-group">
+          <label>Workflow Type:</label>
+          <input type="text" id="workflowType" placeholder="Enter workflow type" />
+        </div>
+
+        <div class="form-group">
+          <label>Workflow ID:</label>
+          <input type="text" id="workflowId" placeholder="Enter workflow ID" />
+        </div>
+
+        <div class="form-group">
+          <label>Participant ID:</label>
+          <input type="text" id="participantId" placeholder="Enter participant ID" />
+        </div>
+
+        <div class="button-group">
+          <button id="connectBtn">Connect</button>
+          <button id="disconnectBtn" disabled>Disconnect</button>
+        </div>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label>Secret Key</label>
-      <input type="text" id="secret" placeholder="Paste your Secret Key here" />
-    </div>
-
-    <div class="form-group">
-      <label>Tenant ID:</label>
-      <input type="text" id="tenantId" placeholder="Enter tenant ID" />
-    </div>
-
-    <div class="form-group">
-      <label>Thread ID:</label>
-      <input type="text" id="threadId" placeholder="Enter thread ID" />
-    </div>
-
-    <div class="form-group">
-      <label>Agent:</label>
-      <input type="text" id="agent" placeholder="Enter agent ID" />
-    </div>
-
-    <div class="form-group">
-      <label>Workflow Type:</label>
-      <input type="text" id="workflowType" placeholder="Enter workflow type" />
-    </div>
-
-    <div class="form-group">
-      <label>Workflow ID:</label>
-      <input type="text" id="workflowId" placeholder="Enter workflow ID" />
-    </div>
-
-    <div class="form-group">
-      <label>Participant ID:</label>
-      <input type="text" id="participantId" placeholder="Enter participant ID" />
-    </div>
-
-    <div class="button-group">
-      <button id="connectBtn">Connect</button>
-      <button id="disconnectBtn" disabled>Disconnect</button>
-    </div>
-  </div>
-
-  <div class="container">
-    <div id="chat"></div>
-    <div class="message-input-container">
-      <input type="text" id="messageInput" placeholder="Type your message..." />
-      <button id="sendBtn">Send</button>
+    <div class="chat-container">
+      <div class="container">
+        <div id="chat"></div>
+        <div class="message-input-container">
+          <input type="text" id="messageInput" placeholder="Type your message..." />
+          <button id="sendBtn">Send</button>
+        </div>
+      </div>
     </div>
   </div>
 
