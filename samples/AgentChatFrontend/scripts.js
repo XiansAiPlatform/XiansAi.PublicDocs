@@ -12,6 +12,7 @@ const connectBtn = document.getElementById("connectBtn");
 const sendBtn = document.getElementById("sendBtn");
 const disconnectBtn = document.getElementById("disconnectBtn");
 const url = document.getElementById("url");
+const metadataInput = document.getElementById("metadata");
 let currentThreadId = null; // Initialize as null
 
 connectBtn.onclick = async () => {
@@ -35,9 +36,10 @@ connectBtn.onclick = async () => {
     .build();
 
   connection.on("ReceiveMessage", (message) => {
+    console.log(message);
     const div = document.createElement("div");
     div.classList.add("message", "received");
-    div.textContent = "Agent: " + message;
+    div.textContent = "AI: " + message.content;
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
   });
@@ -143,6 +145,17 @@ disconnectBtn.onclick = async () => {
   }
 };
 
+// Add function to parse metadata
+function parseMetadata(metadataString) {
+  if (!metadataString.trim()) return null;
+  try {
+    return JSON.parse(metadataString);
+  } catch (e) {
+    console.error("Invalid JSON in metadata:", e);
+    return null;
+  }
+}
+
 sendBtn.onclick = async () => {
   const text = messageInput.value.trim();
   if (!text || !connection || connection.state !== "Connected") {
@@ -168,7 +181,7 @@ sendBtn.onclick = async () => {
     workflowId: document.getElementById("workflowId").value,
     participantId: document.getElementById("participantId").value,
     content: text,
-    metadata: null
+    metadata: parseMetadata(metadataInput.value) || null
   };
   messageInput.value = "";
 
@@ -192,9 +205,9 @@ async function loadMoreMessages() {
   isLoading = true;
   const agent = document.getElementById("agent").value;
   const participantId = document.getElementById("participantId").value;
-  
+  const workflowType = document.getElementById("workflowType").value
   try {
-    await connection.invoke("GetThreadHistory", agent, participantId, currentPage, 20);
+    await connection.invoke("GetThreadHistory", agent, workflowType, participantId, currentPage, 20);
   } catch (err) {
     console.error("Failed to load more messages:", err);
   } finally {
