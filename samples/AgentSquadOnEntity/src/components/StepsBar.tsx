@@ -1,5 +1,6 @@
 import React from 'react';
 import { AiOutlineRobot } from 'react-icons/ai';
+import { STEP_BOT_COLORS } from '../utils/botColors';
 
 interface StepsBarProps {
   activeStep: number;
@@ -25,7 +26,7 @@ const StepsBar: React.FC<StepsBarProps> = ({ activeStep, onStepChange }) => {
           >
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors text-lg
-                ${index === activeStep ? 'bg-primary-light text-white' : 'bg-white border border-gray-300 text-gray-600'}`}
+                ${index === activeStep ? `${STEP_BOT_COLORS[index]} text-white` : 'bg-white border border-gray-300 text-gray-600'}`}
             >
               <AiOutlineRobot />
             </div>

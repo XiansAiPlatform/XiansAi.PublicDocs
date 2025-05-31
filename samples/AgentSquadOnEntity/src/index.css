@@ -2,6 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Enhanced font rendering for Scandinavian design aesthetic */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  }
+
+  body {
+    @apply font-sans;
+    font-optical-sizing: auto;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Improve text contrast and spacing for Scandinavian aesthetic */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'ss01' 1;
+  }
+
+  /* Enhanced button and input text rendering */
+  button, input, textarea, select {
+    font-feature-settings: 'kern' 1, 'liga' 1;
+  }
+
+  /* Smooth transitions for interactive elements */
+  button, a {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Custom typography utilities for Scandinavian design */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .font-numeric {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
 /* Custom global styles */
 body {
   @apply font-sans antialiased;

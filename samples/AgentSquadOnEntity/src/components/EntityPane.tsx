@@ -29,12 +29,12 @@ const EntityPane: React.FC<EntityPaneProps> = ({ activeStep }) => {
 
   return (
     <div className="h-full flex flex-col bg-white">
-      <header className="px-4 py-2 border-b border-gray-200 flex items-center justify-between">
+      <header className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-medium text-gray-800">{currentContent.title}</h2>
-          <p className="text-sm text-gray-500">Step {activeStep + 1} of 4</p>
+          <h2 className="text-lg font-semibold text-gray-900 tracking-tight text-balance">{currentContent.title}</h2>
+          <p className="text-sm text-gray-500 font-normal">Step {activeStep + 1} of 4</p>
         </div>
-        <button className="text-sm text-primary-light hover:underline">
+        <button className="text-sm text-primary-light hover:underline font-medium transition-colors">
           {activeStep === 3 ? 'Download Final' : 'Export Draft'}
         </button>
       </header>
@@ -42,27 +42,27 @@ const EntityPane: React.FC<EntityPaneProps> = ({ activeStep }) => {
         <div className="prose max-w-4xl mx-auto">
           {currentContent.content.split('\n').map((line, idx) => {
             if (line.startsWith('# ')) {
-              return <h1 key={idx} className="text-2xl font-bold mb-4 text-gray-900">{line.slice(2)}</h1>;
+              return <h1 key={idx} className="text-2xl font-bold mb-6 text-primary tracking-tight text-balance">{line.slice(2)}</h1>;
             } else if (line.startsWith('## ')) {
-              return <h2 key={idx} className="text-xl font-semibold mb-3 text-gray-800">{line.slice(3)}</h2>;
+              return <h2 key={idx} className="text-xl font-semibold mb-4 text-primary tracking-tight text-balance">{line.slice(3)}</h2>;
             } else if (line.startsWith('### ')) {
-              return <h3 key={idx} className="text-lg font-medium mb-2 text-gray-700">{line.slice(4)}</h3>;
+              return <h3 key={idx} className="text-lg font-medium mb-3 text-primary-light tracking-tight text-balance">{line.slice(4)}</h3>;
             } else if (line.startsWith('- ✅')) {
-              return <p key={idx} className="text-green-600 mb-1">{line}</p>;
+              return <p key={idx} className="text-accent mb-2 font-normal">{line}</p>;
             } else if (line.startsWith('- ⚠️')) {
-              return <p key={idx} className="text-amber-600 mb-1">{line}</p>;
+              return <p key={idx} className="text-amber-600 mb-2 font-normal">{line}</p>;
             } else if (line.startsWith('- [ ]')) {
-              return <p key={idx} className="text-gray-600 mb-1">{line}</p>;
+              return <p key={idx} className="text-neutral-600 mb-2 font-normal">{line}</p>;
             } else if (line.startsWith('*') && line.endsWith('*')) {
-              return <p key={idx} className="text-sm text-gray-500 italic mt-4">{line.slice(1, -1)}</p>;
+              return <p key={idx} className="text-sm text-neutral-500 italic mt-6 font-normal">{line.slice(1, -1)}</p>;
             } else if (line.startsWith('**') && line.endsWith('**')) {
-              return <p key={idx} className="font-bold text-gray-900 mb-2">{line.slice(2, -2)}</p>;
+              return <p key={idx} className="font-semibold text-primary mb-3 tracking-tight text-balance">{line.slice(2, -2)}</p>;
             } else if (line.trim() === '---') {
-              return <hr key={idx} className="my-6 border-gray-300" />;
+              return <hr key={idx} className="my-8 border-neutral-300" />;
             } else if (line.trim() === '') {
               return <br key={idx} />;
             } else {
-              return <p key={idx} className="mb-2 text-gray-700">{line}</p>;
+              return <p key={idx} className="mb-3 text-neutral-700 font-normal leading-relaxed text-balance">{line}</p>;
             }
           })}
         </div>

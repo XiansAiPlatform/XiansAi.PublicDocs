@@ -46,11 +46,11 @@ const App: React.FC = () => {
       <div
         className={`sm:hidden fixed inset-y-0 left-0 w-4/5 max-w-xs bg-white shadow-lg z-30 transform transition-transform duration-300 ${mobileChatOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="absolute top-0 left-0 right-0 flex justify-end p-2 border-b border-gray-200 bg-white z-10">
+        <div className="absolute top-0 left-0 right-0 flex justify-end p-2 border-b border-neutral-200 bg-white z-10">
           <button
             aria-label="Close chat"
             onClick={() => setMobileChatOpen(false)}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-neutral-500 hover:text-neutral-700"
           >
             ✕
           </button>
@@ -64,12 +64,12 @@ const App: React.FC = () => {
       <div
         className={`sm:hidden fixed inset-y-0 right-0 w-4/5 max-w-xs bg-white shadow-lg z-30 transform transition-transform duration-300 ${mobileFindingsOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        <div className="absolute top-0 left-0 right-0 flex justify-between p-2 border-b border-gray-200 bg-white z-10">
-          <h2 className="text-sm font-medium">Findings</h2>
+        <div className="absolute top-0 left-0 right-0 flex justify-between p-2 border-b border-neutral-200 bg-white z-10">
+          <h2 className="text-sm font-medium text-primary">Findings</h2>
           <button
             aria-label="Close findings"
             onClick={() => setMobileFindingsOpen(false)}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-neutral-500 hover:text-neutral-700"
           >
             ✕
           </button>
@@ -84,7 +84,7 @@ const App: React.FC = () => {
         <button
           aria-label="Open chat"
           onClick={() => setMobileChatOpen(true)}
-          className="sm:hidden fixed left-0 top-1/2 -translate-y-1/2 w-6 h-24 bg-primary-light text-white flex items-center justify-center rounded-r shadow-lg"
+          className="sm:hidden fixed left-0 top-1/2 -translate-y-1/2 w-6 h-24 bg-primary text-white flex items-center justify-center rounded-r shadow-lg"
         >
           <span className="transform -rotate-90 text-xs tracking-widest select-none">CHAT</span>
         </button>
@@ -95,7 +95,7 @@ const App: React.FC = () => {
         <button
           aria-label="Open findings"
           onClick={() => setMobileFindingsOpen(true)}
-          className="sm:hidden fixed right-0 top-1/2 -translate-y-1/2 w-6 h-24 bg-rose-500 text-white flex items-center justify-center rounded-l shadow-lg"
+          className="sm:hidden fixed right-0 top-1/2 -translate-y-1/2 w-6 h-24 bg-accent text-white flex items-center justify-center rounded-l shadow-lg"
         >
           <span className="transform rotate-90 text-xs tracking-widest select-none">FINDINGS</span>
         </button>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AiOutlineRobot } from 'react-icons/ai';
+import { STEP_BOTS } from '../utils/botColors';
 
 interface Message {
   role: 'user' | 'bot';
@@ -10,45 +11,17 @@ interface ChatPaneProps {
   activeStep: number;
 }
 
-// Define bots for each step
-const stepBots = [
-  {
-    name: 'Requirements Bot',
-    description: 'Helps gather and clarify requirements',
-    color: 'bg-blue-500',
-    initialMessage: 'Hello! I\'m here to help you gather and clarify the requirements for your document. What do you need help with?'
-  },
-  {
-    name: 'Draft Bot',
-    description: 'Assists with drafting content',
-    color: 'bg-green-500',
-    initialMessage: 'Hi! I\'m your drafting assistant. I can help you create and structure the content for your document. What would you like to work on?'
-  },
-  {
-    name: 'Review Bot',
-    description: 'Reviews and suggests improvements',
-    color: 'bg-amber-500',
-    initialMessage: 'Hello! I\'m here to help review your document and suggest improvements. Let\'s make sure everything looks good!'
-  },
-  {
-    name: 'Finalize Bot',
-    description: 'Helps finalize and polish the document',
-    color: 'bg-purple-500',
-    initialMessage: 'Hi! I\'m here to help you finalize and polish your document. Let\'s get it ready for completion!'
-  }
-];
-
 const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
   // Separate message histories for each step
   const [messageHistories, setMessageHistories] = useState<Message[][]>(() => {
-    return stepBots.map((bot, index) => [
+    return STEP_BOTS.map((bot, index) => [
       { role: 'bot', content: bot.initialMessage }
     ]);
   });
 
   const [input, setInput] = useState('');
 
-  const currentBot = stepBots[activeStep];
+  const currentBot = STEP_BOTS[activeStep];
   const currentMessages = messageHistories[activeStep];
 
   const handleSend = () => {
@@ -64,7 +37,7 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
 
     // Placeholder bot response with step-specific context
     setTimeout(() => {
-      const botResponse = `${currentBot.name}: I understand you're working on "${input.trim()}". How can I help you with this in the ${stepBots[activeStep].description.toLowerCase()} phase?`;
+      const botResponse = `${currentBot.name}: I understand you're working on "${input.trim()}". How can I help you with this in the ${STEP_BOTS[activeStep].description.toLowerCase()} phase?`;
       
       setMessageHistories(prev => {
         const updated = [...prev];
@@ -97,12 +70,12 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
       {/* Bot Header */}
       <div className="px-4 py-3 border-b border-gray-200 bg-white">
         <div className="flex items-center space-x-3 w-full max-w-sm ml-auto">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${currentBot.color}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${currentBot.colors.bg}`}>
             <AiOutlineRobot />
           </div>
           <div className="text-left">
-            <h3 className="font-medium text-gray-900">{currentBot.name}</h3>
-            <p className="text-xs text-gray-500">{currentBot.description}</p>
+            <h3 className="font-semibold text-gray-900 tracking-tight text-balance">{currentBot.name}</h3>
+            <p className="text-xs text-gray-500 font-normal">{currentBot.description}</p>
           </div>
         </div>
       </div>
@@ -115,8 +88,8 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
               key={idx}
               className={`max-w-[85%] rounded-lg px-3 py-2 text-sm shadow
                 ${msg.role === 'user' 
-                  ? 'ml-auto bg-primary-light text-white text-right' 
-                  : 'mr-auto bg-gray-100 text-gray-800 text-left'}`}
+                  ? 'ml-auto bg-primary-light text-white text-right font-normal leading-relaxed' 
+                  : 'mr-auto bg-gray-100 text-gray-800 text-left font-normal leading-relaxed'}`}
             >
               {msg.content}
             </div>
@@ -132,14 +105,14 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={`Ask ${currentBot.name}...`}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-primary-light text-sm"
+            className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-primary-light text-sm font-normal"
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSend();
             }}
           />
           <button
             onClick={handleSend}
-            className="px-4 py-2 bg-primary-light text-white text-sm rounded disabled:opacity-50"
+            className="px-4 py-2 bg-primary-light text-white text-sm rounded disabled:opacity-50 font-medium transition-colors"
             disabled={!input.trim()}
           >
             Send

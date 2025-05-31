@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FiInfo, FiAlertTriangle, FiXCircle, FiChevronDown } from 'react-icons/fi';
+import { FINDING_TYPE_COLORS } from '../utils/botColors';
 
 export type FindingType = 'suggestion' | 'warning' | 'error';
 
@@ -48,10 +49,34 @@ const initialFindings: Finding[] = [
 
 const severityRank: Record<FindingType, number> = { error: 0, warning: 1, suggestion: 2 };
 
-const typeStyles: Record<FindingType, { icon: React.ReactNode; pillBg: string; textColor: string; borderColor: string; cardBg: string }> = {
-  suggestion: { icon: <FiInfo />, pillBg: 'bg-blue-100', textColor: 'text-blue-800', borderColor: 'border-blue-300', cardBg: 'bg-blue-50' },
-  warning: { icon: <FiAlertTriangle />, pillBg: 'bg-amber-100', textColor: 'text-amber-800', borderColor: 'border-amber-300', cardBg: 'bg-amber-50' },
-  error: { icon: <FiXCircle />, pillBg: 'bg-red-100', textColor: 'text-red-800', borderColor: 'border-red-400', cardBg: 'bg-red-50' },
+const typeStyles: Record<FindingType, { 
+  icon: React.ReactNode; 
+  pillBg: string; 
+  textColor: string; 
+  borderColor: string; 
+  cardBg: string 
+}> = {
+  suggestion: { 
+    icon: <FiInfo />, 
+    pillBg: FINDING_TYPE_COLORS.suggestion.bgLight, 
+    textColor: FINDING_TYPE_COLORS.suggestion.text, 
+    borderColor: FINDING_TYPE_COLORS.suggestion.border, 
+    cardBg: FINDING_TYPE_COLORS.suggestion.bgLight 
+  },
+  warning: { 
+    icon: <FiAlertTriangle />, 
+    pillBg: FINDING_TYPE_COLORS.warning.bgLight, 
+    textColor: FINDING_TYPE_COLORS.warning.text, 
+    borderColor: FINDING_TYPE_COLORS.warning.border, 
+    cardBg: FINDING_TYPE_COLORS.warning.bgLight 
+  },
+  error: { 
+    icon: <FiXCircle />, 
+    pillBg: FINDING_TYPE_COLORS.error.bgLight, 
+    textColor: FINDING_TYPE_COLORS.error.text, 
+    borderColor: FINDING_TYPE_COLORS.error.border, 
+    cardBg: FINDING_TYPE_COLORS.error.bgLight 
+  },
 };
 
 const FindingsPane: React.FC = () => {
