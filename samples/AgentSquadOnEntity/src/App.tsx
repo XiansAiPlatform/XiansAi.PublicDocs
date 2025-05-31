@@ -21,13 +21,13 @@ const App: React.FC = () => {
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Chat pane - desktop only */}
-        <div className="hidden sm:block w-1/4 border-r border-gray-200 overflow-hidden">
+        <div className="hidden sm:block min-w-[280px] flex-1 border-r border-gray-200 overflow-hidden">
           <ChatPane activeStep={activeStep} />
         </div>
 
         {/* Entity state pane */}
         <div 
-          className="flex-1 overflow-hidden"
+          className="flex-[1.5] overflow-hidden"
           onClick={() => {
             setMobileChatOpen(false);
             setMobileFindingsOpen(false);
@@ -37,7 +37,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Findings pane - desktop only */}
-        <div className="hidden sm:block w-1/4 border-l border-gray-200 overflow-hidden">
+        <div className="hidden sm:block min-w-[280px] flex-1 border-l border-gray-200 overflow-hidden">
           <FindingsPane />
         </div>
       </div>

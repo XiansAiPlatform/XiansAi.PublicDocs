@@ -39,7 +39,7 @@ const EntityPane: React.FC<EntityPaneProps> = ({ activeStep }) => {
         </button>
       </header>
       <div className="flex-1 overflow-y-auto p-6">
-        <div className="prose max-w-none">
+        <div className="prose max-w-4xl mx-auto">
           {currentContent.content.split('\n').map((line, idx) => {
             if (line.startsWith('# ')) {
               return <h1 key={idx} className="text-2xl font-bold mb-4 text-gray-900">{line.slice(2)}</h1>;

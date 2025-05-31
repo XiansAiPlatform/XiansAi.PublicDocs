@@ -66,11 +66,13 @@ const FindingsPane: React.FC = () => {
 
   return (
     <div className="h-full flex flex-col bg-white">
-      <header className="px-4 py-2 border-b border-gray-200 flex items-center justify-between">
-        <h2 className="text-lg font-medium text-gray-800">Findings</h2>
-        <span className="text-sm text-gray-500">
-          {initialFindings.length} items
-        </span>
+      <header className="px-4 py-2 border-b border-gray-200">
+        <div className="flex items-center justify-between w-full max-w-sm mr-auto">
+          <h2 className="text-lg font-medium text-gray-800">Findings</h2>
+          <span className="text-sm text-gray-500">
+            {initialFindings.length} items
+          </span>
+        </div>
       </header>
       <div className="flex-1 overflow-y-auto space-y-3 p-3">
         {[...initialFindings].sort((a,b) => severityRank[a.type] - severityRank[b.type]).map((finding) => {
