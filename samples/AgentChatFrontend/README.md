@@ -10,6 +10,7 @@ This is a WebSocket client implementation for the Xians AI chat system using Sig
 ```json
 {
   "WebSocket": {
+    "Enabled": true,
     "Secrets": {
       "TenantId": "your-secret-key-here"
     },
@@ -35,6 +36,7 @@ This is a WebSocket client implementation for the Xians AI chat system using Sig
    - **Workflow Type**: Type of workflow
    - **Workflow ID**: (Required) Workflow identifier
    - **Participant ID**: (Required) Participant identifier
+   - **Metadata**:(optional)
 
 ## Connection Flow
 
