@@ -11,6 +11,38 @@ interface ChatPaneProps {
   activeStep: number;
 }
 
+// Suggested messages for each bot type
+const SUGGESTED_MESSAGES = [
+  // Requirements Bot suggestions
+  [
+    "What are the key requirements for this document?",
+    "Help me define the scope and objectives",
+    "What stakeholders should be considered?",
+    "What are the success criteria?"
+  ],
+  // Draft Bot suggestions
+  [
+    "Help me create an outline",
+    "What sections should this document have?",
+    "Can you help me write the introduction?",
+    "How should I structure this content?"
+  ],
+  // Review Bot suggestions
+  [
+    "Please review this section for clarity",
+    "Are there any inconsistencies?",
+    "What improvements can be made?",
+    "Check for completeness and accuracy"
+  ],
+  // Finalize Bot suggestions
+  [
+    "Is the document ready for publication?",
+    "Final formatting and style check",
+    "Are all sections complete?",
+    "What final touches are needed?"
+  ]
+];
+
 const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
   // Separate message histories for each step
   const [messageHistories, setMessageHistories] = useState<Message[][]>(() => {
@@ -20,14 +52,16 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
   });
 
   const [input, setInput] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(true);
 
   const currentBot = STEP_BOTS[activeStep];
   const currentMessages = messageHistories[activeStep];
+  const currentSuggestions = SUGGESTED_MESSAGES[activeStep];
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const sendMessage = (messageContent: string) => {
+    if (!messageContent.trim()) return;
 
-    const newMessage: Message = { role: 'user', content: input.trim() };
+    const newMessage: Message = { role: 'user', content: messageContent.trim() };
     
     setMessageHistories(prev => {
       const updated = [...prev];
@@ -35,9 +69,12 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
       return updated;
     });
 
+    // Hide suggestions after sending a message
+    setShowSuggestions(false);
+
     // Placeholder bot response with step-specific context
     setTimeout(() => {
-      const botResponse = `${currentBot.name}: I understand you're working on "${input.trim()}". How can I help you with this in the ${STEP_BOTS[activeStep].description.toLowerCase()} phase?`;
+      const botResponse = `${currentBot.name}: I understand you're working on "${messageContent.trim()}". How can I help you with this in the ${STEP_BOTS[activeStep].description.toLowerCase()} phase?`;
       
       setMessageHistories(prev => {
         const updated = [...prev];
@@ -45,9 +82,21 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
         return updated;
       });
     }, 500);
+  };
 
+  const handleSend = () => {
+    sendMessage(input);
     setInput('');
   };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    sendMessage(suggestion);
+  };
+
+  useEffect(() => {
+    // Show suggestions when switching to a new step or when there are only initial messages
+    setShowSuggestions(currentMessages.length <= 1);
+  }, [activeStep, currentMessages.length]);
 
   useEffect(() => {
     const listener = (event: any) => {
@@ -97,6 +146,43 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
         </div>
       </div>
 
+      {/* Suggested Messages */}
+      {showSuggestions && (
+        <div className="px-4 py-3 border-t border-gray-100 bg-white">
+          <div className="w-full max-w-sm ml-auto">
+            <p className="text-xs text-gray-500 mb-2 font-medium">Suggested questions:</p>
+            <div className="flex flex-wrap gap-2">
+              {currentSuggestions.map((suggestion, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className={`px-3 py-1.5 text-xs rounded-full border transition-all duration-200 hover:shadow-sm
+                    ${currentBot.colors.bgLight} ${currentBot.colors.text} ${currentBot.colors.border}
+                    hover:scale-105 active:scale-95 font-medium`}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Suggestions Toggle */}
+      {!showSuggestions && (
+        <div className="px-4 py-2 border-t border-gray-100 bg-white">
+          <div className="w-full max-w-sm ml-auto">
+            <button
+              onClick={() => setShowSuggestions(true)}
+              className={`text-xs font-medium transition-all duration-200 hover:scale-105 px-2 py-1 rounded
+                ${currentBot.colors.text} hover:${currentBot.colors.bgLight}`}
+            >
+              Suggestions
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <div className="p-4 border-t border-gray-200 bg-white">
         <div className="flex gap-2 w-full max-w-sm ml-auto">
@@ -109,6 +195,7 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSend();
             }}
+            onFocus={() => setShowSuggestions(false)}
           />
           <button
             onClick={handleSend}
