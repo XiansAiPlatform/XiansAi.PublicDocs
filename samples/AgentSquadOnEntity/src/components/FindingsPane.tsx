@@ -6,25 +6,25 @@ export type FindingType = 'suggestion' | 'warning' | 'error';
 // Finding type colors (semantic colors that match Tailwind colors)
 const FINDING_TYPE_COLORS = {
   suggestion: {
-    bg: 'bg-info',
-    bgLight: 'bg-info-light',
-    bgDark: 'bg-info-dark',
-    text: 'text-info-text',
-    border: 'border-info-border',
+    bg: 'bg-info-500',
+    bgLight: 'bg-info-100',
+    bgDark: 'bg-info-700',
+    text: 'text-info-700',
+    border: 'border-info-300',
   },
   warning: {
-    bg: 'bg-warning',
-    bgLight: 'bg-warning-light',
-    bgDark: 'bg-warning-dark',
-    text: 'text-warning-text',
-    border: 'border-warning-border',
+    bg: 'bg-warning-500',
+    bgLight: 'bg-warning-100',
+    bgDark: 'bg-warning-700',
+    text: 'text-warning-700',
+    border: 'border-warning-300',
   },
   error: {
-    bg: 'bg-error',
-    bgLight: 'bg-error-light',
-    bgDark: 'bg-error-dark',
-    text: 'text-error-text',
-    border: 'border-error-border',
+    bg: 'bg-error-500',
+    bgLight: 'bg-error-100',
+    bgDark: 'bg-error-700',
+    text: 'text-error-700',
+    border: 'border-error-300',
   },
 } as const;
 

@@ -2,11 +2,11 @@ import React from 'react';
 
 // Dynamic component imports
 const componentRegistry = {
-  'documentScope.tsx': () => import('./components/entity/documentScope').then(m => m.default),
-  'representatives.tsx': () => import('./components/entity/representatives').then(m => m.default),
-  'conditions.tsx': () => import('./components/entity/conditions').then(m => m.default),
-  'witnesses.tsx': () => import('./components/entity/witnesses').then(m => m.default),
-  'submitDocument.tsx': () => import('./components/entity/submitDocument').then(m => m.default),
+  'documentScope.tsx': () => import('./documentScope').then(m => m.default),
+  'representatives.tsx': () => import('./representatives').then(m => m.default),
+  'conditions.tsx': () => import('./conditions').then(m => m.default),
+  'witnesses.tsx': () => import('./witnesses').then(m => m.default),
+  'submitDocument.tsx': () => import('./submitDocument').then(m => m.default),
 };
 
 export type ComponentLoader = () => Promise<React.ComponentType>;

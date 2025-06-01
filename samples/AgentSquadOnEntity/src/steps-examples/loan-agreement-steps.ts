@@ -1,5 +1,5 @@
 import React from 'react';
-import { StepDefinition, createComponentRegistry, ComponentLoader } from '../steps';
+import { StepDefinition, createComponentRegistry, ComponentLoader } from '../components/power-of-attorney/steps';
 
 // Example: Component registry for loan agreement specific components
 // Note: These components don't exist yet - this is a template showing how to structure different document types
@@ -13,12 +13,12 @@ const loanComponentRegistry = createComponentRegistry({
   // 'submitLoan.tsx': () => import('../components/entity/submitLoan').then(m => m.default),
   
   // For now, fallback to existing components as placeholders:
-  'loanDetails.tsx': () => import('../components/entity/documentScope').then(m => m.default),
-  'borrowerInfo.tsx': () => import('../components/entity/representatives').then(m => m.default),
-  'lenderInfo.tsx': () => import('../components/entity/representatives').then(m => m.default),
-  'repaymentTerms.tsx': () => import('../components/entity/conditions').then(m => m.default),
-  'collateral.tsx': () => import('../components/entity/conditions').then(m => m.default),
-  'submitLoan.tsx': () => import('../components/entity/submitDocument').then(m => m.default),
+  'loanDetails.tsx': () => import('../components/power-of-attorney/documentScope').then(m => m.default),
+  'borrowerInfo.tsx': () => import('../components/power-of-attorney/representatives').then(m => m.default),
+  'lenderInfo.tsx': () => import('../components/power-of-attorney/representatives').then(m => m.default),
+  'repaymentTerms.tsx': () => import('../components/power-of-attorney/conditions').then(m => m.default),
+  'collateral.tsx': () => import('../components/power-of-attorney/conditions').then(m => m.default),
+  'submitLoan.tsx': () => import('../components/power-of-attorney/submitDocument').then(m => m.default),
 });
 
 // Example: Loan Agreement specific steps configuration

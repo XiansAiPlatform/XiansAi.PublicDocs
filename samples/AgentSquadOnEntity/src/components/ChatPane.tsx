@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AiOutlineRobot } from 'react-icons/ai';
 import { useSteps } from '../context/StepsContext';
-import { getThemeColors } from '../steps';
+import { getThemeColors } from './power-of-attorney/steps';
 
 interface Message {
   role: 'user' | 'bot';

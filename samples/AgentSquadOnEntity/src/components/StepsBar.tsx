@@ -1,7 +1,7 @@
 import React from 'react';
 import { AiOutlineRobot } from 'react-icons/ai';
 import { useSteps } from '../context/StepsContext';
-import { getThemeColors } from '../steps';
+import { getThemeColors } from './power-of-attorney/steps';
 
 const StepsBar: React.FC = () => {
   const { steps, activeStep, setActiveStep } = useSteps();
