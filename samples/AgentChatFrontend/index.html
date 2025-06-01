@@ -7,69 +7,65 @@
 </head>
 <body>
   <div class="main-container">
-    <div class="form-container">
-      <div class="container">
-        <h2>Xians AI Chat</h2>
-        
-        <div class="form-group">
-          <label>Websocket URL:</label>
-          <input type="text" id="url" placeholder="Paste your Websocket URL" />
+    <div class="sidebar">
+      <div class="user-settings">
+        <div class="user-settings-header">
+          <h3>User Settings</h3>
+          <button id="toggleSettings" class="toggle-btn">▼</button>
         </div>
+        <div class="settings-content" id="settingsContent">
+          <div class="form-group">
+            <label>Websocket URL:</label>
+            <input type="text" id="url" placeholder="Paste your Websocket URL" />
+          </div>
 
-        <div class="form-group">
-          <label>Secret Key</label>
-          <input type="text" id="secret" placeholder="Paste your Secret Key here" />
+          <div class="form-group">
+            <label>Secret Key</label>
+            <input type="text" id="secret" placeholder="Paste your Secret Key here" />
+          </div>
+
+          <div class="form-group">
+            <label>Tenant ID:</label>
+            <input type="text" id="tenantId" placeholder="Enter tenant ID" />
+          </div>
+
+          <div class="form-group">
+            <label>Participant ID:</label>
+            <input type="text" id="participantId" placeholder="Enter participant ID" />
+          </div>
+
+          <div class="form-group">
+            <label>Metadata (JSON):</label>
+            <textarea id="metadata" placeholder='Enter metadata as JSON (e.g. {"key": "value"})' rows="3"></textarea>
+          </div>
         </div>
+      </div>
 
-        <div class="form-group">
-          <label>Tenant ID:</label>
-          <input type="text" id="tenantId" placeholder="Enter tenant ID" />
-        </div>
-
-        <div class="form-group">
-          <label>Thread ID:</label>
-          <input type="text" id="threadId" placeholder="Enter thread ID" />
-        </div>
-
-        <div class="form-group">
-          <label>Agent:</label>
-          <input type="text" id="agent" placeholder="Enter agent ID" />
-        </div>
-
-        <div class="form-group">
-          <label>Workflow Type:</label>
-          <input type="text" id="workflowType" placeholder="Enter workflow type" />
-        </div>
-
-        <div class="form-group">
-          <label>Workflow ID:</label>
-          <input type="text" id="workflowId" placeholder="Enter workflow ID" />
-        </div>
-
-        <div class="form-group">
-          <label>Participant ID:</label>
-          <input type="text" id="participantId" placeholder="Enter participant ID" />
-        </div>
-
-        <div class="form-group">
-          <label>Metadata (JSON):</label>
-          <textarea id="metadata" placeholder='Enter metadata as JSON (e.g. {"key": "value"})' rows="3"></textarea>
-        </div>
-
-        <div class="button-group">
-          <button id="connectBtn">Connect</button>
-          <button id="disconnectBtn" disabled>Disconnect</button>
+      <div class="agents-list">
+        <h3>Available Bots</h3>
+        <div id="agentsContainer" class="agents-grid">
+          <!-- Agents will be loaded here dynamically -->
         </div>
       </div>
     </div>
 
     <div class="chat-container">
-      <div class="container">
-        <div id="chat"></div>
-        <div class="message-input-container">
-          <input type="text" id="messageInput" placeholder="Type your message..." />
-          <button id="sendBtn">Send</button>
+      <div class="chat-header">
+        <div class="selected-agent" id="selectedAgent">
+          <img src="public/images/agent.svg" alt="Agent" class="agent-icon" id="agentIcon">
+          <span id="agentName">Select an Bot to start chatting</span>
         </div>
+        <div class="connection-status">
+          <button id="connectBtn">Connect</button>
+          <button id="disconnectBtn" disabled>Disconnect</button>
+        </div>
+      </div>
+      
+      <div class="chat-messages" id="chat"></div>
+      
+      <div class="message-input-container">
+        <input type="text" id="messageInput" placeholder="Type your message..." />
+        <button id="sendBtn">Send</button>
       </div>
     </div>
   </div>

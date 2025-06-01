@@ -1,0 +1,29 @@
+[
+    { 
+        "id": "<workflowId>", 
+        "name": "<botName>",
+        "agent":"<agentName>", 
+        "description": "<botDescription>", 
+        "avatarColor": "#FECDD3", 
+        "iconColor": "#FDA4AF",
+        "workflowType":"<workflowType>"
+    },
+    { 
+        "id": "<workflowId>", 
+        "name": "<botName>", 
+        "agent":"<agentName>", 
+        "description": "<botDescription>", 
+        "avatarColor": "#E9D5FF", 
+        "iconColor": "#D8B4FE",
+        "workflowType":"<workflowType>"
+    },
+    { 
+        "id": "<workflowId>", 
+        "name": "<botName>", 
+        "agent":"<agentName>", 
+        "description": "<botDescription>", 
+        "avatarColor": "#FEF3C7", 
+        "iconColor": "#FDE68A",
+        "workflowType":"<workflowType>"
+    }
+]
