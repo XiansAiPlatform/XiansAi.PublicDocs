@@ -1,0 +1,21 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with softer color -->
+  <circle cx="100" cy="100" r="90" fill="#f7f9fc" />
+  
+  <!-- Simplified robot head - more rounded with thicker stroke -->
+  <rect x="65" y="55" width="70" height="85" rx="20" ry="20" fill="#e6eef5" stroke="#64748b" stroke-width="3" />
+  
+  <!-- Minimalist eyes - slightly larger -->
+  <circle cx="85" cy="90" r="8" fill="#475569" />
+  <circle cx="115" cy="90" r="8" fill="#475569" />
+  
+  <!-- Simple antenna with thicker line -->
+  <line x1="100" y1="55" x2="100" y2="40" stroke="#64748b" stroke-width="3" stroke-linecap="round" />
+  <circle cx="100" cy="35" r="6" fill="#64748b" />
+  
+  <!-- Clean, minimal expression/indicator - thicker -->
+  <rect x="80" y="110" width="40" height="4" rx="2" ry="2" fill="#475569" />
+  
+  <!-- More visible accent line -->
+  <line x1="75" y1="125" x2="125" y2="125" stroke="#64748b" stroke-width="2.5" stroke-linecap="round" />
+</svg> 
