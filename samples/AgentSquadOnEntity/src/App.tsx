@@ -4,9 +4,11 @@ import StepsBar from './components/StepsBar';
 import ChatPane from './components/ChatPane';
 import EntityPane from './components/EntityPane';
 import FindingsPane from './components/FindingsPane';
+import { StepsProvider, useSteps } from './context/StepsContext';
+import { SettingsProvider } from './context/SettingsContext';
 
-const App: React.FC = () => {
-  const [activeStep, setActiveStep] = useState(0);
+const MainLayout: React.FC = () => {
+  const { activeStep } = useSteps();
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [mobileFindingsOpen, setMobileFindingsOpen] = useState(false);
 
@@ -16,24 +18,24 @@ const App: React.FC = () => {
       <NavBar />
 
       {/* Steps / Areas of work */}
-      <StepsBar activeStep={activeStep} onStepChange={setActiveStep} />
+      <StepsBar />
 
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Chat pane - desktop only */}
         <div className="hidden sm:block min-w-[280px] flex-1 border-r border-gray-200 overflow-hidden">
-          <ChatPane activeStep={activeStep} />
+          <ChatPane />
         </div>
 
         {/* Entity state pane */}
-        <div 
+        <div
           className="flex-[1.5] overflow-hidden"
           onClick={() => {
             setMobileChatOpen(false);
             setMobileFindingsOpen(false);
           }}
         >
-          <EntityPane activeStep={activeStep} />
+          <EntityPane />
         </div>
 
         {/* Findings pane - desktop only */}
@@ -56,7 +58,7 @@ const App: React.FC = () => {
           </button>
         </div>
         <div className="absolute top-12 bottom-0 left-0 right-0">
-          <ChatPane activeStep={activeStep} />
+          <ChatPane />
         </div>
       </div>
 
@@ -90,7 +92,6 @@ const App: React.FC = () => {
         </button>
       )}
 
-      {/* Collapsed strip button for findings */}
       {!mobileFindingsOpen && (
         <button
           aria-label="Open findings"
@@ -103,5 +104,13 @@ const App: React.FC = () => {
     </div>
   );
 };
+
+const App: React.FC = () => (
+  <SettingsProvider>
+    <StepsProvider>
+      <MainLayout />
+    </StepsProvider>
+  </SettingsProvider>
+);
 
 export default App;

@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FiChevronDown, FiUser, FiSettings, FiLogOut, FiPlus, FiFileText } from 'react-icons/fi';
 import Logo from './Logo';
+import SettingsModal from './SettingsModal';
 
 const NavBar: React.FC = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isDocumentMenuOpen, setIsDocumentMenuOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const documentMenuRef = useRef<HTMLDivElement>(null);
 
@@ -24,6 +26,11 @@ const NavBar: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const handleSettingsClick = () => {
+    setIsSettingsModalOpen(true);
+    setIsProfileMenuOpen(false);
+  };
 
   return (
     <header className="h-14 bg-white border-b border-neutral-200 shadow-sm">
@@ -101,13 +108,13 @@ const NavBar: React.FC = () => {
                     Profile
                   </a>
                   
-                  <a
-                    href="#"
-                    className="flex items-center gap-3 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors font-normal"
+                  <button
+                    onClick={handleSettingsClick}
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors font-normal w-full text-left"
                   >
                     <FiSettings size={16} />
                     Settings
-                  </a>
+                  </button>
                   
                   <hr className="my-1 border-neutral-100" />
                   
@@ -124,6 +131,12 @@ const NavBar: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal 
+        isOpen={isSettingsModalOpen} 
+        onClose={() => setIsSettingsModalOpen(false)} 
+      />
     </header>
   );
 };

@@ -1,87 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import { AiOutlineRobot } from 'react-icons/ai';
-import { STEP_BOTS } from '../utils/botColors';
+import { useSteps } from '../context/StepsContext';
 
 interface Message {
   role: 'user' | 'bot';
   content: string;
 }
 
-interface ChatPaneProps {
-  activeStep: number;
-}
+const ChatPane: React.FC = () => {
+  const { steps, activeStep } = useSteps();
+  const currentStep = steps[activeStep];
+  const hasBot = Boolean(currentStep.bot);
 
-// Suggested messages for each bot type
-const SUGGESTED_MESSAGES = [
-  // Requirements Bot suggestions
-  [
-    "What are the key requirements for this document?",
-    "Help me define the scope and objectives",
-    "What stakeholders should be considered?",
-    "What are the success criteria?"
-  ],
-  // Draft Bot suggestions
-  [
-    "Help me create an outline",
-    "What sections should this document have?",
-    "Can you help me write the introduction?",
-    "How should I structure this content?"
-  ],
-  // Review Bot suggestions
-  [
-    "Please review this section for clarity",
-    "Are there any inconsistencies?",
-    "What improvements can be made?",
-    "Check for completeness and accuracy"
-  ],
-  // Finalize Bot suggestions
-  [
-    "Is the document ready for publication?",
-    "Final formatting and style check",
-    "Are all sections complete?",
-    "What final touches are needed?"
-  ]
-];
-
-const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
-  // Separate message histories for each step
+  // Initialise a separate message history per step
   const [messageHistories, setMessageHistories] = useState<Message[][]>(() => {
-    return STEP_BOTS.map((bot, index) => [
-      { role: 'bot', content: bot.initialMessage }
-    ]);
+    return steps.map((step) =>
+      step.bot
+        ? [{ role: 'bot', content: `Hello! I'm ${step.bot.title}. How can I help you?` }]
+        : []
+    );
   });
+
+  // Re-initialise history array if the number of steps changes (unlikely at runtime but keeps hook safe)
+  useEffect(() => {
+    setMessageHistories((prev) => {
+      if (prev.length === steps.length) return prev;
+      return steps.map((step, idx) => prev[idx] ?? (step.bot ? [{ role: 'bot', content: `Hello! I'm ${step.bot.title}. How can I help you?` }] : []));
+    });
+  }, [steps.length]);
 
   const [input, setInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
 
-  const currentBot = STEP_BOTS[activeStep];
-  const currentMessages = messageHistories[activeStep];
-  const currentSuggestions = SUGGESTED_MESSAGES[activeStep];
+  const currentMessages = messageHistories[activeStep] ?? [];
 
   const sendMessage = (messageContent: string) => {
-    if (!messageContent.trim()) return;
+    if (!messageContent.trim() || !hasBot) return;
 
-    const newMessage: Message = { role: 'user', content: messageContent.trim() };
-    
-    setMessageHistories(prev => {
+    const trimmed = messageContent.trim();
+    const newMessage: Message = { role: 'user', content: trimmed };
+
+    setMessageHistories((prev) => {
       const updated = [...prev];
-      updated[activeStep] = [...updated[activeStep], newMessage];
+      updated[activeStep] = [...(updated[activeStep] ?? []), newMessage];
       return updated;
     });
 
-    // Hide suggestions after sending a message
+    // Hide suggestions after first interaction
     setShowSuggestions(false);
 
-    // Placeholder bot response with step-specific context
+    // Fake bot response
     setTimeout(() => {
-      const botResponse = `${currentBot.name}: I understand you're working on "${messageContent.trim()}". How can I help you with this in the ${STEP_BOTS[activeStep].description.toLowerCase()} phase?`;
-      
-      setMessageHistories(prev => {
+      const botResponse: Message = {
+        role: 'bot',
+        content: `${currentStep.bot?.title}: I received "${trimmed}". How else can I help?`,
+      };
+      setMessageHistories((prev) => {
         const updated = [...prev];
-        updated[activeStep] = [...updated[activeStep], { role: 'bot', content: botResponse }];
+        updated[activeStep] = [...(updated[activeStep] ?? []), botResponse];
         return updated;
       });
-    }, 500);
+    }, 400);
   };
 
   const handleSend = () => {
@@ -89,42 +68,35 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
     setInput('');
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    sendMessage(suggestion);
-  };
-
+  // Auto-toggle suggestions visibility when step changes
   useEffect(() => {
-    // Show suggestions when switching to a new step or when there are only initial messages
-    setShowSuggestions(currentMessages.length <= 1);
-  }, [activeStep, currentMessages.length]);
-
-  useEffect(() => {
-    const listener = (event: any) => {
-      if (event?.detail?.content) {
-        setMessageHistories(prev => {
-          const updated = [...prev];
-          updated[activeStep] = [...updated[activeStep], { role: 'user', content: event.detail.content }];
-          return updated;
-        });
-      }
-    };
-    window.addEventListener('externalChatMessage', listener);
-    return () => {
-      window.removeEventListener('externalChatMessage', listener);
-    };
+    setShowSuggestions((currentMessages?.length ?? 0) <= 1);
   }, [activeStep]);
+
+  // Early return if no bot configured for this step
+  if (!hasBot) {
+    return (
+      <div className="flex items-center justify-center h-full bg-gray-50 text-gray-500 text-sm p-4 text-center">
+        Chat is not available for the "{currentStep.title}" step.
+      </div>
+    );
+  }
+
+  const theme = currentStep.theme;
 
   return (
     <div className="flex flex-col h-full">
-      {/* Bot Header */}
+      {/* Bot header */}
       <div className="px-4 py-3 border-b border-gray-200 bg-white">
         <div className="flex items-center space-x-3 w-full max-w-sm ml-auto">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${currentBot.colors.bg}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${theme.bg}`}>
             <AiOutlineRobot />
           </div>
           <div className="text-left">
-            <h3 className="font-semibold text-gray-900 tracking-tight text-balance">{currentBot.name}</h3>
-            <p className="text-xs text-gray-500 font-normal">{currentBot.description}</p>
+            <h3 className="font-semibold text-gray-900 tracking-tight text-balance">{currentStep.bot?.title}</h3>
+            {currentStep.bot?.description && (
+              <p className="text-xs text-gray-500 font-normal">{currentStep.bot.description}</p>
+            )}
           </div>
         </div>
       </div>
@@ -135,10 +107,11 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
           {currentMessages.map((msg, idx) => (
             <div
               key={idx}
-              className={`max-w-[85%] rounded-lg px-3 py-2 text-sm shadow
-                ${msg.role === 'user' 
-                  ? 'ml-auto bg-primary-light text-white text-right font-normal leading-relaxed' 
-                  : 'mr-auto bg-gray-100 text-gray-800 text-left font-normal leading-relaxed'}`}
+              className={`max-w-[85%] rounded-lg px-3 py-2 text-sm shadow ${
+                msg.role === 'user'
+                  ? 'ml-auto bg-primary-light text-white text-right'
+                  : 'mr-auto bg-white border border-gray-200 text-gray-800'
+              }`}
             >
               {msg.content}
             </div>
@@ -146,39 +119,22 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
         </div>
       </div>
 
-      {/* Suggested Messages */}
+      {/* Suggestions (very minimal generic for illustration) */}
       {showSuggestions && (
         <div className="px-4 py-3 border-t border-gray-100 bg-white">
           <div className="w-full max-w-sm ml-auto">
-            <p className="text-xs text-gray-500 mb-2 font-medium">Suggested questions:</p>
+            <p className="text-xs text-gray-500 mb-2 font-medium">Example prompts:</p>
             <div className="flex flex-wrap gap-2">
-              {currentSuggestions.map((suggestion, idx) => (
+              {['Can you assist me?', 'What should I do next?'].map((suggestion) => (
                 <button
-                  key={idx}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className={`px-3 py-1.5 text-xs rounded-full border transition-all duration-200 hover:shadow-sm
-                    ${currentBot.colors.bgLight} ${currentBot.colors.text} ${currentBot.colors.border}
-                    hover:scale-105 active:scale-95 font-medium`}
+                  key={suggestion}
+                  onClick={() => sendMessage(suggestion)}
+                  className={`px-3 py-1.5 text-xs rounded-full border transition-all duration-200 ${theme.bgLight} ${theme.text} ${theme.border} hover:scale-105 active:scale-95 font-medium`}
                 >
                   {suggestion}
                 </button>
               ))}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Floating Suggestions Toggle */}
-      {!showSuggestions && (
-        <div className="px-4 py-2 border-t border-gray-100 bg-white">
-          <div className="w-full max-w-sm ml-auto">
-            <button
-              onClick={() => setShowSuggestions(true)}
-              className={`text-xs font-medium transition-all duration-200 hover:scale-105 px-2 py-1 rounded
-                ${currentBot.colors.text} hover:${currentBot.colors.bgLight}`}
-            >
-              Suggestions
-            </button>
           </div>
         </div>
       )}
@@ -190,17 +146,16 @@ const ChatPane: React.FC<ChatPaneProps> = ({ activeStep }) => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={`Ask ${currentBot.name}...`}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-primary-light text-sm font-normal"
+            placeholder={`Ask ${currentStep.bot?.title ?? 'the bot'}...`}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring text-sm"
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSend();
             }}
-            onFocus={() => setShowSuggestions(false)}
           />
           <button
             onClick={handleSend}
-            className="px-4 py-2 bg-primary-light text-white text-sm rounded disabled:opacity-50 font-medium transition-colors"
             disabled={!input.trim()}
+            className="px-4 py-2 bg-primary-light text-white text-sm rounded disabled:opacity-50"
           >
             Send
           </button>
