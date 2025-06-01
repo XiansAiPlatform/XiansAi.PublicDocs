@@ -149,7 +149,7 @@ const EntityPane: React.FC = () => {
               {canGoPrevious && (
                 <button
                   onClick={goToPreviousStep}
-                  className={`inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 ${themeColors.buttonSecondary} ${themeColors.buttonSecondaryHover} ${themeColors.buttonSecondaryBorder} ${themeColors.buttonPrimaryFocus}`}
+                  className={`inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 focus:outline-none ${themeColors.buttonSecondary} ${themeColors.buttonSecondaryHover} ${themeColors.buttonSecondaryBorder}`}
                 >
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -160,7 +160,7 @@ const EntityPane: React.FC = () => {
               {canGoNext && (
                 <button
                   onClick={goToNextStep}
-                  className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${themeColors.buttonPrimary} ${themeColors.buttonPrimaryHover} ${themeColors.buttonPrimaryFocus}`}
+                  className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white focus:outline-none ${themeColors.buttonPrimary} ${themeColors.buttonPrimaryHover}`}
                 >
                   Next
                   <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,7 +200,7 @@ const EntityPane: React.FC = () => {
             {canGoPrevious && (
               <button
                 onClick={goToPreviousStep}
-                className={`inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 ${themeColors.buttonSecondary} ${themeColors.buttonSecondaryHover} ${themeColors.buttonSecondaryBorder} ${themeColors.buttonPrimaryFocus}`}
+                className={`inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 focus:outline-none ${themeColors.buttonSecondary} ${themeColors.buttonSecondaryHover} ${themeColors.buttonSecondaryBorder}`}
               >
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -211,7 +211,7 @@ const EntityPane: React.FC = () => {
             {canGoNext && (
               <button
                 onClick={goToNextStep}
-                className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${themeColors.buttonPrimary} ${themeColors.buttonPrimaryHover} ${themeColors.buttonPrimaryFocus}`}
+                className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white focus:outline-none ${themeColors.buttonPrimary} ${themeColors.buttonPrimaryHover}`}
               >
                 Next
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
