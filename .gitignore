@@ -228,3 +228,4 @@ _ReSharper*/
 !**/[Pp]ackages/build/
 samples/.DS_Store
 samples/.DS_Store
+.DS_Store
