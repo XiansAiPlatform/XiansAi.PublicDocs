@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSteps } from '../context/StepsContext';
 import type { ComponentLoader } from '../steps';
+import { getThemeColors } from '../steps';
 
 // Generic dynamic component loader
 const DynamicEntityComponent: React.FC<{ componentLoader: ComponentLoader }> = ({ componentLoader }) => {
@@ -98,10 +99,29 @@ const LoadingFallback: React.FC = () => (
 
 // Main EntityPane component
 const EntityPane: React.FC = () => {
-  const { steps, activeStep } = useSteps();
+  const { steps, activeStep, setActiveStep } = useSteps();
   const currentStep = steps[activeStep];
 
-  if (!currentStep) {
+  // Get theme colors from the theme name
+  const themeColors = currentStep ? getThemeColors(currentStep.theme) : null;
+
+  // Navigation functions
+  const goToPreviousStep = () => {
+    if (activeStep > 0) {
+      setActiveStep(activeStep - 1);
+    }
+  };
+
+  const goToNextStep = () => {
+    if (activeStep < steps.length - 1) {
+      setActiveStep(activeStep + 1);
+    }
+  };
+
+  const canGoPrevious = activeStep > 0;
+  const canGoNext = activeStep < steps.length - 1;
+
+  if (!currentStep || !themeColors) {
     return (
       <div className="h-full flex flex-col bg-white">
         <div className="flex-1 flex items-center justify-center">
@@ -120,8 +140,34 @@ const EntityPane: React.FC = () => {
     return (
       <div className="h-full flex flex-col bg-white">
         <header className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">{currentStep.title}</h2>
-          <p className="text-sm text-gray-600 mt-1">Step {activeStep + 1} of {steps.length}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">{currentStep.title}</h2>
+              <p className="text-sm text-gray-600 mt-1">Step {activeStep + 1} of {steps.length}</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={goToPreviousStep}
+                disabled={!canGoPrevious}
+                className={`inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${themeColors.buttonSecondary} ${themeColors.buttonSecondaryHover} ${themeColors.buttonSecondaryBorder} ${themeColors.buttonPrimaryFocus} disabled:hover:bg-white`}
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Previous
+              </button>
+              <button
+                onClick={goToNextStep}
+                disabled={!canGoNext}
+                className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${themeColors.buttonPrimary} ${themeColors.buttonPrimaryHover} ${themeColors.buttonPrimaryFocus}`}
+              >
+                Next
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </header>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center max-w-md p-6">
@@ -141,9 +187,43 @@ const EntityPane: React.FC = () => {
   }
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <DynamicEntityComponent componentLoader={componentLoader} />
-    </Suspense>
+    <div className="h-full flex flex-col bg-white">
+      <header className="px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900">{currentStep.title}</h2>
+            <p className="text-sm text-gray-600 mt-1">Step {activeStep + 1} of {steps.length}</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={goToPreviousStep}
+              disabled={!canGoPrevious}
+              className={`inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${themeColors.buttonSecondary} ${themeColors.buttonSecondaryHover} ${themeColors.buttonSecondaryBorder} ${themeColors.buttonPrimaryFocus} disabled:hover:bg-white`}
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Previous
+            </button>
+            <button
+              onClick={goToNextStep}
+              disabled={!canGoNext}
+              className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${themeColors.buttonPrimary} ${themeColors.buttonPrimaryHover} ${themeColors.buttonPrimaryFocus}`}
+            >
+              Next
+              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+      <div className="flex-1">
+        <Suspense fallback={<LoadingFallback />}>
+          <DynamicEntityComponent componentLoader={componentLoader} />
+        </Suspense>
+      </div>
+    </div>
   );
 };
 

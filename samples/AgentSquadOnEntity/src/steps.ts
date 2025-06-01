@@ -11,12 +11,20 @@ const componentRegistry = {
 
 export type ComponentLoader = () => Promise<React.ComponentType>;
 
-export interface StepTheme {
+export type StepTheme = string;
+
+export interface StepThemeColors {
   bg: string;
   bgLight: string;
   bgDark: string;
   text: string;
   border: string;
+  buttonPrimary: string;
+  buttonPrimaryHover: string;
+  buttonPrimaryFocus: string;
+  buttonSecondary: string;
+  buttonSecondaryHover: string;
+  buttonSecondaryBorder: string;
 }
 
 export interface StepBot {
@@ -36,29 +44,38 @@ export interface StepDefinition {
   bot?: StepBot;
 }
 
-// Step definitions with component loaders
+// Utility function to derive all colors from theme name
+export const getThemeColors = (themeName: string): StepThemeColors => {
+  // Extract the base theme name (remove bg- prefix if present)
+  const baseTheme = themeName.replace('bg-', '');
+  
+  // Dynamically generate Tailwind classes based on theme name
+  return {
+    bg: `bg-${baseTheme}-600`,
+    bgLight: `bg-${baseTheme}-50`,
+    bgDark: `bg-${baseTheme}-800`,
+    text: `text-${baseTheme}-900`,
+    border: `border-${baseTheme}-200`,
+    buttonPrimary: `bg-${baseTheme}-600`,
+    buttonPrimaryHover: `hover:bg-${baseTheme}-700`,
+    buttonPrimaryFocus: `focus:ring-${baseTheme}-500`,
+    buttonSecondary: `bg-${baseTheme}-50`,
+    buttonSecondaryHover: `hover:bg-${baseTheme}-100`,
+    buttonSecondaryBorder: `border-${baseTheme}-200`
+  };
+};
+
+// Step definitions with simplified theme names
 export const steps: StepDefinition[] = [
   {
     title: "Scope",
-    theme: {
-      bg: "bg-bot-requirements",
-      bgLight: "bg-bot-requirements-light",
-      bgDark: "bg-bot-requirements-dark",
-      text: "text-bot-requirements-text",
-      border: "border-bot-requirements-border"
-    },
+    theme: "purple",
     entityUi: "documentScope.tsx",
     componentLoader: componentRegistry['documentScope.tsx']
   },
   {
     title: "Representatives",
-    theme: {
-      bg: "bg-bot-draft",
-      bgLight: "bg-bot-draft-light",
-      bgDark: "bg-bot-draft-dark",
-      text: "text-bot-draft-text",
-      border: "border-bot-draft-border"
-    },
+    theme: "warm",
     bot: {
       title: "Representatives Agent",
       agent: "HR Agent v3",
@@ -71,13 +88,7 @@ export const steps: StepDefinition[] = [
   },
   {
     title: "Conditions",
-    theme: {
-      bg: "bg-bot-review",
-      bgLight: "bg-bot-review-light",
-      bgDark: "bg-bot-review-dark",
-      text: "text-bot-review-text",
-      border: "border-bot-review-border"
-    },
+    theme: "lavender",
     bot: {
       title: "Conditions Agent",
       id: "99x.io:HR Agent v3:Care Bot v3:94d63e47-d2b1-4f00-9890-7c91a6b48212",
@@ -90,13 +101,7 @@ export const steps: StepDefinition[] = [
   },
   {
     title: "Witnesses",
-    theme: {
-      bg: "bg-bot-review",
-      bgLight: "bg-bot-review-light",
-      bgDark: "bg-bot-review-dark",
-      text: "text-bot-review-text",
-      border: "border-bot-review-border"
-    },
+    theme: "blue",
     bot: {
       title: "Witnesses Agent",
       id: "99x.io:HR Agent v3:Pay Bot v3",
@@ -109,13 +114,7 @@ export const steps: StepDefinition[] = [
   },
   {
     title: "Submit",
-    theme: {
-      bg: "bg-bot-finalize",
-      bgLight: "bg-bot-finalize-light",
-      bgDark: "bg-bot-finalize-dark",
-      text: "text-bot-finalize-text",
-      border: "border-bot-finalize-border"
-    },
+    theme: "green",
     entityUi: "submitDocument.tsx",
     componentLoader: componentRegistry['submitDocument.tsx']
   }

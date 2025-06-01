@@ -25,25 +25,13 @@ const loanComponentRegistry = createComponentRegistry({
 export const loanAgreementSteps: StepDefinition[] = [
   {
     title: "Loan Details",
-    theme: {
-      bg: "bg-blue-600",
-      bgLight: "bg-blue-100",
-      bgDark: "bg-blue-800",
-      text: "text-blue-800",
-      border: "border-blue-300"
-    },
+    theme: "info",
     entityUi: "loanDetails.tsx",
     componentLoader: loanComponentRegistry['loanDetails.tsx']
   },
   {
     title: "Borrower Information",
-    theme: {
-      bg: "bg-green-600",
-      bgLight: "bg-green-100", 
-      bgDark: "bg-green-800",
-      text: "text-green-800",
-      border: "border-green-300"
-    },
+    theme: "lavender",
     bot: {
       title: "Borrower Assistant",
       description: "Help gather borrower information and documentation"
@@ -53,25 +41,13 @@ export const loanAgreementSteps: StepDefinition[] = [
   },
   {
     title: "Lender Information",
-    theme: {
-      bg: "bg-purple-600",
-      bgLight: "bg-purple-100",
-      bgDark: "bg-purple-800", 
-      text: "text-purple-800",
-      border: "border-purple-300"
-    },
+    theme: "purple",
     entityUi: "lenderInfo.tsx",
     componentLoader: loanComponentRegistry['lenderInfo.tsx']
   },
   {
     title: "Repayment Terms",
-    theme: {
-      bg: "bg-orange-600",
-      bgLight: "bg-orange-100",
-      bgDark: "bg-orange-800",
-      text: "text-orange-800", 
-      border: "border-orange-300"
-    },
+    theme: "warm",
     bot: {
       title: "Terms Calculator",
       description: "Calculate and optimize repayment schedules"
@@ -81,25 +57,13 @@ export const loanAgreementSteps: StepDefinition[] = [
   },
   {
     title: "Collateral",
-    theme: {
-      bg: "bg-red-600",
-      bgLight: "bg-red-100",
-      bgDark: "bg-red-800",
-      text: "text-red-800",
-      border: "border-red-300"
-    },
+    theme: "warning",
     entityUi: "collateral.tsx",
     componentLoader: loanComponentRegistry['collateral.tsx']
   },
   {
     title: "Submit Agreement",
-    theme: {
-      bg: "bg-gray-600",
-      bgLight: "bg-gray-100",
-      bgDark: "bg-gray-800",
-      text: "text-gray-800",
-      border: "border-gray-300"
-    },
+    theme: "cream",
     entityUi: "submitLoan.tsx", 
     componentLoader: loanComponentRegistry['submitLoan.tsx']
   }

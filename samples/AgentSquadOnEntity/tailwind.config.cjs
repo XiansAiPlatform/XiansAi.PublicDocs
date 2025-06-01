@@ -4,6 +4,18 @@ module.exports = {
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
   ],
+  safelist: [
+    // Safelist dynamic color classes used in getThemeColors function
+    {
+      pattern: /^(bg|text|border)-(purple|warm|lavender|cream|blue|error|warning|info)-(50|100|200|300|400|500|600|700|800|900)$/,
+    },
+    {
+      pattern: /^hover:bg-(purple|warm|lavender|cream|blue|error|warning|info)-(50|100|200|300|400|500|600|700|800|900)$/,
+    },
+    {
+      pattern: /^focus:ring-(purple|warm|lavender|cream|blue|error|warning|info)-(50|100|200|300|400|500|600|700|800|900)$/,
+    }
+  ],
   theme: {
     extend: {
       fontFamily: {
@@ -135,58 +147,42 @@ module.exports = {
           800: '#1F2937',
           900: '#111827',
         },
-        bot: {
-          // Bot colors used in chat panel - using new color palette
-          requirements: {
-            DEFAULT: '#2C1D26', // purple-900
-            light: '#F7F5F7', // purple-50
-            dark: '#3D2539', // purple-800
-            text: '#2C1D26', // purple-900
-            border: '#D9CDD9', // purple-200
-          },
-          draft: {
-            DEFAULT: '#B08F56', // warm-700
-            light: '#F8F1E8', // warm-200
-            dark: '#8B7145', // warm-800
-            text: '#6B5534', // warm-900
-            border: '#DBC299', // warm-500
-          },
-          review: {
-            DEFAULT: '#9B6EE8', // lavender-500
-            light: '#E8DEFF', // lavender-200
-            dark: '#7C3AED', // lavender-700
-            text: '#581C87', // lavender-900
-            border: '#D4C1FF', // lavender-300
-          },
-          finalize: {
-            DEFAULT: '#C5C5BC', // cream-700
-            light: '#FAFAF8', // cream-200
-            dark: '#A8A89D', // cream-800
-            text: '#8A8A7E', // cream-900
-            border: '#E8E8E3', // cream-500
-          },
-          // Semantic finding colors
-          error: {
-            DEFAULT: '#E53E3E', // red-500
-            light: '#FED7D7', // red-100
-            dark: '#C53030', // red-600
-            text: '#63171B', // red-900
-            border: '#FC8181', // red-300
-          },
-          warning: {
-            DEFAULT: '#FFC107', // yellow-500
-            light: '#FFF7D9', // yellow-100
-            dark: '#FFB300', // yellow-600
-            text: '#CC7700', // yellow-900
-            border: '#FFE080', // yellow-300
-          },
-          info: {
-            DEFAULT: '#1A8EFF', // blue-500
-            light: '#E0F1FF', // blue-100
-            dark: '#0078E6', // blue-600
-            text: '#003666', // blue-900
-            border: '#80C4FF', // blue-300
-          }
+        // Semantic finding colors for specific use cases
+        error: {
+          50: '#FFF5F5',
+          100: '#FED7D7',
+          200: '#FEB2B2',
+          300: '#FC8181',
+          400: '#F56565',
+          500: '#E53E3E',
+          600: '#C53030',
+          700: '#9B2C2C',
+          800: '#822727',
+          900: '#63171B',
+        },
+        warning: {
+          50: '#FFFCF0',
+          100: '#FFF7D9',
+          200: '#FFECB3',
+          300: '#FFE080',
+          400: '#FFD54D',
+          500: '#FFC107',
+          600: '#FFB300',
+          700: '#FF9F00',
+          800: '#E68900',
+          900: '#CC7700',
+        },
+        info: {
+          50: '#F0F8FF',
+          100: '#E0F1FF',
+          200: '#B3DBFF',
+          300: '#80C4FF',
+          400: '#4DA8FF',
+          500: '#1A8EFF',
+          600: '#0078E6',
+          700: '#0063CC',
+          800: '#004C99',
+          900: '#003666',
         },
       },
     },

@@ -1,8 +1,32 @@
 import React, { useState } from 'react';
 import { FiInfo, FiAlertTriangle, FiXCircle, FiChevronDown } from 'react-icons/fi';
-import { FINDING_TYPE_COLORS } from '../utils/botColors';
 
 export type FindingType = 'suggestion' | 'warning' | 'error';
+
+// Finding type colors (semantic colors that match Tailwind colors)
+const FINDING_TYPE_COLORS = {
+  suggestion: {
+    bg: 'bg-info',
+    bgLight: 'bg-info-light',
+    bgDark: 'bg-info-dark',
+    text: 'text-info-text',
+    border: 'border-info-border',
+  },
+  warning: {
+    bg: 'bg-warning',
+    bgLight: 'bg-warning-light',
+    bgDark: 'bg-warning-dark',
+    text: 'text-warning-text',
+    border: 'border-warning-border',
+  },
+  error: {
+    bg: 'bg-error',
+    bgLight: 'bg-error-light',
+    bgDark: 'bg-error-dark',
+    text: 'text-error-text',
+    border: 'border-error-border',
+  },
+} as const;
 
 export interface Finding {
   id: number;

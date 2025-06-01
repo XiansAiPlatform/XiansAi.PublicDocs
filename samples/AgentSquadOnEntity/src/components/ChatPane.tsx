@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AiOutlineRobot } from 'react-icons/ai';
 import { useSteps } from '../context/StepsContext';
+import { getThemeColors } from '../steps';
 
 interface Message {
   role: 'user' | 'bot';
@@ -11,6 +12,9 @@ const ChatPane: React.FC = () => {
   const { steps, activeStep } = useSteps();
   const currentStep = steps[activeStep];
   const hasBot = Boolean(currentStep.bot);
+
+  // Get theme colors from the theme name
+  const themeColors = getThemeColors(currentStep.theme);
 
   // Initialise a separate message history per step
   const [messageHistories, setMessageHistories] = useState<Message[][]>(() => {
@@ -82,14 +86,12 @@ const ChatPane: React.FC = () => {
     );
   }
 
-  const theme = currentStep.theme;
-
   return (
     <div className="flex flex-col h-full">
       {/* Bot header */}
       <div className="px-4 py-3 border-b border-gray-200 bg-white">
         <div className="flex items-center space-x-3 w-full max-w-sm ml-auto">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${theme.bg}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${themeColors.bg}`}>
             <AiOutlineRobot />
           </div>
           <div className="text-left">
@@ -129,7 +131,7 @@ const ChatPane: React.FC = () => {
                 <button
                   key={suggestion}
                   onClick={() => sendMessage(suggestion)}
-                  className={`px-3 py-1.5 text-xs rounded-full border transition-all duration-200 ${theme.bgLight} ${theme.text} ${theme.border} hover:scale-105 active:scale-95 font-medium`}
+                  className={`px-3 py-1.5 text-xs rounded-full border transition-all duration-200 hover:scale-105 active:scale-95 font-medium ${themeColors.bgLight} ${themeColors.text} ${themeColors.border}`}
                 >
                   {suggestion}
                 </button>
