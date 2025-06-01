@@ -58,7 +58,7 @@ public class AgentConfig
 ```
 
 Required parameters:
-- `id`: Unique identifier in format "tenant:agent-name:workflow-name"
+- `id`: Unique identifier in format "tenant:agent-name:workflow-name, also refered to workflowId"
 - `name`: Display name for the agent
 - `agent`: Agent identifier
 - `workflowType`: Type of workflow the agent handles
@@ -90,7 +90,7 @@ The message history is received through the SignalR connection in the following 
      ```
 
 3. **Message Structure**
-   Each message in the history contains:
+   Use the following model to represent a Message. Each message in the history contains:
    ```csharp
    public class Message
    {
@@ -107,7 +107,7 @@ The message history is received through the SignalR connection in the following 
 4. **Message Sending and Receiving**
    - Messages are sent using the SignalR connection's `SendInboundMessage` method
    - The application waits for a response before continuing
-   - When sending messages, use the following request structure:
+   - When sending messages, use the following request model:
    ```csharp
    public class SendMessageRequest
    {
@@ -120,14 +120,6 @@ The message history is received through the SignalR connection in the following 
        public object Metadata { get; set; }      // Additional metadata
    }
    ```
-
-   The message flow works as follows:
-   1. User selects an agent and enters a message
-   2. Application creates a SendMessageRequest with the message details
-   3. Request is sent using SignalR's `SendInboundMessage` method
-   4. Application waits for the response (up to 30 seconds)
-   5. When response is received, it's displayed to the user
-   6. Only then does the application continue to the next message input
 
    Example code for sending and receiving messages:
    ```csharp
@@ -185,12 +177,11 @@ The message history is received through the SignalR connection in the following 
 6. **Pagination**
    - History is loaded in pages of 20 messages
    - More messages can be loaded by incrementing the page number
-   - The server indicates if more messages are available
 
 7. **Real-time Updates**
    - New messages are received through the `ReceiveMessage` event
-   - These messages are automatically added to the chat history
-   - The history is maintained in chronological order
+   - Make sure the Messages are automatically added to the chat history
+   - Make sure the history is maintained in chronological order
 
 ## Implementation
 
@@ -249,7 +240,7 @@ class Program
     {
         try
         {
-            string json = await File.ReadAllTextAsync("agents.json");
+            string json = await File.ReadAllTextAsync("<agents.json File Path>");
             _agents = JsonConvert.DeserializeObject<List<AgentConfig>>(json);
             Console.WriteLine($"Loaded {_agents.Count} agents");
         }
@@ -456,41 +447,12 @@ class Program
 
 ## Usage
 
-### 1. Create Agent Configuration
-
-Create an `agents.json` file in your project directory with the following structure:
-
-```json
-[
-    {
-        "id": "tenant:agent-name:workflow-name",
-        "name": "bot-name",
-        "agent": "agent-name",
-        "workflowType": "workflow-type"
-    }
-]
-```
-
-Required parameters:
-- `id`: Unique identifier in format "tenant:agent-name:workflow-name, also refered to workflowId"
-- `name`: Display name for the agent
-- `agent`: Agent identifier
-- `workflowType`: Type of workflow the agent handles
-
-### 2. Update Configuration
-
-Update the `.env` file with your configuration values:
-- `WEBSOCKET_URL`: Your SignalR hub URL
-- `API_KEY`: Your API key
-- `TENANT_ID`: Your tenant ID
-- `PARTICIPANT_ID`: Your participant ID
-
-### 3. Run the Application
+### 1. Run the Application
 
 ```bash
 dotnet run
 ```
-### 4. Console Application
+### 2. Console Application
 
 ![Websocket Application Interface](./img/websocket-console-app-output.png)
 
