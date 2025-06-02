@@ -30,9 +30,24 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
 
   // Check for changes
   useEffect(() => {
-    const changed = Object.keys(settings).some(
-      key => formData[key as keyof SettingsData] !== settings[key as keyof SettingsData]
+    console.log('START hasChanges effect. formData:', JSON.stringify(formData, null, 2), 'settings:', JSON.stringify(settings, null, 2));
+    
+    const formKeys = Object.keys(formData) as Array<keyof SettingsData>;
+    const settingsKeys = Object.keys(settings) as Array<keyof SettingsData>;
+    const allUniqueKeys = Array.from(new Set([...formKeys, ...settingsKeys]));
+
+    const changed = allUniqueKeys.some(
+      key => {
+        const valFormData = formData[key];
+        const valSettings = settings[key];
+        if (valFormData !== valSettings) {
+          console.log(`Field '${key}' differs: formData['${key}'] = '${valFormData}' (type: ${typeof valFormData}), settings['${key}'] = '${valSettings}' (type: ${typeof valSettings})`);
+          return true;
+        }
+        return false;
+      }
     );
+    console.log('END hasChanges effect. Calculated hasChanges:', changed);
     setHasChanges(changed);
   }, [formData, settings]);
 
@@ -104,34 +119,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           <div>
-            <label htmlFor="userId" className="block text-sm font-medium text-neutral-700 mb-2">
-              User ID
-            </label>
-            <input
-              id="userId"
-              type="text"
-              value={formData.userId}
-              onChange={(e) => handleInputChange('userId', e.target.value)}
-              placeholder="Enter your user ID"
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="documentId" className="block text-sm font-medium text-neutral-700 mb-2">
-              Document ID
-            </label>
-            <input
-              id="documentId"
-              type="text"
-              value={formData.documentId}
-              onChange={(e) => handleInputChange('documentId', e.target.value)}
-              placeholder="Enter document ID"
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
-            />
-          </div>
-
-          <div>
             <label htmlFor="tenantId" className="block text-sm font-medium text-neutral-700 mb-2">
               Tenant ID
             </label>
@@ -142,6 +129,37 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
               onChange={(e) => handleInputChange('tenantId', e.target.value)}
               placeholder="Enter tenant ID"
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="participantId" className="block text-sm font-medium text-neutral-700 mb-2">
+              Participant ID
+            </label>
+            <input
+              id="participantId"
+              type="text"
+              value={formData.participantId}
+              onChange={(e) => handleInputChange('participantId', e.target.value)}
+              placeholder="Enter participant ID"
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="defaultMetadata" className="block text-sm font-medium text-neutral-700 mb-2">
+              Default Metadata (JSON)
+            </label>
+            <textarea
+              id="defaultMetadata"
+              value={formData.defaultMetadata || ''}
+              onChange={(e) => handleInputChange('defaultMetadata', e.target.value)}
+              placeholder='{
+  "key1": "value1",
+  "key2": "value2"
+}'
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors h-32 resize-none"
+              rows={5}
             />
           </div>
         </div>

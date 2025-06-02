@@ -220,7 +220,7 @@ export class WebSocketHub {
     try {
       await signalRConnection.connection.invoke('SubscribeToAgent',
         bot.workflowId,
-        this.settings?.userId,
+        this.settings?.participantId,
         this.settings?.tenantId
       );
       console.log(`Subscribed to agent: ${bot.title} (${bot.workflowId})`);
@@ -245,8 +245,8 @@ export class WebSocketHub {
     }
 
     // Check if we have the required parameters for GetThreadHistory
-    if (!bot.workflowType || !this.settings?.userId) {
-      console.warn(`Missing required parameters for GetThreadHistory: workflowType=${bot.workflowType}, userId=${this.settings?.userId}`);
+    if (!bot.workflowType || !this.settings?.participantId) {
+      console.warn(`Missing required parameters for GetThreadHistory: workflowType=${bot.workflowType}, participantId=${this.settings?.participantId}`);
       // Skip loading thread history if we don't have the required parameters
       return;
     }
@@ -254,7 +254,7 @@ export class WebSocketHub {
     try {
       await signalRConnection.connection.invoke('GetThreadHistory',
         bot.workflowType,
-        this.settings.userId,
+        this.settings.participantId,
         1,  // Page number
         20  // Page size
       );
@@ -402,20 +402,25 @@ export class WebSocketHub {
     // Handle thread history
     connection.on('ThreadHistory', (history: Message[]) => {
       if (!history || history.length === 0) {
-        // console.log(`[WebSocketHub] 'ThreadHistory' event for step ${stepIndex}: No history messages.`); // Less verbose
+        // console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] 'ThreadHistory' event for step ${stepIndex}: No history messages.`);
         return;
       }
+      
       const workflowId = history[0].workflowId; 
-      console.log(`[WebSocketHub] 'ThreadHistory' event for step ${stepIndex}: Processing ${history.length} historical messages for workflow ${workflowId}.`);
+      console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] 'ThreadHistory' event for step ${stepIndex}: Received ${history.length} historical messages for workflow ${workflowId}.`);
+
+      // ** SORT HISTORICAL MESSAGES BEFORE PROCESSING **
+      // Ensure messages are processed in chronological order (oldest first)
+      const sortedHistory = [...history].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] 'ThreadHistory' for step ${stepIndex}: Sorted ${sortedHistory.length} messages.`);
+
       let newMessagesProcessedCount = 0;
-      for (const histMessage of history) {
-        // Log raw historical message before processing
-        // console.log(`[WebSocketHub] ThreadHistory: Processing historical message:`, JSON.parse(JSON.stringify(histMessage))); 
+      for (const histMessage of sortedHistory) { // Iterate over the sorted history
         if (this.processMessage(workflowId, histMessage, stepIndex)) {
           newMessagesProcessedCount++;
         }
       }
-      console.log(`[WebSocketHub] 'ThreadHistory' for step ${stepIndex}: ${newMessagesProcessedCount} new messages processed and UI events emitted.`);
+      console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] 'ThreadHistory' for step ${stepIndex}: ${newMessagesProcessedCount} new messages processed and UI events emitted.`);
     });
 
     // Connection established
@@ -441,6 +446,9 @@ export class WebSocketHub {
       throw new Error(`No bot configured for step ${stepIndex}`);
     }
 
+    // convert the default metadata string to an object
+    const defaultMetadata = this.settings?.defaultMetadata ? JSON.parse(this.settings.defaultMetadata) : {};
+
     try {
       // Create SendMessageRequest according to documentation
       const request: SendMessageRequest = {
@@ -448,9 +456,9 @@ export class WebSocketHub {
         agent: step.bot.agent || '',
         workflowType: step.bot.workflowType || '',
         workflowId: step.bot.workflowId || '',
-        participantId: this.settings?.userId || '',
+        participantId: this.settings?.participantId || '',
         content: typeof message === 'string' ? message : message.content,
-        metadata: typeof message === 'object' ? message.metadata : null
+        metadata: defaultMetadata
       };
 
       // Invoke the SendInboundMessage method on the hub

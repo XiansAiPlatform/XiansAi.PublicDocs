@@ -3,9 +3,9 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useRe
 export interface SettingsData {
   agentWebsocketUrl: string;
   agentApiKey: string;
-  userId: string;
-  documentId: string;
   tenantId: string;
+  participantId: string;
+  defaultMetadata: string;
 }
 
 interface SettingsContextValue {
@@ -16,9 +16,9 @@ interface SettingsContextValue {
 const defaultSettings: SettingsData = {
   agentWebsocketUrl: '',
   agentApiKey: '',
-  userId: '',
-  documentId: '',
   tenantId: '',
+  participantId: '',
+  defaultMetadata: '',
 };
 
 const STORAGE_KEY = 'agent-settings';
