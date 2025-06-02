@@ -32,6 +32,43 @@ TENANT_ID=your-tenant-id
 PARTICIPANT_ID=your-participant-id
 ```
 
+## Setup Websocket Connection
+
+Before subscribing to agents, you need to establish a websocket connection. Here's how to set up and start the connection:
+
+```csharp
+private static async Task SetupWebsocketConnection()
+{
+    // Create the connection with authentication
+    _connection = new HubConnectionBuilder()
+        .WithUrl($"{_webSocketUrl}?tenantId={_tenantId}", options =>
+        {
+            options.Headers.Add("Authorization", $"Bearer {_apiKey}");
+        })
+        .WithAutomaticReconnect()  // Enable automatic reconnection
+        .Build();
+
+    try
+    {
+        // Start the connection
+        await _connection.StartAsync();
+        Console.WriteLine("Connected to Websocket hub");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error connecting to Websocket hub: {ex.Message}");
+        throw;
+    }
+}
+```
+
+Important notes:
+- The connection requires a valid WebSocket URL, API key, and tenant ID
+- The connection includes automatic reconnection capability
+- Message handlers should be set up before starting the connection
+- Always handle connection errors appropriately
+- The connection must be established before attempting to subscribe to agents
+
 ## Agent Configuration
 
 1. Create an `agents.json` file in your project directory with the following structure:
@@ -63,13 +100,56 @@ Required parameters:
 - `agent`: Agent identifier
 - `workflowType`: Type of workflow the agent handles
 
+### Subscribing to Agents
+
+To subscribe to agents, you need to call the `SubscribeToAgent` method through the Websocket connection. This establishes a connection between your client and the specified agent.
+
+```csharp
+// Example of subscribing to an agent
+await connection.InvokeAsync("SubscribeToAgent", 
+    agentId,        // The agent's unique identifier
+    participantId,  // Your participant ID
+    tenantId        // Your tenant ID
+);
+```
+
+Here's a complete example of subscribing to multiple agents:
+
+```csharp
+private static async Task SubscribeToAgents()
+{
+    foreach (var agent in _agents)
+    {
+        try
+        {
+            await _connection.InvokeAsync("SubscribeToAgent", 
+                agent.Id, 
+                _participantId, 
+                _tenantId);
+            Console.WriteLine($"Subscribed to agent: {agent.Name}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error subscribing to agent {agent.Name}: {ex.Message}");
+        }
+    }
+}
+```
+
+Important notes:
+- Make sure you have established the Websocket connection before subscribing
+- Each agent needs to be subscribed individually
+- The subscription is required to receive messages from the agent
+- If the subscription fails, you won't be able to communicate with that agent
+
 ## Message Flow
 
-The message history is received through the SignalR connection in the following way:
+The message history is received through the Websocket connection in the following way:
 
-1. **Initial History Load**
+### 1. Initial History Load
+
    - When the application starts, it calls `GetThreadHistory` for each agent
-   - This request is made through the SignalR connection
+   - This request is made through the Websocket connection
    - Parameters required:
      ```csharp
      await connection.InvokeAsync("GetThreadHistory",
@@ -81,7 +161,8 @@ The message history is received through the SignalR connection in the following 
      );
      ```
 
-2. **History Reception**
+### 2. History Reception
+
    - The server responds with a `ThreadHistory` event
    - This event contains a list of messages for the specified agent
    - Messages are received in the `HandleThreadHistory` method:
@@ -89,7 +170,8 @@ The message history is received through the SignalR connection in the following 
      _connection.On<List<Message>>("ThreadHistory", HandleThreadHistory);
      ```
 
-3. **Message Structure**
+### 3. Message Structure
+
    Use the following model to represent a Message. Each message in the history contains:
    ```csharp
    public class Message
@@ -104,8 +186,9 @@ The message history is received through the SignalR connection in the following 
    }
    ```
 
-4. **Message Sending and Receiving**
-   - Messages are sent using the SignalR connection's `SendInboundMessage` method
+### 4. Message Sending and Receiving
+
+   - Messages are sent using the Websocket connection's `SendInboundMessage` method
    - The application waits for a response before continuing
    - When sending messages, use the following request model:
    ```csharp
@@ -166,7 +249,8 @@ The message history is received through the SignalR connection in the following 
    await SendMessage("Hello, how are you?", "my-agent-name");
    ```
 
-5. **History Storage**
+### 5. History Storage
+
    - Messages are stored in the `_chatHistories` dictionary
    - Key: Agent's WorkflowId
    - Value: List of messages for that agent
@@ -174,11 +258,13 @@ The message history is received through the SignalR connection in the following 
    private static Dictionary<string, List<Message>> _chatHistories;
    ```
 
-6. **Pagination**
+### 6. Pagination
+
    - History is loaded in pages of 20 messages
    - More messages can be loaded by incrementing the page number
 
-7. **Real-time Updates**
+### 7. Real-time Updates
+
    - New messages are received through the `ReceiveMessage` event
    - Make sure the Messages are automatically added to the chat history
    - Make sure the history is maintained in chronological order
@@ -224,7 +310,7 @@ class Program
         await LoadAgentConfigurations();
         
         // Setup SignalR connection
-        await SetupSignalRConnection();
+        await SetupWebsocketConnection();
         
         // Subscribe to agents
         await SubscribeToAgents();
@@ -251,7 +337,7 @@ class Program
         }
     }
 
-    private static async Task SetupSignalRConnection()
+    private static async Task SetupWebsocketConnection()
     {
         _connection = new HubConnectionBuilder()
             .WithUrl($"{_webSocketUrl}?tenantId={_tenantId}", options =>
@@ -269,11 +355,11 @@ class Program
         try
         {
             await _connection.StartAsync();
-            Console.WriteLine("Connected to SignalR hub");
+            Console.WriteLine("Connected to Websocket hub");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error connecting to SignalR hub: {ex.Message}");
+            Console.WriteLine($"Error connecting to Websocket hub: {ex.Message}");
             throw;
         }
     }
@@ -458,17 +544,17 @@ dotnet run
 
 ## Key Features
 
-1. **Connection Management**
+### 1. Connection Management
    - Automatic reconnection
    - API key authentication
    - Tenant ID support
 
-2. **Message Handling**
+### 2. Message Handling
    - Real-time message reception
    - Message history loading
    - Thread ID tracking
 
-3. **Agent Management**
+### 3. Agent Management
    - Multiple agent support
    - Agent subscription
    - Separate chat histories
@@ -477,17 +563,17 @@ dotnet run
 
 Common issues and solutions:
 
-1. **Connection Issues**
+### 1. Connection Issues
    - Verify API key and tenant ID in .env file
    - Check network connectivity
    - Ensure hub URL is correct
 
-2. **Message Delivery Issues**
+### 2. Message Delivery Issues
    - Verify agent configuration
    - Check message format
    - Validate thread ID
 
-3. **History Loading Issues**
+### 3. History Loading Issues
    - Verify agent subscription
    - Check pagination parameters
    - Validate agent IDs

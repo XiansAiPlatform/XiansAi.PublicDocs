@@ -55,7 +55,7 @@ nav:
     - Logging: n-encyclopedia/logging.md
     - Unit Testing Activities: n-encyclopedia/unit-testing-activities.md
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
-    - Access Agents via WebSocket: n-encyclopedia/access-agents-via-websocket
+    - Access Agents via WebSocket: n-encyclopedia/access-agents-via-websocket.md
  
 markdown_extensions:
   - tables
