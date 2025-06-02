@@ -1,6 +1,6 @@
-# Agent Squad Entity UI
+# Agent Squad Entity UI - Multi-Agent WebSocket Communication Platform
 
-A modern React TypeScript application for document workflow management featuring a multi-step process for document creation, review, and finalization.
+A modern React TypeScript application for document workflow management featuring a multi-step process with real-time WebSocket communication to AI agents.
 
 ## 🚀 Quick Start
 
@@ -41,12 +41,16 @@ A modern React TypeScript application for document workflow management featuring
 
 ## 📋 Project Overview
 
-Agent Squad Entity UI is a document workflow management system that guides users through a structured 4-step process:
+Agent Squad Entity UI is a document workflow management system that guides users through a structured multi-step process. Each step can have an associated AI agent bot that provides real-time assistance through WebSocket connections.
 
-1. **Requirements Gathering** - Collect and define document requirements
-2. **Document Draft** - Create initial document version
-3. **Document Review** - Stakeholder review and feedback incorporation
-4. **Final Document** - Approved and ready-to-execute document
+### Key Features
+
+- **Multi-Step Workflow**: Navigate through different document creation steps
+- **Real-time AI Chat**: Each step can have a dedicated AI agent for assistance
+- **WebSocket Communication**: Asynchronous, real-time messaging with backend agents
+- **System Messages**: Agents can send UI update commands and data
+- **Auto-reconnect**: Automatic WebSocket reconnection with exponential backoff
+- **Connection Status**: Visual indicators for agent connection states
 
 ## 🏗️ Architecture
 
@@ -55,8 +59,31 @@ Agent Squad Entity UI is a document workflow management system that guides users
 - **Frontend Framework:** React 18 with TypeScript
 - **Build Tool:** Vite 5.x
 - **Styling:** Tailwind CSS 3.x
+- **WebSocket:** Native WebSocket API with custom hub middleware
 - **Icons:** React Icons
 - **Development:** Hot Module Replacement (HMR) via Vite
+
+### WebSocket Architecture
+
+The application uses a hub-based architecture for managing multiple WebSocket connections:
+
+1. **WebSocket Hub** (`src/middleware/WebSocketHub.ts`)
+   - Manages multiple concurrent WebSocket connections
+   - One connection per step that has a bot configured
+   - Handles automatic reconnection with exponential backoff
+   - Routes messages to appropriate handlers
+   - Provides event-based communication
+
+2. **Message Store** (`src/middleware/MessageStore.ts`)
+   - Centralized storage for chat and system messages
+   - Manages thread IDs per step
+   - Provides efficient message retrieval
+
+3. **WebSocket Steps Context** (`src/context/WebSocketStepsContext.tsx`)
+   - React context for WebSocket state management
+   - Bridges WebSocket Hub with React components
+   - Handles UI state updates from system messages
+   - Auto-connects when settings are available
 
 ### Project Structure
 
@@ -66,161 +93,172 @@ src/
 │   ├── App.tsx         # Main application component
 │   ├── NavBar.tsx      # Top navigation bar
 │   ├── StepsBar.tsx    # Step indicator/navigation
-│   ├── ChatPane.tsx    # Left sidebar chat interface
+│   ├── ChatPane.tsx    # WebSocket-enabled chat interface
 │   ├── EntityPane.tsx  # Center pane for document display
 │   ├── FindingsPane.tsx # Right sidebar for findings/notes
-│   └── Logo.tsx        # Application logo component
+│   └── power-of-attorney/
+│       └── steps.ts    # Step definitions with bot configurations
+├── context/            # React contexts
+│   ├── StepsContext.tsx # Step management
+│   ├── SettingsContext.tsx # App settings (WebSocket URL, API key, etc.)
+│   └── WebSocketStepsContext.tsx # WebSocket integration
+├── middleware/         # WebSocket infrastructure
+│   ├── WebSocketHub.ts # WebSocket connection manager
+│   └── MessageStore.ts # Message storage and retrieval
+├── types/              # TypeScript definitions
+│   └── index.ts       # Shared type definitions
 ├── utils/              # Utility functions
 │   └── botColors.ts    # Color utilities for bot/agent theming
 ├── main.tsx           # Application entry point
 └── index.css          # Global styles and Tailwind imports
 ```
 
-### Component Architecture
+## 🔧 Configuration
 
-#### Main Layout Components
+### Step Bot Configuration
 
-1. **App.tsx** - Root component managing:
-   - State for active step (0-3)
-   - Mobile overlay states for responsive design
-   - Layout orchestration
+Bots are configured in `src/components/power-of-attorney/steps.ts`:
 
-2. **NavBar.tsx** - Top navigation with:
-   - Application branding
-   - User actions/settings
+```typescript
+{
+  title: "Representatives",
+  theme: "warm",
+  bot: {
+    title: "Representatives Agent",
+    id: "unique-bot-id",          // Optional: specific bot instance
+    agent: "HR Agent v3",         // Agent name
+    description: "Assist with employee Hiring",
+    workflowType: "HR Agent v3:Hire Bot v3",
+    workflowId: "99x.io:HR Agent v3:Hire Bot v3"  // Required for WebSocket
+  },
+  entityUi: "representatives.tsx",
+  componentLoader: componentRegistry['representatives.tsx']
+}
+```
 
-3. **StepsBar.tsx** - Step indicator showing:
-   - Current progress (1-4)
-   - Navigation between steps
+### Settings Configuration
 
-#### Core Functional Components
+The application requires these settings (configured via UI or localStorage):
 
-1. **EntityPane.tsx** - Central document viewer:
-   - Displays step-specific content
-   - Markdown-like content rendering
-   - Document status indicators
-   - Export/download functionality
+- **agentWebsocketUrl**: WebSocket endpoint URL
+- **agentApiKey**: Authentication token
+- **userId**: User identifier
+- **documentId**: Document identifier
 
-2. **ChatPane.tsx** - Communication interface:
-   - Real-time chat or messaging
-   - Agent/bot interactions
-   - Context-aware conversations
+## 📡 WebSocket Protocol
 
-3. **FindingsPane.tsx** - Analysis and notes:
-   - Document findings
-   - Review comments
-   - Stakeholder feedback
+### Connection
 
-### State Management
+The app establishes WebSocket connections for each step that has a bot with a `workflowId`. Connection URL format:
 
-The application uses React's built-in state management:
+```
+wss://api.example.com/hub?userId=xxx&documentId=xxx&workflowId=xxx&workflowType=xxx
+```
 
-- `activeStep` - Controls which step (0-3) is currently displayed
-- `mobileChatOpen` - Manages mobile chat overlay visibility
-- `mobileFindingsOpen` - Manages mobile findings overlay visibility
+### Authentication
 
-### Responsive Design
+On connection, the client sends:
+```json
+{
+  "type": "auth",
+  "token": "your-api-key"
+}
+```
 
-- **Desktop (≥640px):** Three-pane layout with all components visible
-- **Mobile (<640px):**
-  - Single-pane layout with Entity view primary
-  - Slide-out overlays for Chat and Findings
-  - Touch-friendly navigation strips
+### Message Flow
 
-## 🎨 Styling
+#### Sending Messages
+```json
+{
+  "threadId": "optional-thread-id",
+  "agent": "AgentName",
+  "workflowType": "workflow_type",
+  "workflowId": "workflow_id",
+  "participantId": "user_id",
+  "content": "message content",
+  "metadata": {}
+}
+```
 
-### Tailwind CSS Configuration
+#### Receiving Messages
 
-The project uses Tailwind CSS with custom configuration including:
+1. **Chat Messages**:
+```json
+{
+  "content": "message content",
+  "direction": "Outgoing",
+  "type": "chat"
+}
+```
 
-- Custom color schemes for primary, accent, and neutral colors
-- Responsive breakpoints
-- Typography utilities
-- Custom component classes
+2. **System Messages**:
+```json
+{
+  "type": "system",
+  "payload": {
+    "action": "updateUI",
+    "data": {}
+  }
+}
+```
 
-### Design System
+## 🎨 UI Features
 
-- **Primary Colors:** Used for main navigation and headers
-- **Accent Colors:** Used for status indicators and highlights  
-- **Neutral Colors:** Used for content and backgrounds
-- **Typography:** Balanced text with proper hierarchy
+### Chat Pane
 
-## 🔧 Development
+The chat pane (`ChatPane.tsx`) now includes:
+- Real-time message display
+- Connection status indicator
+- Typing indicators
+- Message direction support (Incoming/Outgoing/Handover)
+- Auto-scroll to latest messages
+- Disabled state when not connected
 
-### Adding New Components
+### Connection States
 
-1. Create component file in `src/components/`
-2. Follow TypeScript interface patterns
-3. Use Tailwind classes for styling
-4. Implement responsive design patterns
+Each step shows its connection status:
+- 🟢 Green: Connected
+- 🟡 Yellow (pulsing): Connecting
+- 🔴 Red: Disconnected/Error
 
-### Modifying Step Content
+## 🔐 Security Considerations
 
-Document content for each step is defined in `EntityPane.tsx` in the `stepContent` array. Each step object contains:
-
-- `title` - Step display name
-- `content` - Markdown-like content string
-
-### Color Theming
-
-Bot/agent colors are managed in `src/utils/botColors.ts` for consistent theming across chat interfaces.
-
-## 📱 Mobile Considerations
-
-- Touch-friendly interface elements
-- Swipe gestures for navigation
-- Optimized overlay animations
-- Accessible mobile navigation
+- Use WSS (WebSocket Secure) in production
+- Store API keys securely
+- Validate all incoming messages
+- Implement proper authentication
+- Use environment variables for sensitive configuration
 
 ## 🚨 Troubleshooting
+
+### WebSocket Connection Issues
+
+1. **Check Settings**: Ensure all required settings are configured
+2. **Check Console**: Look for WebSocket error messages
+3. **Verify URL**: Ensure WebSocket URL is correct and accessible
+4. **Check Network**: Verify firewall/proxy settings allow WebSocket connections
 
 ### Common Issues
 
 1. **Port already in use:**
-
    ```bash
-   # Kill process on port 5173
    npx kill-port 5173
    npm run dev
    ```
 
-2. **Dependencies not installing:**
-
-   ```bash
-   # Clear cache and reinstall
-   rm -rf node_modules package-lock.json
-   npm install
-   ```
-
-3. **Build fails:**
-
-   ```bash
-   # Check TypeScript errors
-   npx tsc --noEmit
-   ```
-
-## 🧪 Testing
-
-Currently, the project does not include automated tests. Consider adding:
-
-- Unit tests with Jest/Vitest
-- Component tests with React Testing Library
-- E2E tests with Playwright or Cypress
-
-## 📈 Performance
-
-- Vite provides fast development builds
-- Code splitting via dynamic imports
-- Optimized production builds
-- Responsive image loading
+2. **WebSocket fails to connect:**
+   - Check if the WebSocket URL is correct
+   - Verify API key is valid
+   - Ensure backend is running and accessible
 
 ## 🤝 Contributing
 
 1. Create feature branch from main
 2. Follow existing code patterns
 3. Ensure TypeScript compliance
-4. Test on both desktop and mobile
-5. Submit pull request with clear description
+4. Test WebSocket functionality
+5. Test on both desktop and mobile
+6. Submit pull request with clear description
 
 ## 📄 License
 
@@ -231,4 +269,5 @@ Currently, the project does not include automated tests. Consider adding:
 - [React Documentation](https://react.dev/)
 - [TypeScript Documentation](https://www.typescriptlang.org/)
 - [Vite Documentation](https://vitejs.dev/)
-- [Tailwind CSS Documentation](https://tailwindcss.com/) 
+- [Tailwind CSS Documentation](https://tailwindcss.com/)
+- [WebSocket API](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) 

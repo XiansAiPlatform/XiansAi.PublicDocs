@@ -78,10 +78,10 @@ export const steps: StepDefinition[] = [
     theme: "warm",
     bot: {
       title: "Representatives Agent",
-      agent: "HR Agent v3",
-      description: "Assist with employee Hiring",
-      workflowType: "HR Agent v3:Hire Bot v3",
-      workflowId: "99x.io:HR Agent v3:Hire Bot v3"
+      agent: "Representative Bot",
+      description: "Assist with managing the representatives",
+      workflowType: "Power of Attorney Agent v2:Representative Bot",
+      workflowId: "99x.io:Power of Attorney Agent v2:Representative Bot"
     },
     entityUi: "representatives.tsx",
     componentLoader: componentRegistry['representatives.tsx']
@@ -91,10 +91,11 @@ export const steps: StepDefinition[] = [
     theme: "lavender",
     bot: {
       title: "Conditions Agent",
-      id: "99x.io:HR Agent v3:Care Bot v3:94d63e47-d2b1-4f00-9890-7c91a6b48212",
-      agent: "HR Agent v3",
+      agent: "Condition Bot",
+      id: "99x.io:Power of Attorney Agent v2:Condition Bot",
       description: "Assist people with Caring",
-      workflowType: "HR Agent v3:Care Bot v3"
+      workflowType: "Power of Attorney Agent v2:Condition Bot",
+      workflowId: "99x.io:Power of Attorney Agent v2:Condition Bot"
     },
     entityUi: "conditions.tsx",
     componentLoader: componentRegistry['conditions.tsx']
@@ -104,10 +105,11 @@ export const steps: StepDefinition[] = [
     theme: "blue",
     bot: {
       title: "Witnesses Agent",
-      id: "99x.io:HR Agent v3:Pay Bot v3",
-      agent: "HR Agent v3",
+      agent: "Witness Bot",
+      id: "99x.io:Power of Attorney Agent v2:Witness Bot",
       description: "Assist people with Payments",
-      workflowType: "HR Agent v3:Pay Bot v3"
+      workflowType: "Power of Attorney Agent v2:Witness Bot",
+      workflowId: "99x.io:Power of Attorney Agent v2:Witness Bot"
     },
     entityUi: "witnesses.tsx",
     componentLoader: componentRegistry['witnesses.tsx']

@@ -5,6 +5,7 @@ export interface SettingsData {
   agentApiKey: string;
   userId: string;
   documentId: string;
+  tenantId: string;
 }
 
 interface SettingsContextValue {
@@ -17,6 +18,7 @@ const defaultSettings: SettingsData = {
   agentApiKey: '',
   userId: '',
   documentId: '',
+  tenantId: '',
 };
 
 const STORAGE_KEY = 'agent-settings';

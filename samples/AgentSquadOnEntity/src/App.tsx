@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import NavBar from './components/NavBar';
 import StepsBar from './components/StepsBar';
-import ChatPane from './components/ChatPane';
+import ChatPane from './components/chat/ChatPane';
 import EntityPane from './components/EntityPane';
 import FindingsPane from './components/FindingsPane';
 import { StepsProvider, useSteps } from './context/StepsContext';
 import { SettingsProvider } from './context/SettingsContext';
+import { WebSocketStepsProvider } from './context/WebSocketStepsContext';
 
 const MainLayout: React.FC = () => {
   const { activeStep } = useSteps();
@@ -108,7 +109,9 @@ const MainLayout: React.FC = () => {
 const App: React.FC = () => (
   <SettingsProvider>
     <StepsProvider>
-      <MainLayout />
+      <WebSocketStepsProvider>
+        <MainLayout />
+      </WebSocketStepsProvider>
     </StepsProvider>
   </SettingsProvider>
 );
