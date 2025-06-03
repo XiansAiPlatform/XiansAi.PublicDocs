@@ -17,11 +17,8 @@ export const useTypingState = (currentMessages: ChatMessage[]) => {
     if (isTyping && currentTotalMessages > lastProcessedMessageCountRef.current) {
       const latestMessage = currentMessages[currentTotalMessages - 1];
       
-      // console.log('[useTypingState] New message detected while typing:', latestMessage);
-
       // Stop typing ONLY if the newest message is from the bot ('Outgoing')
       if (latestMessage && latestMessage.direction === 'Outgoing') {
-        // console.log('[useTypingState] Bot response received. Stopping typing.');
         setIsTyping(false);
       }
     }
@@ -53,7 +50,7 @@ export const useTypingState = (currentMessages: ChatMessage[]) => {
 
     // Safety timeout: stop typing after 60 seconds regardless
     const maxTimeout = setTimeout(() => {
-      // console.log('[useTypingState] Maximum 60s typing timeout reached. Stopping typing.');
+      console.log('[useTypingState] Maximum 60s typing timeout reached. Stopping typing.');
       setIsTyping(false);
     }, 60000);
 

@@ -59,15 +59,11 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   
   // Effect to create and manage the single WebSocketHub instance and its listeners
   useEffect(() => {
-    console.log('[WebSocketStepsContext] Mount effect: Creating WebSocketHub if needed.');
-    if (!hubRef.current) {
-      hubRef.current = new WebSocketHub(); 
-      console.log(`[WebSocketStepsContext] SINGLE WebSocketHub INSTANCE CREATED.`);
-    } else {
-      console.warn(`[WebSocketStepsContext] Mount effect: hubRef.current already exists. This is unexpected if this effect runs only once.`);
-    }
+    console.log('[WebSocketStepsContext] Mount effect: Getting WebSocketHub singleton instance.');
     
-    const hub = hubRef.current!;
+    // Get the singleton instance instead of creating a new one
+    const hub = WebSocketHub.getInstance();
+    hubRef.current = hub;
 
     const handleConnectionChange = (event: HubEvent) => {
       setConnectionStates(hub.getConnectionStates());
@@ -115,16 +111,17 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
 
     // Cleanup function for this effect (runs on component unmount)
     return () => {
-      console.log(`[WebSocketStepsContext] Unmount effect: Disconnecting and cleaning up WebSocketHub.`);
+      console.log(`[WebSocketStepsContext] Unmount effect: Removing event listeners from WebSocketHub.`);
       hub.off('connection_change', handleConnectionChange);
       hub.off('message', handleMessage);
       hub.off('system_message', handleSystemMessage);
       hub.off('error', handleError);
-      hub.disconnectAll();
+      // Don't disconnect or reset the singleton - other components might still need it
+      // Only remove our event listeners
       hubRef.current = null; // Clean up the ref on unmount
-      console.log(`[WebSocketStepsContext] Hub listeners removed and disconnected.`);
+      console.log(`[WebSocketStepsContext] Event listeners removed from hub.`);
     };
-  }, [currentMessageStore]); // Empty array means this effect runs once on mount and cleans up on unmount. currentMessageStore is stable.
+  }, [currentMessageStore]);
 
   // Effect to initialize the hub (call hub.initialize) when settings or steps change
   useEffect(() => {

@@ -12,7 +12,7 @@ export interface SignalRConnection {
 
 export interface Message {
   content: string | null | undefined;
-  direction: 'Incoming' | 'Outgoing';
+  direction: 'Incoming' | 'Outgoing' | 'Handover' ;
   createdAt: Date;
   workflowId: string;
   threadId: string;
@@ -30,7 +30,18 @@ export interface SendMessageRequest {
   metadata?: any;
 }
 
+/**
+ * WebSocketHub manages SignalR connections to chat agents.
+ * 
+ * This class implements a singleton pattern to prevent multiple instances
+ * from being created when React StrictMode causes components to mount twice
+ * in development mode. Without this pattern, duplicate connections would be
+ * established, causing each message to be received and processed multiple times.
+ */
 export class WebSocketHub {
+  private static instance: WebSocketHub | null = null;
+  private static instanceLock: boolean = false;
+
   private connections: Map<number, SignalRConnection> = new Map();
   private listeners: Map<string, Set<(event: HubEvent) => void>> = new Map();
   private settings: SettingsData | null = null;
@@ -39,7 +50,7 @@ export class WebSocketHub {
   private connectionLocks: Map<number, Promise<void>> = new Map();
   private readonly hubInstanceId: string; // Unique ID for this instance
 
-  constructor() {
+  private constructor() {
     this.hubInstanceId = crypto.randomUUID(); // Assign a unique ID to each hub instance
     console.log(`[WebSocketHub] New instance created with ID: ${this.hubInstanceId}`);
     this.listeners.set('message', new Set());
@@ -47,6 +58,36 @@ export class WebSocketHub {
     this.listeners.set('error', new Set());
     this.listeners.set('system_message', new Set());
     this.listeners.set('thread_history', new Set());
+  }
+
+  // Singleton pattern - ensure only one instance exists
+  public static getInstance(): WebSocketHub {
+    if (WebSocketHub.instanceLock) {
+      // If instance creation is in progress, wait for it
+      while (WebSocketHub.instanceLock && !WebSocketHub.instance) {
+        // Simple busy wait - in a real scenario you might use a Promise
+      }
+    }
+    
+    if (!WebSocketHub.instance) {
+      WebSocketHub.instanceLock = true;
+      WebSocketHub.instance = new WebSocketHub();
+      WebSocketHub.instanceLock = false;
+      console.log(`[WebSocketHub] Singleton instance created with ID: ${WebSocketHub.instance.hubInstanceId}`);
+    } else {
+      console.log(`[WebSocketHub] Returning existing singleton instance with ID: ${WebSocketHub.instance.hubInstanceId}`);
+    }
+    
+    return WebSocketHub.instance;
+  }
+
+  // Method to reset the singleton (useful for testing or complete cleanup)
+  public static resetInstance(): void {
+    if (WebSocketHub.instance) {
+      WebSocketHub.instance.disconnectAll();
+      WebSocketHub.instance = null;
+      console.log(`[WebSocketHub] Singleton instance reset`);
+    }
   }
 
   // Initialize the hub with settings and steps
@@ -260,6 +301,42 @@ export class WebSocketHub {
     }
   }
 
+  // Helper function to map backend direction values to frontend direction values
+  private mapDirection(backendDirection: string | number): 'Incoming' | 'Outgoing' | 'Handover' {
+    // Handle numeric directions from backend
+    if (typeof backendDirection === 'number') {
+      switch (backendDirection) {
+        case 0:
+          return 'Incoming';  // User message
+        case 1:
+          return 'Outgoing';  // Bot message
+        case 2:
+          return 'Handover';  // Handover message
+        default:
+          console.warn(`Unknown numeric direction: ${backendDirection}, defaulting to 'Outgoing'`);
+          return 'Outgoing';
+      }
+    }
+    
+    // Handle string directions from backend
+    if (typeof backendDirection === 'string') {
+      switch (backendDirection.toLowerCase()) {
+        case 'incoming':
+          return 'Incoming';
+        case 'outgoing':
+          return 'Outgoing';
+        case 'handover':
+          return 'Handover';
+        default:
+          console.warn(`Unknown string direction: ${backendDirection}, defaulting to 'Outgoing'`);
+          return 'Outgoing';
+      }
+    }
+    
+    console.warn(`Invalid direction type: ${typeof backendDirection}, value: ${backendDirection}, defaulting to 'Outgoing'`);
+    return 'Outgoing';
+  }
+
   // Process a message - simplified without duplication checking
   private processMessage(workflowId: string, message: Message, stepIndex: number): boolean {
     console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Received message for step ${stepIndex}`);
@@ -269,11 +346,9 @@ export class WebSocketHub {
     }
     this.chatHistories.get(workflowId)?.push(message);
 
-    console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Emitting UI event for message:`, {
-      content: (message.content || '').substring(0, 30) + '...',
-      direction: message.direction,
-      stepIndex
-    });
+    // Map the backend direction to the expected frontend direction
+    const mappedDirection = this.mapDirection(message.direction);
+    console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Mapped direction from ${message.direction} to ${mappedDirection}`);
 
     this.emit({
       type: 'message',
@@ -281,7 +356,7 @@ export class WebSocketHub {
       data: { 
         id: crypto.randomUUID(), 
         content: message.content || '',
-        direction: message.direction,
+        direction: mappedDirection,  // Use the mapped direction
         stepIndex,
         timestamp: message.createdAt || new Date(),
         threadId: message.threadId,
@@ -344,7 +419,7 @@ export class WebSocketHub {
 
     // Handle received metadata (delivered separately)
     connection.on('ReceiveMetadata', (message: any) => {
-      console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] setupSignalRHandlers: Raw 'ReceiveMetadata' event from SignalR client for step ${stepIndex}. Message object:`, JSON.parse(JSON.stringify(message)));
+      console.log(`################## [WebSocketHub INSTANCE: ${this.hubInstanceId}] setupSignalRHandlers: Raw 'ReceiveMetadata' event from SignalR client for step ${stepIndex}. Message object:`, JSON.parse(JSON.stringify(message)));
       try {
         // Process metadata as a system message
         this.emit({
