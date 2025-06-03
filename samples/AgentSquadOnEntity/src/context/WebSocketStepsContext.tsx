@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { ChatMessage, SystemMessage, ConnectionState, InboundMessage, HubEvent } from '../types';
 import { WebSocketHub } from '../middleware/WebSocketHub';
-import { MessageStore } from '../middleware/MessageStore';
+import { MessageStore, MessageStoreEvents } from '../middleware/MessageStore';
+import { MetadataMessage } from '../middleware/MetadataMessageRouter';
 import { useSteps } from './StepsContext';
 import { useSettings } from './SettingsContext';
 
@@ -19,8 +20,15 @@ interface WebSocketStepsContextType {
   disconnect: () => Promise<void>;
   sendMessage: (content: string, metadata?: any) => Promise<void>;
   
+  // Metadata subscription
+  subscribeToMetadata: (subscriberId: string, messageTypes: string[], callback: (message: MetadataMessage) => void, stepIndex?: number) => () => void;
+  unsubscribeFromMetadata: (subscriberId: string) => void;
+  
   // UI State from system messages
   uiState: Map<number, any>;
+  
+  // Statistics
+  getStats: () => any;
 }
 
 const WebSocketStepsContext = createContext<WebSocketStepsContextType | null>(null);
@@ -50,41 +58,67 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   const hubRef = useRef<WebSocketHub | null>(null);
   const storeRef = useRef<MessageStore | null>(null);
   
-  // Initialize storeRef once. MessageStore itself is lightweight.
+  // Initialize MessageStore with events
   if (storeRef.current === null) {
-    storeRef.current = new MessageStore();
-    console.log('[WebSocketStepsContext] MessageStore instance created.');
+    const messageStoreEvents: MessageStoreEvents = {
+      onMessageAdded: (stepIndex, message) => {
+        setChatMessages(prevMessages => {
+          const newMessagesMap = new Map(prevMessages);
+          newMessagesMap.set(stepIndex, storeRef.current!.getChatMessages(stepIndex));
+          return newMessagesMap;
+        });
+      },
+      onSystemMessageAdded: (stepIndex, message) => {
+        setSystemMessages(prevSystemMessages => {
+          const newSystemMessagesMap = new Map(prevSystemMessages);
+          newSystemMessagesMap.set(stepIndex, storeRef.current!.getSystemMessages(stepIndex));
+          return newSystemMessagesMap;
+        });
+      },
+      onMessagesCleared: (stepIndex) => {
+        setChatMessages(prevMessages => {
+          const newMessagesMap = new Map(prevMessages);
+          newMessagesMap.delete(stepIndex);
+          return newMessagesMap;
+        });
+        setSystemMessages(prevSystemMessages => {
+          const newSystemMessagesMap = new Map(prevSystemMessages);
+          newSystemMessagesMap.delete(stepIndex);
+          return newSystemMessagesMap;
+        });
+      }
+    };
+    
+    storeRef.current = new MessageStore(messageStoreEvents);
+    console.log('[WebSocketStepsContext] MessageStore instance created with events.');
   }
-  const currentMessageStore = storeRef.current; // Stable reference
+  const currentMessageStore = storeRef.current;
   
-  // Effect to create and manage the single WebSocketHub instance and its listeners
+  // Effect to create and manage the WebSocketHub instance and its listeners
   useEffect(() => {
     console.log('[WebSocketStepsContext] Mount effect: Getting WebSocketHub singleton instance.');
     
-    // Get the singleton instance instead of creating a new one
     const hub = WebSocketHub.getInstance();
     hubRef.current = hub;
 
     const handleConnectionChange = (event: HubEvent) => {
-      setConnectionStates(hub.getConnectionStates());
-      const currentStates = hub.getConnectionStates();
-      const currentlyConnected = Array.from(currentStates.values()).some(state => state.status === 'connected');
+      const newConnectionStates = hub.getConnectionStates();
+      setConnectionStates(new Map(newConnectionStates));
+      const currentlyConnected = Array.from(newConnectionStates.values()).some(state => state.status === 'connected');
       setIsConnected(currentlyConnected);
     };
 
     const handleMessage = (event: HubEvent) => {
       const chatMessage = event.data as ChatMessage;
       currentMessageStore.addChatMessage(chatMessage);
-      setChatMessages(prevMessages => {
-        const newMessagesMap = new Map(prevMessages);
-        newMessagesMap.set(chatMessage.stepIndex, [...currentMessageStore.getChatMessages(chatMessage.stepIndex)]);
-        return newMessagesMap;
-      });
+      // State will be updated via MessageStore events
     };
 
     const handleSystemMessage = (event: HubEvent) => {
       const systemMessage = event.data as SystemMessage;
       currentMessageStore.addSystemMessage(systemMessage);
+      
+      // Handle UI state updates
       if (systemMessage.type === 'UI_UPDATE') {
         setUiState(prevUiState => {
           const newUiStateMap = new Map(prevUiState);
@@ -92,11 +126,7 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
           return newUiStateMap;
         });
       }
-      setSystemMessages(prevSystemMessages => {
-        const newSystemMessagesMap = new Map(prevSystemMessages);
-        newSystemMessagesMap.set(systemMessage.stepIndex, [...currentMessageStore.getSystemMessages(systemMessage.stepIndex)]);
-        return newSystemMessagesMap;
-      });
+      // State will be updated via MessageStore events
     };
 
     const handleError = (event: HubEvent) => {
@@ -109,21 +139,19 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
     hub.on('error', handleError);
     console.log(`[WebSocketStepsContext] Event listeners attached to hub.`);
 
-    // Cleanup function for this effect (runs on component unmount)
+    // Cleanup function
     return () => {
       console.log(`[WebSocketStepsContext] Unmount effect: Removing event listeners from WebSocketHub.`);
       hub.off('connection_change', handleConnectionChange);
       hub.off('message', handleMessage);
       hub.off('system_message', handleSystemMessage);
       hub.off('error', handleError);
-      // Don't disconnect or reset the singleton - other components might still need it
-      // Only remove our event listeners
-      hubRef.current = null; // Clean up the ref on unmount
+      hubRef.current = null;
       console.log(`[WebSocketStepsContext] Event listeners removed from hub.`);
     };
   }, [currentMessageStore]);
 
-  // Effect to initialize the hub (call hub.initialize) when settings or steps change
+  // Effect to initialize the hub when settings or steps change
   useEffect(() => {
     const hub = hubRef.current;
     if (!hub) {
@@ -137,9 +165,9 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
       hub.initialize(settings, steps)
         .then(() => {
           console.log(`[WebSocketStepsContext] Hub initialized successfully.`);
-          setConnectionStates(hub.getConnectionStates());
-          const currentStates = hub.getConnectionStates();
-          const currentlyConnected = Array.from(currentStates.values()).some(state => state.status === 'connected');
+          const newConnectionStates = hub.getConnectionStates();
+          setConnectionStates(new Map(newConnectionStates));
+          const currentlyConnected = Array.from(newConnectionStates.values()).some(state => state.status === 'connected');
           setIsConnected(currentlyConnected);
         })
         .catch(error => {
@@ -152,9 +180,9 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
         setIsConnected(false);
       });
     }
-  }, [settings, steps]); // Rerun when settings or steps change
+  }, [settings, steps]);
 
-  // sendMessage now uses the persistent hub from hubRef
+  // sendMessage using the new architecture
   const sendMessage = useCallback(async (content: string, metadata?: any) => {
     const hub = hubRef.current;
     if (!hub) {
@@ -176,14 +204,9 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
       stepIndex: activeStep,
       timestamp: new Date(),
       metadata,
-      threadId: currentMessageStore.getThreadId(activeStep) || '', // Get current threadId
+      threadId: currentMessageStore.getThreadId(activeStep) || '', 
     };
     currentMessageStore.addChatMessage(userMessage);
-    setChatMessages(prevMessages => {
-      const newMessagesMap = new Map(prevMessages);
-      newMessagesMap.set(userMessage.stepIndex, [...currentMessageStore.getChatMessages(userMessage.stepIndex)]);
-      return newMessagesMap;
-    });
 
     const request: InboundMessage = {
       threadId: currentMessageStore.getThreadId(activeStep),
@@ -197,16 +220,34 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
     
     try {
       await hub.sendMessage(request, activeStep);
-      // console.log(`[WebSocketStepsContext HUB: ${hub.hubInstanceId}] Message sent via hub for step ${activeStep}.`);
     } catch (error) {
       console.error(`[WebSocketStepsContext] Error sending message for step ${activeStep}:`, error);
-      // Optionally, revert optimistic update here or show an error to the user
       throw error;
     }
   }, [activeStep, steps, settings, currentMessageStore]);
 
-  // Simplified connect/disconnect for context consumers (mostly for manual control, if ever needed)
-  // The primary connection logic is now handled by the useEffects.
+  // Metadata subscription methods
+  const subscribeToMetadata = useCallback((subscriberId: string, messageTypes: string[], callback: (message: MetadataMessage) => void, stepIndex?: number) => {
+    const hub = hubRef.current;
+    if (!hub) {
+      console.warn('[WebSocketStepsContext] Cannot subscribe to metadata: Hub not initialized');
+      return () => {}; // Return empty unsubscribe function
+    }
+    
+    return hub.subscribeToMetadata(subscriberId, messageTypes, callback, stepIndex);
+  }, []);
+
+  const unsubscribeFromMetadata = useCallback((subscriberId: string) => {
+    const hub = hubRef.current;
+    if (!hub) {
+      console.warn('[WebSocketStepsContext] Cannot unsubscribe from metadata: Hub not initialized');
+      return;
+    }
+    
+    hub.unsubscribeFromMetadata(subscriberId);
+  }, []);
+
+  // Manual connect/disconnect for context consumers
   const manualConnect = useCallback(async () => {
     const hub = hubRef.current;
     if (hub && settings.tenantId && settings.agentWebsocketUrl) {
@@ -228,16 +269,37 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
       setIsConnected(false);
     }
   }, []);
+
+  // Get statistics from all components
+  const getStats = useCallback(() => {
+    const hub = hubRef.current;
+    const store = storeRef.current;
+    
+    return {
+      hub: hub?.getStats() || null,
+      messageStore: store?.getStats() || null,
+      context: {
+        isConnected,
+        connectionStatesCount: connectionStates.size,
+        chatMessagesCount: Array.from(chatMessages.values()).reduce((sum, msgs) => sum + msgs.length, 0),
+        systemMessagesCount: Array.from(systemMessages.values()).reduce((sum, msgs) => sum + msgs.length, 0),
+        uiStateCount: uiState.size
+      }
+    };
+  }, [isConnected, connectionStates, chatMessages, systemMessages, uiState]);
   
   const value: WebSocketStepsContextType = {
     connectionStates,
     isConnected,
     chatMessages,
     systemMessages,
-    connect: manualConnect, // Expose manual control if needed
-    disconnect: manualDisconnect, // Expose manual control if needed
+    connect: manualConnect,
+    disconnect: manualDisconnect,
     sendMessage,
-    uiState
+    subscribeToMetadata,
+    unsubscribeFromMetadata,
+    uiState,
+    getStats
   };
   
   return (

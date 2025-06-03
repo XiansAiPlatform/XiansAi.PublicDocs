@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import ChatMessage from './ChatMessage';
 import TypingIndicator from './TypingIndicator';
 import LoadingIndicator from './LoadingIndicator';
@@ -41,6 +41,15 @@ const MessageList: React.FC<MessageListProps> = ({
     }
   }, [messages, hasInitiallyLoaded, scrollToBottom]);
 
+  // Handle typing indicator content changes (when ActivityLog updates change height)
+  const handleTypingIndicatorContentChange = useCallback(() => {
+    if (!hasInitiallyLoaded) return;
+    // Use a small delay to ensure DOM has updated before scrolling
+    setTimeout(() => {
+      scrollToBottom(true); // Force smooth scroll for typing indicator changes
+    }, 50);
+  }, [hasInitiallyLoaded, scrollToBottom]);
+
   return (
     <div 
       ref={scrollContainerRef}
@@ -61,7 +70,12 @@ const MessageList: React.FC<MessageListProps> = ({
               <ChatMessage key={msg.id} message={msg} />
             ))}
             
-            {isTyping && <TypingIndicator typingStage={typingStage} />}
+            {isTyping && (
+              <TypingIndicator 
+                typingStage={typingStage} 
+                onContentChange={handleTypingIndicatorContentChange}
+              />
+            )}
           </div>
         )}
         
