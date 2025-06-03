@@ -133,7 +133,7 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
       return;
     }
 
-    const allSettingsPresent = settings.tenantId && settings.agentWebsocketUrl && settings.agentApiKey && settings.userId && settings.documentId;
+    const allSettingsPresent = settings.tenantId && settings.agentWebsocketUrl && settings.agentApiKey && settings.participantId;
 
     if (allSettingsPresent) {
       console.log(`[WebSocketStepsContext] Initialize effect: Settings present. Calling hub.initialize.`);
@@ -193,7 +193,7 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
       agent: currentStepDetails.bot.agent || '',
       workflowType: currentStepDetails.bot.workflowType || '',
       workflowId: currentStepDetails.bot.workflowId,
-      participantId: settings.userId || '',
+      participantId: settings.participantId || '',
       content,
       metadata
     };

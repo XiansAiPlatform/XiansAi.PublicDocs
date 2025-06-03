@@ -1,7 +1,7 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { BotAgent, ConnectionState, HubEvent, OutboundMessage } from '../types';
 import { SettingsData } from '../context/SettingsContext';
-import { StepDefinition } from '../components/power-of-attorney/steps';
+import { StepDefinition } from '../components/power-of-attorney/types';
 
 export interface SignalRConnection {
   connection: HubConnection;
@@ -11,7 +11,7 @@ export interface SignalRConnection {
 }
 
 export interface Message {
-  content: string;
+  content: string | null | undefined;
   direction: 'Incoming' | 'Outgoing';
   createdAt: Date;
   workflowId: string;
@@ -37,7 +37,6 @@ export class WebSocketHub {
   private steps: StepDefinition[] = [];
   private chatHistories: Map<string, Message[]> = new Map();
   private connectionLocks: Map<number, Promise<void>> = new Map();
-  private processedMessages: Set<string> = new Set();
   private readonly hubInstanceId: string; // Unique ID for this instance
 
   constructor() {
@@ -54,9 +53,6 @@ export class WebSocketHub {
   async initialize(settings: SettingsData, steps: StepDefinition[]): Promise<void> {
     this.settings = settings;
     this.steps = steps;
-    
-    // Clear processed messages when reinitializing
-    this.processedMessages.clear();
     
     // Connect to all steps that have bots
     const connectionPromises = steps
@@ -264,52 +260,17 @@ export class WebSocketHub {
     }
   }
 
-  // Create a robust fingerprint for a message to handle potential micro-variations in timestamps
-  private getMessageFingerprint(workflowId: string, message: Message): string {
-    const normalizedTimestamp = message.createdAt ? new Date(Math.round(new Date(message.createdAt).getTime() / 1000) * 1000).toISOString() : 'no-timestamp';
-    const fingerprintObj = {
-      wId: workflowId,
-      c: message.content,
-      d: message.direction,
-      pId: message.participantId,
-      tId: message.threadId,
-      ts: normalizedTimestamp
-    };
-    // console.log('[WebSocketHub] Generating fingerprint. Object:', fingerprintObj); // Optional: log object before stringify
-    return JSON.stringify(fingerprintObj);
-  }
-
-  // Process a message - This is the central point for deduplication and UI event emission for new messages.
+  // Process a message - simplified without duplication checking
   private processMessage(workflowId: string, message: Message, stepIndex: number): boolean {
-    console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Received raw message object:`, JSON.parse(JSON.stringify(message)));
-    const fingerprint = this.getMessageFingerprint(workflowId, message);
-    console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Generated fingerprint: ${fingerprint}`);
-    console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Size of processedMessages BEFORE 'has' check: ${this.processedMessages.size}`);
-
-    if (this.processedMessages.has(fingerprint)) {
-      console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Skipping DUPLICATE message with fingerprint: ${fingerprint}`, {
-        content: message.content.substring(0, 30) + '...',
-      });
-      console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Size of processedMessages AFTER failed 'has' check (duplicate found): ${this.processedMessages.size}`);
-      return false; // Duplicate
-    }
-
-    console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Adding NEW fingerprint to processedMessages: ${fingerprint}`);
-    this.processedMessages.add(fingerprint);
-    console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Size of processedMessages AFTER 'add': ${this.processedMessages.size}`);
-
-    setTimeout(() => {
-      const wasPresent = this.processedMessages.delete(fingerprint);
-      // console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] Fingerprint ${fingerprint} ${wasPresent ? 'deleted' : 'not found for deletion'} after timeout. Current size: ${this.processedMessages.size}`);
-    }, 300000);
+    console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Received message for step ${stepIndex}`);
 
     if (!this.chatHistories.has(workflowId)) {
       this.chatHistories.set(workflowId, []);
     }
     this.chatHistories.get(workflowId)?.push(message);
 
-    console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Emitting UI event for NEW message:`, {
-      content: message.content.substring(0, 30) + '...',
+    console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] processMessage: Emitting UI event for message:`, {
+      content: (message.content || '').substring(0, 30) + '...',
       direction: message.direction,
       stepIndex
     });
@@ -319,7 +280,7 @@ export class WebSocketHub {
       stepIndex,
       data: { 
         id: crypto.randomUUID(), 
-        content: message.content,
+        content: message.content || '',
         direction: message.direction,
         stepIndex,
         timestamp: message.createdAt || new Date(),
@@ -381,6 +342,26 @@ export class WebSocketHub {
       }
     });
 
+    // Handle received metadata (delivered separately)
+    connection.on('ReceiveMetadata', (message: any) => {
+      console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] setupSignalRHandlers: Raw 'ReceiveMetadata' event from SignalR client for step ${stepIndex}. Message object:`, JSON.parse(JSON.stringify(message)));
+      try {
+        // Process metadata as a system message
+        this.emit({
+          type: 'system_message',
+          stepIndex,
+          data: {
+            type: 'METADATA',
+            stepIndex,
+            payload: message,
+            timestamp: new Date()
+          }
+        });
+      } catch (error) {
+        console.error(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] Error in 'ReceiveMetadata' handler for step ${stepIndex}:`, error);
+      }
+    });
+
     // Handle thread ID updates
     connection.on('InboundProcessed', (threadId: string) => {
       console.log(`Thread ID updated for step ${stepIndex}: ${threadId}`);
@@ -402,25 +383,20 @@ export class WebSocketHub {
     // Handle thread history
     connection.on('ThreadHistory', (history: Message[]) => {
       if (!history || history.length === 0) {
-        // console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] 'ThreadHistory' event for step ${stepIndex}: No history messages.`);
         return;
       }
       
       const workflowId = history[0].workflowId; 
       console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] 'ThreadHistory' event for step ${stepIndex}: Received ${history.length} historical messages for workflow ${workflowId}.`);
 
-      // ** SORT HISTORICAL MESSAGES BEFORE PROCESSING **
-      // Ensure messages are processed in chronological order (oldest first)
+      // Sort historical messages in chronological order (oldest first)
       const sortedHistory = [...history].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
       console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] 'ThreadHistory' for step ${stepIndex}: Sorted ${sortedHistory.length} messages.`);
 
-      let newMessagesProcessedCount = 0;
-      for (const histMessage of sortedHistory) { // Iterate over the sorted history
-        if (this.processMessage(workflowId, histMessage, stepIndex)) {
-          newMessagesProcessedCount++;
-        }
+      for (const histMessage of sortedHistory) {
+        this.processMessage(workflowId, histMessage, stepIndex);
       }
-      console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] 'ThreadHistory' for step ${stepIndex}: ${newMessagesProcessedCount} new messages processed and UI events emitted.`);
+      console.log(`[WebSocketHub INSTANCE: ${this.hubInstanceId}] 'ThreadHistory' for step ${stepIndex}: ${sortedHistory.length} messages processed and UI events emitted.`);
     });
 
     // Connection established

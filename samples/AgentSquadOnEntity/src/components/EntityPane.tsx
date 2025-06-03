@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSteps } from '../context/StepsContext';
-import type { ComponentLoader } from './power-of-attorney/steps';
-import { getThemeColors } from './power-of-attorney/steps';
+import type { ComponentLoader } from './power-of-attorney/types';
+import { getThemeColors } from './power-of-attorney/theme';
 
 // Generic dynamic component loader
 const DynamicEntityComponent: React.FC<{ componentLoader: ComponentLoader }> = ({ componentLoader }) => {

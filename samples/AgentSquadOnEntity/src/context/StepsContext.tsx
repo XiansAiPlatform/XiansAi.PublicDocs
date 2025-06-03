@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { steps, StepDefinition, StepTheme, StepBot } from '../components/power-of-attorney/steps';
+import { steps } from '../components/power-of-attorney/steps';
+import { StepDefinition, StepTheme, StepBot } from '../components/power-of-attorney/types';
 
 // Re-export types for convenience
 export type { StepDefinition, StepTheme, StepBot };

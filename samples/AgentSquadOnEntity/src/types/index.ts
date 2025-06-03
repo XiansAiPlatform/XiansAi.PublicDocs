@@ -20,7 +20,7 @@ export interface ChatMessage {
 }
 
 export interface SystemMessage {
-  type: 'UI_UPDATE' | 'STATE_CHANGE' | 'DATA' | 'ERROR' | 'INFO';
+  type: 'UI_UPDATE' | 'STATE_CHANGE' | 'DATA' | 'ERROR' | 'INFO' | 'METADATA';
   stepIndex: number;
   payload: any;
   timestamp: Date;

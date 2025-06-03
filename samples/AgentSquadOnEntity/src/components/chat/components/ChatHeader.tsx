@@ -1,6 +1,6 @@
 import React from 'react';
 import { AiOutlineRobot } from 'react-icons/ai';
-import { getThemeColors } from '../../power-of-attorney/steps';
+import { getThemeColors } from '../../power-of-attorney/theme';
 
 interface ChatHeaderProps {
   bot: {
