@@ -11,21 +11,27 @@ The WebSocket messaging system has been refactored to improve readability, clari
 - **MessageProcessor**: Processes and transforms messages
 - **MetadataMessageRouter**: Routes metadata messages to interested UI components
 - **EventDispatcher**: Clean, type-safe event system
-- **MessageStore**: Focused data storage with immutability
+- **WebSocketStepsContext**: Direct React state management for messages (simplified from MessageStore)
 - **WebSocketHub**: Orchestrates all components (much cleaner)
 
-### 2. **Metadata Message Distribution**
+### 2. **Simplified Message Management**
+- Messages are now managed directly in React state using useState and Maps
+- Eliminated the complex MessageStore layer for better simplicity
+- Direct state updates with proper immutability for React change detection
+- Reduced complexity and improved maintainability
+
+### 3. **Metadata Message Distribution**
 - Messages are now routed based on `messageType` attribute in `message.metadata`
 - UI components can subscribe to specific message types
 - Automatic cleanup and type safety
 - Support for step-specific subscriptions
 
-### 3. **Improved Type Safety**
+### 4. **Improved Type Safety**
 - All components use proper TypeScript interfaces
 - Event system with generic type constraints
 - Clear separation between internal and external types
 
-### 4. **Better Error Handling**
+### 5. **Better Error Handling**
 - Isolated error handling in each component
 - Proper error propagation and logging
 - No silent failures
@@ -85,14 +91,45 @@ Type-safe event system with automatic cleanup.
 - Error isolation
 - Statistics and debugging
 
-### MessageStore (Enhanced)
-Improved message storage with event callbacks.
+### WebSocketStepsContext (Simplified Message Management)
+Manages chat and system messages directly in React state, eliminating the need for a separate MessageStore layer.
 
 **Key Features:**
-- Immutable updates for React
-- Event-driven state updates
-- Bulk operations for history loading
-- Statistics and querying
+- Direct React state management with useState and Maps
+- Immutable updates for proper React change detection
+- Built-in helper functions for message operations
+- Simplified thread ID management
+- Statistics calculated directly from React state
+
+**Example Usage:**
+```typescript
+// Direct state management in WebSocketStepsContext
+const [chatMessages, setChatMessages] = useState<Map<number, ChatMessage[]>>(new Map());
+const [systemMessages, setSystemMessages] = useState<Map<number, SystemMessage[]>>(new Map());
+const [threadIds, setThreadIds] = useState<Map<number, string>>(new Map());
+
+// Helper functions for message operations
+const addChatMessage = useCallback((message: ChatMessage) => {
+  setChatMessages(prevMessages => {
+    const newMessagesMap = new Map(prevMessages);
+    const existingMessages = newMessagesMap.get(message.stepIndex) || [];
+    newMessagesMap.set(message.stepIndex, [...existingMessages, message]);
+    return newMessagesMap;
+  });
+
+  if (message.threadId) {
+    setThreadIds(prev => new Map(prev).set(message.stepIndex, message.threadId!));
+  }
+}, []);
+```
+
+### WebSocketHub
+Orchestrates all components and handles message distribution.
+
+**Key Features:**
+- Message distribution to all components
+- Automatic error handling and logging
+- Statistics and debugging support
 
 ## Usage Examples
 

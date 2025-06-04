@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { ChatMessage, SystemMessage, ConnectionState, InboundMessage, HubEvent } from '../types';
 import { WebSocketHub } from '../middleware/WebSocketHub';
-import { MessageStore, MessageStoreEvents } from '../middleware/MessageStore';
 import { MetadataMessage } from '../middleware/MetadataMessageRouter';
 import { EntityStore } from '../middleware/EntityStore';
 import { DocumentService } from '../modules/poa/services/DocumentService';
@@ -55,48 +54,40 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   const [connectionStates, setConnectionStates] = useState<Map<number, ConnectionState>>(new Map());
   const [chatMessages, setChatMessages] = useState<Map<number, ChatMessage[]>>(new Map());
   const [systemMessages, setSystemMessages] = useState<Map<number, SystemMessage[]>>(new Map());
+  const [threadIds, setThreadIds] = useState<Map<number, string>>(new Map());
   const [uiState, setUiState] = useState<Map<number, any>>(new Map());
   const [isConnected, setIsConnected] = useState(false);
   
   const hubRef = useRef<WebSocketHub | null>(null);
-  const storeRef = useRef<MessageStore | null>(null);
   const entityStoreRef = useRef<EntityStore>(EntityStore.getInstance());
   const documentServiceRef = useRef<DocumentService>(DocumentService.getInstance());
-  
-  // Initialize MessageStore with events - but only once
-  if (storeRef.current === null) {
-    const messageStoreEvents: MessageStoreEvents = {
-      onMessageAdded: (stepIndex, message) => {
-        setChatMessages(prevMessages => {
-          const newMessagesMap = new Map(prevMessages);
-          newMessagesMap.set(stepIndex, storeRef.current!.getChatMessages(stepIndex));
-          return newMessagesMap;
-        });
-      },
-      onSystemMessageAdded: (stepIndex, message) => {
-        setSystemMessages(prevSystemMessages => {
-          const newSystemMessagesMap = new Map(prevSystemMessages);
-          newSystemMessagesMap.set(stepIndex, storeRef.current!.getSystemMessages(stepIndex));
-          return newSystemMessagesMap;
-        });
-      },
-      onMessagesCleared: (stepIndex) => {
-        setChatMessages(prevMessages => {
-          const newMessagesMap = new Map(prevMessages);
-          newMessagesMap.delete(stepIndex);
-          return newMessagesMap;
-        });
-        setSystemMessages(prevSystemMessages => {
-          const newSystemMessagesMap = new Map(prevSystemMessages);
-          newSystemMessagesMap.delete(stepIndex);
-          return newSystemMessagesMap;
-        });
-      }
-    };
-    
-    storeRef.current = new MessageStore(messageStoreEvents);
-  }
-  const currentMessageStore = storeRef.current;
+
+  // Helper functions for message management
+  const addChatMessage = useCallback((message: ChatMessage) => {
+    setChatMessages(prevMessages => {
+      const newMessagesMap = new Map(prevMessages);
+      const existingMessages = newMessagesMap.get(message.stepIndex) || [];
+      newMessagesMap.set(message.stepIndex, [...existingMessages, message]);
+      return newMessagesMap;
+    });
+
+    if (message.threadId) {
+      setThreadIds(prev => new Map(prev).set(message.stepIndex, message.threadId!));
+    }
+  }, []);
+
+  const addSystemMessage = useCallback((message: SystemMessage) => {
+    setSystemMessages(prevSystemMessages => {
+      const newSystemMessagesMap = new Map(prevSystemMessages);
+      const existingMessages = newSystemMessagesMap.get(message.stepIndex) || [];
+      newSystemMessagesMap.set(message.stepIndex, [...existingMessages, message]);
+      return newSystemMessagesMap;
+    });
+  }, []);
+
+  const getThreadId = useCallback((stepIndex: number): string | undefined => {
+    return threadIds.get(stepIndex);
+  }, [threadIds]);
   
   // Effect to create and manage the WebSocketHub instance and its listeners
   useEffect(() => {
@@ -117,12 +108,12 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
 
     const handleMessage = (event: HubEvent) => {
       const chatMessage = event.data as ChatMessage;
-      currentMessageStore.addChatMessage(chatMessage);
+      addChatMessage(chatMessage);
     };
 
     const handleSystemMessage = (event: HubEvent) => {
       const systemMessage = event.data as SystemMessage;
-      currentMessageStore.addSystemMessage(systemMessage);
+      addSystemMessage(systemMessage);
       
       if (systemMessage.type === 'UI_UPDATE') {
         setUiState(prevUiState => {
@@ -160,7 +151,7 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
       hub.off('error', handleError);
       hubRef.current = null;
     };
-  }, [currentMessageStore, steps.length]);
+  }, [addChatMessage, addSystemMessage, steps.length]);
 
   // Effect to initialize the hub when settings or steps change
   useEffect(() => {
@@ -229,15 +220,15 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
       stepIndex: activeStep,
       timestamp: new Date(),
       metadata,
-      threadId: currentMessageStore.getThreadId(activeStep) || '', 
+      threadId: getThreadId(activeStep) || '', 
     };
-    currentMessageStore.addChatMessage(userMessage);
+    addChatMessage(userMessage);
 
     // Prepare request using agent or fallback to bot
     let request: InboundMessage;
     if (agent) {
       request = {
-        threadId: currentMessageStore.getThreadId(activeStep),
+        threadId: getThreadId(activeStep),
         agent: agent.agent,
         workflowType: agent.workflowType || '',
         workflowId: agent.workflowId,
@@ -248,7 +239,7 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
     } else {
       // Fallback to old bot structure
       request = {
-        threadId: currentMessageStore.getThreadId(activeStep),
+        threadId: getThreadId(activeStep),
         agent: currentStepDetails.bot!.agent || '',
         workflowType: currentStepDetails.bot!.workflowType || '',
         workflowId: currentStepDetails.bot!.workflowId!,
@@ -264,7 +255,7 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
       console.error(`[WebSocketStepsContext] Error sending message for step ${activeStep}:`, error);
       throw error;
     }
-  }, [activeStep, steps, settings, currentMessageStore]);
+  }, [activeStep, steps, settings, addChatMessage, getThreadId]);
 
   // Metadata subscription methods
   const subscribeToMetadata = useCallback((subscriberId: string, messageTypes: string[], callback: (message: MetadataMessage) => void, stepIndex?: number) => {
@@ -313,12 +304,25 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   // Get statistics from all components
   const getStats = useCallback(() => {
     const hub = hubRef.current;
-    const store = storeRef.current;
     const entityStore = entityStoreRef.current;
+    
+    // Calculate message store stats directly from React state
+    const messageStoreStats = {
+      totalSteps: Array.from(new Set([...chatMessages.keys(), ...systemMessages.keys()])).length,
+      totalChatMessages: Array.from(chatMessages.values()).reduce((sum, msgs) => sum + msgs.length, 0),
+      totalSystemMessages: Array.from(systemMessages.values()).reduce((sum, msgs) => sum + msgs.length, 0),
+      stepStats: Array.from(new Set([...chatMessages.keys(), ...systemMessages.keys()])).reduce((acc, stepIndex) => {
+        acc[stepIndex] = {
+          chat: chatMessages.get(stepIndex)?.length || 0,
+          system: systemMessages.get(stepIndex)?.length || 0
+        };
+        return acc;
+      }, {} as Record<number, { chat: number; system: number }>)
+    };
     
     return {
       hub: hub?.getStats() || null,
-      messageStore: store?.getStats() || null,
+      messageStore: messageStoreStats,
       entityStore: entityStore?.getStats() || null,
       context: {
         isConnected,

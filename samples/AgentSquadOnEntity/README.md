@@ -74,13 +74,9 @@ The application uses a hub-based architecture for managing multiple WebSocket co
    - Routes messages to appropriate handlers
    - Provides event-based communication
 
-2. **Message Store** (`src/middleware/MessageStore.ts`)
-   - Centralized storage for chat and system messages
-   - Manages thread IDs per step
-   - Provides efficient message retrieval
-
-3. **WebSocket Steps Context** (`src/context/WebSocketStepsContext.tsx`)
+2. **WebSocket Steps Context** (`src/context/WebSocketStepsContext.tsx`)
    - React context for WebSocket state management
+   - Manages chat and system messages directly in React state
    - Bridges WebSocket Hub with React components
    - Handles UI state updates from system messages
    - Auto-connects when settings are available
@@ -101,10 +97,9 @@ src/
 ├── context/            # React contexts
 │   ├── StepsContext.tsx # Step management
 │   ├── SettingsContext.tsx # App settings (WebSocket URL, API key, etc.)
-│   └── WebSocketStepsContext.tsx # WebSocket integration
+│   └── WebSocketStepsContext.tsx # WebSocket integration & message management
 ├── middleware/         # WebSocket infrastructure
-│   ├── WebSocketHub.ts # WebSocket connection manager
-│   └── MessageStore.ts # Message storage and retrieval
+│   └── WebSocketHub.ts # WebSocket connection manager
 ├── types/              # TypeScript definitions
 │   └── index.ts       # Shared type definitions
 ├── utils/              # Utility functions
