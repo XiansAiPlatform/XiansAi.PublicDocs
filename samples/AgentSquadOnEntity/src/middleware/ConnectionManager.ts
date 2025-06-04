@@ -2,6 +2,7 @@ import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signal
 import { BotAgent, ConnectionState } from '../types';
 import { SettingsData } from '../context/SettingsContext';
 import { StepDefinition, Agent } from '../components/types';
+import { MessageProcessor, Message } from './MessageProcessor';
 
 export interface SignalRConnection {
   connection: HubConnection;
@@ -12,13 +13,12 @@ export interface SignalRConnection {
 
 export interface ConnectionManagerEvents {
   onConnectionChange: (agentIndex: number, state: ConnectionState) => void;
-  onConnectionReady: (agentIndex: number, connection: HubConnection) => void;
   onConnectionError: (agentIndex: number, error: any) => void;
 }
 
 /**
- * ConnectionManager handles SignalR connection lifecycle
- * Updated to work with Agent array instead of StepDefinition array
+ * ConnectionManager handles SignalR connection lifecycle and message setup
+ * Updated to handle all connection-related logic including SignalR handlers
  */
 export class ConnectionManager {
   private connections: Map<number, SignalRConnection> = new Map();
@@ -26,9 +26,11 @@ export class ConnectionManager {
   private settings: SettingsData | null = null;
   private agents: Agent[] = [];
   private events: ConnectionManagerEvents;
+  private messageProcessor: MessageProcessor;
 
-  constructor(events: ConnectionManagerEvents) {
+  constructor(events: ConnectionManagerEvents, messageProcessor: MessageProcessor) {
     this.events = events;
+    this.messageProcessor = messageProcessor;
   }
 
   /**
@@ -134,8 +136,9 @@ export class ConnectionManager {
       
       this.emitConnectionChange(agentIndex, 'connected');
       
-      // Notify that connection is ready for message handling
-      this.events.onConnectionReady(agentIndex, connection);
+      // Setup SignalR message handlers and load thread history
+      this.setupSignalRHandlers(connection, agentIndex);
+      this.loadThreadHistory(agentIndex);
       
       // Give the connection a moment to fully establish
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -169,6 +172,97 @@ export class ConnectionManager {
   }
 
   /**
+   * Setup SignalR event handlers for a connection
+   * Moved from WebSocketHub for better separation of concerns
+   */
+  private setupSignalRHandlers(connection: HubConnection, agentIndex: number): void {
+    const agent = this.agents[agentIndex];
+    console.log(`[ConnectionManager] Setting up SignalR handlers for agent ${agentIndex} (${agent?.workflowId})`);
+
+    // Add a catch-all handler to see ALL events
+    const originalOn = connection.on.bind(connection);
+    connection.on = function(methodName: string, newMethod: (...args: any[]) => void) {
+      console.log(`[ConnectionManager] 🎯 Registering handler for event: ${methodName} on agent ${agentIndex}`);
+      return originalOn(methodName, (...args: any[]) => {
+        console.log(`[ConnectionManager] 📨 Received event '${methodName}' for agent ${agentIndex}:`, args);
+        return newMethod(...args);
+      });
+    };
+
+    // Handle received messages (real-time)
+    connection.on('ReceiveMessage', (message: Message) => {
+      console.log(`[ConnectionManager] ✅ ReceiveMessage for agent ${agentIndex} (${agent?.title}):`, message);
+      this.messageProcessor.processMessage(message.workflowId, message, agentIndex);
+    });
+
+    // Handle received metadata (delivered separately)
+    connection.on('ReceiveMetadata', (metadata: any) => {
+      console.log(`[ConnectionManager] 📊 ReceiveMetadata for agent ${agentIndex} (${agent?.title}):`, metadata);
+      console.log(`[ConnectionManager] 🔍 Metadata messageType:`, metadata?.Metadata?.messageType || metadata?.metadata?.messageType || 'NOT_FOUND');
+      this.messageProcessor.processMetadata(metadata, agentIndex);
+    });
+
+    // Handle thread ID updates
+    connection.on('InboundProcessed', (threadId: string) => {
+      console.log(`[ConnectionManager] InboundProcessed for agent ${agentIndex}: ${threadId}`);
+      console.log(`[ConnectionManager] 📤 Message processed by backend, waiting for agent response...`);
+      this.messageProcessor.processThreadUpdate(threadId, agentIndex);
+    });
+
+    // Handle thread history
+    connection.on('ThreadHistory', (history: Message[]) => {
+      console.log(`[ConnectionManager] ThreadHistory for agent ${agentIndex}: ${history.length} messages`);
+      this.messageProcessor.processThreadHistory(history, agentIndex);
+    });
+
+    // Connection established
+    connection.on('Connected', () => {
+      console.log(`[ConnectionManager] Connected event for agent ${agentIndex}`);
+    });
+
+    // Add error handler
+    connection.on('Error', (error: any) => {
+      console.error(`[ConnectionManager] ❌ Error event for agent ${agentIndex}:`, error);
+    });
+
+    // Add general event logging to catch any other events
+    connection.onclose((error) => {
+      console.log(`[ConnectionManager] Connection closed for agent ${agentIndex}:`, error);
+    });
+
+    console.log(`[ConnectionManager] 🎯 All SignalR handlers registered for agent ${agentIndex}`);
+  }
+
+  /**
+   * Load thread history for an agent
+   * Moved from WebSocketHub for better separation of concerns
+   */
+  private async loadThreadHistory(agentIndex: number): Promise<void> {
+    const agent = this.agents[agentIndex];
+    if (!agent?.workflowType || !this.settings?.participantId) {
+      console.warn(`[ConnectionManager] Cannot load thread history for agent ${agentIndex}: missing workflowType or participantId`);
+      return;
+    }
+
+    const connection = this.getConnection(agentIndex);
+    if (!connection) {
+      console.warn(`[ConnectionManager] Cannot load thread history for agent ${agentIndex}: no connection`);
+      return;
+    }
+
+    try {
+      await connection.invoke('GetThreadHistory',
+        agent.workflowType,
+        this.settings.participantId,
+        1,  // Page number
+        20  // Page size
+      );
+    } catch (error) {
+      console.error(`[ConnectionManager] Error loading thread history for agent ${agentIndex}:`, error);
+    }
+  }
+
+  /**
    * Setup connection state change handlers
    */
   private setupConnectionHandlers(signalRConnection: SignalRConnection, agent: Agent, agentIndex: number): void {
@@ -185,7 +279,8 @@ export class ConnectionManager {
       signalRConnection.reconnectAttempts = 0;
       this.emitConnectionChange(agentIndex, 'connected');
       
-      // Re-subscribe to agent after reconnection
+      // Re-setup handlers and re-subscribe to agent after reconnection
+      this.setupSignalRHandlers(connection, agentIndex);
       this.subscribeToAgent(agent, agentIndex);
     });
 

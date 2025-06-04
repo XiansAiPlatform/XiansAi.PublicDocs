@@ -31,7 +31,7 @@ export interface HubEvents {
  * WebSocketHub - Refactored to use modular components and Agents array
  * 
  * This class now coordinates between specialized components:
- * - ConnectionManager: Handles SignalR connections for all agents
+ * - ConnectionManager: Handles SignalR connections and message handlers for all agents
  * - MessageProcessor: Processes and routes messages
  * - MetadataMessageRouter: Routes metadata messages to UI components
  * - EventDispatcher: Clean event system
@@ -82,31 +82,6 @@ export class WebSocketHub {
     // Initialize components
     this.metadataRouter = new MetadataMessageRouter();
     this.eventDispatcher = new EventDispatcher<HubEvents>();
-
-    // Initialize ConnectionManager with event handlers
-    const connectionEvents: ConnectionManagerEvents = {
-      onConnectionChange: (agentIndex, state) => {
-        const stepIndex = this.getStepIndexForAgent(agentIndex);
-        this.eventDispatcher.emit('connection_change', {
-          type: 'connection_change',
-          stepIndex: stepIndex !== null ? stepIndex : agentIndex,
-          data: state
-        });
-      },
-      onConnectionReady: (agentIndex, connection) => {
-        this.setupSignalRHandlers(connection, agentIndex);
-        this.loadThreadHistory(agentIndex);
-      },
-      onConnectionError: (agentIndex, error) => {
-        const stepIndex = this.getStepIndexForAgent(agentIndex);
-        this.eventDispatcher.emit('error', {
-          type: 'error',
-          stepIndex: stepIndex !== null ? stepIndex : agentIndex,
-          data: { error: `Connection error: ${error}`, stepIndex: stepIndex !== null ? stepIndex : agentIndex }
-        });
-      }
-    };
-    this.connectionManager = new ConnectionManager(connectionEvents);
 
     // Initialize MessageProcessor with event handlers - CORRECTED VERSION
     const messageEvents: MessageProcessorEvents = {
@@ -167,6 +142,27 @@ export class WebSocketHub {
     
     // Use original MessageProcessor constructor
     this.messageProcessor = new MessageProcessor(messageEvents, this.metadataRouter);
+
+    // Initialize ConnectionManager with event handlers and MessageProcessor
+    const connectionEvents: ConnectionManagerEvents = {
+      onConnectionChange: (agentIndex, state) => {
+        const stepIndex = this.getStepIndexForAgent(agentIndex);
+        this.eventDispatcher.emit('connection_change', {
+          type: 'connection_change',
+          stepIndex: stepIndex !== null ? stepIndex : agentIndex,
+          data: state
+        });
+      },
+      onConnectionError: (agentIndex, error) => {
+        const stepIndex = this.getStepIndexForAgent(agentIndex);
+        this.eventDispatcher.emit('error', {
+          type: 'error',
+          stepIndex: stepIndex !== null ? stepIndex : agentIndex,
+          data: { error: `Connection error: ${error}`, stepIndex: stepIndex !== null ? stepIndex : agentIndex }
+        });
+      }
+    };
+    this.connectionManager = new ConnectionManager(connectionEvents, this.messageProcessor);
   }
 
   // Singleton pattern
@@ -218,97 +214,6 @@ export class WebSocketHub {
     // Initialize connections for all agents
     await this.connectionManager.initialize(settings, this.agents);
   }
-
-  /**
-   * Setup SignalR event handlers for a connection
-   * Now uses agent index instead of step index
-   */
-  private setupSignalRHandlers(connection: HubConnection, agentIndex: number): void {
-    const agent = this.agents[agentIndex];
-    console.log(`[WebSocketHub] Setting up SignalR handlers for agent ${agentIndex} (${agent?.workflowId})`);
-
-    // Add a catch-all handler to see ALL events
-    const originalOn = connection.on.bind(connection);
-    connection.on = function(methodName: string, newMethod: (...args: any[]) => void) {
-      console.log(`[WebSocketHub] 🎯 Registering handler for event: ${methodName} on agent ${agentIndex}`);
-      return originalOn(methodName, (...args: any[]) => {
-        console.log(`[WebSocketHub] 📨 Received event '${methodName}' for agent ${agentIndex}:`, args);
-        return newMethod(...args);
-      });
-    };
-
-    // Handle received messages (real-time)
-    connection.on('ReceiveMessage', (message: Message) => {
-      console.log(`[WebSocketHub] ✅ ReceiveMessage for agent ${agentIndex} (${agent?.title}):`, message);
-      this.messageProcessor.processMessage(message.workflowId, message, agentIndex);
-    });
-
-    // Handle received metadata (delivered separately)
-    connection.on('ReceiveMetadata', (metadata: any) => {
-      console.log(`[WebSocketHub] 📊 ReceiveMetadata for agent ${agentIndex} (${agent?.title}):`, metadata);
-      console.log(`[WebSocketHub] 🔍 Metadata messageType:`, metadata?.Metadata?.messageType || metadata?.metadata?.messageType || 'NOT_FOUND');
-      this.messageProcessor.processMetadata(metadata, agentIndex);
-    });
-
-    // Handle thread ID updates
-    connection.on('InboundProcessed', (threadId: string) => {
-      console.log(`[WebSocketHub] InboundProcessed for agent ${agentIndex}: ${threadId}`);
-      console.log(`[WebSocketHub] 📤 Message processed by backend, waiting for agent response...`);
-      this.messageProcessor.processThreadUpdate(threadId, agentIndex);
-    });
-
-    // Handle thread history
-    connection.on('ThreadHistory', (history: Message[]) => {
-      console.log(`[WebSocketHub] ThreadHistory for agent ${agentIndex}: ${history.length} messages`);
-      this.messageProcessor.processThreadHistory(history, agentIndex);
-    });
-
-    // Connection established
-    connection.on('Connected', () => {
-      console.log(`[WebSocketHub] Connected event for agent ${agentIndex}`);
-    });
-
-    // Add error handler
-    connection.on('Error', (error: any) => {
-      console.error(`[WebSocketHub] ❌ Error event for agent ${agentIndex}:`, error);
-    });
-
-    // Add general event logging to catch any other events
-    connection.onclose((error) => {
-      console.log(`[WebSocketHub] Connection closed for agent ${agentIndex}:`, error);
-    });
-
-    console.log(`[WebSocketHub] 🎯 All SignalR handlers registered for agent ${agentIndex}`);
-  }
-
-  /**
-   * Load thread history for an agent
-   */
-  private async loadThreadHistory(agentIndex: number): Promise<void> {
-    const agent = this.agents[agentIndex];
-    if (!agent?.workflowType || !this.settings?.participantId) {
-      console.warn(`[WebSocketHub] Cannot load thread history for agent ${agentIndex}: missing workflowType or participantId`);
-      return;
-    }
-
-    const connection = this.connectionManager.getConnection(agentIndex);
-    if (!connection) {
-      console.warn(`[WebSocketHub] Cannot load thread history for agent ${agentIndex}: no connection`);
-      return;
-    }
-
-    try {
-      await connection.invoke('GetThreadHistory',
-        agent.workflowType,
-        this.settings.participantId,
-        1,  // Page number
-        20  // Page size
-      );
-    } catch (error) {
-      console.error(`[WebSocketHub] Error loading thread history for agent ${agentIndex}:`, error);
-    }
-  }
-
 
   /**
    * Send message through specific step connection
