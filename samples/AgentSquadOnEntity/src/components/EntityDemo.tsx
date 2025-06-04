@@ -1,219 +1,257 @@
-import React, { useState } from 'react';
-import { 
-  useEntities, 
-  useEntitiesByType, 
-  useEntity, 
-  useEntitySubscription 
-} from '../context/EntityContext';
-import { 
-  DocumentEntity, 
-  PersonEntity, 
-  TaskEntity,
-  AuditResultEntity,
-  createDocumentEntity,
-  createPersonEntity,
-  createTaskEntity,
-  createAuditResultEntity
-} from '../types/entities';
+import React, { useState, useEffect, useRef } from 'react';
+import { useEntities } from '../context/EntityContext';
+import { EntityStore } from '../middleware/EntityStore';
+import { DocumentService, Document } from '../modules/poa/services/DocumentService';
+
+interface DocumentCategory {
+  category: string;
+  documents: Document[];
+}
 
 const EntityDemo: React.FC = () => {
-  const { 
-    addEntity, 
-    updateEntity, 
-    deleteEntity, 
-    getStats, 
-    loading, 
-    error 
-  } = useEntities();
-
-  // Get entities by type using specialized hooks
-  const documents = useEntitiesByType<DocumentEntity>('document');
-  const persons = useEntitiesByType<PersonEntity>('person');
-  const tasks = useEntitiesByType<TaskEntity>('task');
-  const auditResults = useEntitiesByType<AuditResultEntity>('audit_result');
-
-  const [selectedEntityId, setSelectedEntityId] = useState<string>('');
-  const selectedEntity = useEntity(selectedEntityId);
+  const { loading, error, getStats } = useEntities();
+  const entityStore = useRef(EntityStore.getInstance());
+  const documentService = useRef(DocumentService.getInstance());
+  
+  const [documentCategories, setDocumentCategories] = useState<DocumentCategory[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'view'>('list');
   const [updates, setUpdates] = useState<string[]>([]);
 
-  // Subscribe to all entity updates for logging
-  useEntitySubscription(
-    undefined, // All entity types
-    undefined, // All entity IDs
-    (entities, action) => {
-      const timestamp = new Date().toLocaleTimeString();
-      const entityTypes = entities.map(e => e.type).join(', ');
-      const message = `[${timestamp}] ${action.type}: ${entities.length} entities (${entityTypes})`;
-      setUpdates(prev => [message, ...prev.slice(0, 9)]); // Keep last 10 updates
-    }
-  );
-
-  // Sample data creation functions
-  const createSampleDocument = () => {
-    const doc = createDocumentEntity({
-      title: `Sample Document ${Date.now()}`,
-      content: 'This is a sample power of attorney document.',
-      documentType: 'power_of_attorney',
-      status: 'draft',
-      author: 'Legal Assistant',
-      tags: ['power-of-attorney', 'legal', 'draft']
+  // Subscribe to entity updates
+  useEffect(() => {
+    const unsubscribe = entityStore.current.subscribe(() => {
+      updateDocumentCategories();
     });
-    addEntity(doc);
-  };
 
-  const createSamplePerson = () => {
-    const person = createPersonEntity({
-      firstName: `John${Math.floor(Math.random() * 100)}`,
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      role: 'principal',
-      address: {
-        street: '123 Main St',
-        city: 'Anytown',
-        state: 'CA',
-        zipCode: '12345',
-        country: 'USA'
+    // Initial load
+    updateDocumentCategories();
+
+    return unsubscribe;
+  }, []);
+
+  // Subscribe to document updates for logging
+  useEffect(() => {
+    const unsubscribe = entityStore.current.subscribeToEntities({
+      id: 'document_demo_subscription',
+      callback: (entities, action) => {
+        const timestamp = new Date().toLocaleTimeString();
+        const documentEntities = entities.filter(e => 
+          e.type === 'poa_document' || 
+          (e as any).documentId || 
+          (e as any).title
+        );
+        
+        if (documentEntities.length > 0) {
+          const message = `[${timestamp}] ${action.type}: ${documentEntities.length} documents`;
+          setUpdates(prev => [message, ...prev.slice(0, 9)]);
+        }
       }
     });
-    addEntity(person);
+
+    return unsubscribe;
+  }, []);
+
+  const updateDocumentCategories = () => {
+    const categories = entityStore.current.getAllDocumentCategories();
+    setDocumentCategories(categories.map(cat => ({
+      category: cat.category,
+      documents: cat.documents as Document[]
+    })));
   };
 
-  const createSampleTask = () => {
-    const task = createTaskEntity({
-      title: `Review Document ${Date.now()}`,
-      description: 'Review the power of attorney document for completeness.',
-      status: 'pending',
-      priority: 'medium',
-      stepIndex: 0
-    });
-    addEntity(task);
+  const handleDocumentClick = (document: Document) => {
+    setSelectedDocument(document);
+    setViewMode('view');
   };
 
-  const createSampleAuditResult = () => {
-    // Find a document to attach the audit to, or create one if none exists
-    let targetDocument = documents[0];
-    if (!targetDocument) {
-      targetDocument = createDocumentEntity({
-        title: 'Auto-generated Document for Audit',
-        content: 'Sample document for audit demonstration.',
-        documentType: 'power_of_attorney',
-        status: 'draft',
-        author: 'System',
-        tags: ['audit-demo']
+  const handleBackToList = () => {
+    setViewMode('list');
+    setSelectedDocument(null);
+  };
+
+  const getTotalDocuments = () => {
+    return documentCategories.reduce((total, cat) => total + cat.documents.length, 0);
+  };
+
+  const getStatusCounts = () => {
+    const counts = { draft: 0, pending_review: 0, approved: 0, rejected: 0 };
+    documentCategories.forEach(cat => {
+      cat.documents.forEach(doc => {
+        if (doc.status in counts) {
+          counts[doc.status]++;
+        }
       });
-      addEntity(targetDocument);
-    }
-
-    const auditResult = createAuditResultEntity({
-      documentId: targetDocument.id,
-      findings: [
-        {
-          type: 0,
-          message: "At least one witness is required",
-          description: "Maximum Witnesses Limit by ensuring that a Power of Attorney document does not exceed the maximum allowed number of witnesses (2)",
-          link: "https://theprep.ai"
-        },
-        {
-          type: 3,
-          message: "In Norway 70% of the time, at least one representative is also a witness.",
-          description: "Document statistics information",
-          link: null
-        }
-      ],
-      errors: [
-        {
-          type: 0,
-          message: "At least one witness is required",
-          description: "Maximum Witnesses Limit by ensuring that a Power of Attorney document does not exceed the maximum allowed number of witnesses (2)",
-          link: "https://theprep.ai"
-        }
-      ],
-      warnings: [],
-      recommendations: [],
-      information: [
-        {
-          type: 3,
-          message: "In Norway 70% of the time, at least one representative is also a witness.",
-          description: "Document statistics information",
-          link: null
-        }
-      ],
-      isSuccess: false,
-      hasErrors: true,
-      hasWarnings: false,
-      hasRecommendations: false,
-      hasInformation: true,
-      data: {
-        principal: {
-          userId: "20420d0f-7b24-49e3-bd7d-29bcc74f3828",
-          fullName: "Kari Nordmann",
-          nationalId: "01417012345",
-          address: "Parkveien 1, 0350 Oslo"
-        },
-        scope: "Property and financial matters",
-        representatives: [
-          {
-            id: "e6d591ec-7a95-43ef-bbde-66eb4e23ad54",
-            fullName: "Nora Hansen",
-            nationalId: "01017012347",
-            relationship: "Backup Fullmektig"
-          }
-        ],
-        conditions: [
-          {
-            id: "8a829b5e-57c2-4416-be93-b7fa0e7c8055",
-            type: 0,
-            text: "No one can sell my home.",
-            targetId: null,
-            createdAt: "2025-06-02T04:43:17.266042Z",
-            updatedAt: null
-          }
-        ],
-        witnesses: []
-      }
     });
-    addEntity(auditResult);
+    return counts;
   };
 
-  const updateSelectedEntity = () => {
-    if (selectedEntity) {
-      const updates: any = { updatedAt: new Date() };
-      
-      if (selectedEntity.type === 'document') {
-        updates.status = 'pending_review';
-      } else if (selectedEntity.type === 'person') {
-        updates.email = `updated-${Date.now()}@example.com`;
-      } else if (selectedEntity.type === 'task') {
-        updates.status = 'in_progress';
-      } else if (selectedEntity.type === 'audit_result') {
-        updates.isSuccess = true;
-      }
-      
-      updateEntity(selectedEntity.id, updates);
-    }
-  };
-
-  const deleteSelectedEntity = () => {
-    if (selectedEntity) {
-      deleteEntity(selectedEntity.id);
-      setSelectedEntityId('');
-    }
+  const refreshDocuments = () => {
+    // Clear cache and trigger refresh
+    documentService.current.clearCache();
+    updateDocumentCategories();
   };
 
   const stats = getStats();
+  const statusCounts = getStatusCounts();
+
+  if (viewMode === 'view' && selectedDocument) {
+    return (
+      <div className="p-6 h-full flex flex-col">
+        {/* Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={handleBackToList}
+              className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+            >
+              ← Back to Documents
+            </button>
+            <h1 className="text-2xl font-bold text-gray-900">Document Viewer</h1>
+          </div>
+          <div className="text-sm text-gray-500">
+            Document ID: {selectedDocument.documentId}
+          </div>
+        </div>
+
+        {/* Document Details */}
+        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Document Metadata */}
+          <div className="bg-white p-6 rounded-lg shadow border">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Document Information</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium text-gray-700">Title:</p>
+                <p className="text-lg text-gray-900">{selectedDocument.title}</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Status:</p>
+                  <p className={`inline-block px-2 py-1 rounded text-sm font-medium ${
+                    selectedDocument.status === 'approved' ? 'bg-green-100 text-green-800' :
+                    selectedDocument.status === 'pending_review' ? 'bg-yellow-100 text-yellow-800' :
+                    selectedDocument.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {selectedDocument.status}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Version:</p>
+                  <p className="text-sm text-gray-600">{selectedDocument.version}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Created:</p>
+                  <p className="text-sm text-gray-600">{selectedDocument.createdAt.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Updated:</p>
+                  <p className="text-sm text-gray-600">{selectedDocument.updatedAt.toLocaleString()}</p>
+                </div>
+              </div>
+
+              {selectedDocument.principal && (
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Principal:</p>
+                  <div className="mt-1 p-3 bg-gray-50 rounded">
+                    <p className="font-medium">{selectedDocument.principal.fullName}</p>
+                    <p className="text-sm text-gray-600">ID: {selectedDocument.principal.nationalId}</p>
+                    <p className="text-sm text-gray-600">{selectedDocument.principal.address}</p>
+                  </div>
+                </div>
+              )}
+
+              {selectedDocument.scope && (
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Scope:</p>
+                  <p className="text-sm text-gray-600">{selectedDocument.scope}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Document Content & Structure */}
+          <div className="bg-white p-6 rounded-lg shadow border">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Document Structure</h2>
+            
+            <div className="space-y-4">
+              {selectedDocument.representatives && selectedDocument.representatives.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">Representatives ({selectedDocument.representatives.length}):</p>
+                  <div className="space-y-2">
+                    {selectedDocument.representatives.map((rep, index) => (
+                      <div key={rep.id || index} className="p-2 bg-blue-50 rounded text-sm">
+                        <p className="font-medium">{rep.fullName}</p>
+                        <p className="text-gray-600">ID: {rep.nationalId}</p>
+                        <p className="text-gray-600">Role: {rep.relationship}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedDocument.witnesses && selectedDocument.witnesses.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">Witnesses ({selectedDocument.witnesses.length}):</p>
+                  <div className="space-y-2">
+                    {selectedDocument.witnesses.map((witness, index) => (
+                      <div key={witness.id || index} className="p-2 bg-green-50 rounded text-sm">
+                        <p className="font-medium">{witness.fullName}</p>
+                        <p className="text-gray-600">ID: {witness.nationalId}</p>
+                        {witness.relationship && <p className="text-gray-600">Relation: {witness.relationship}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedDocument.conditions && selectedDocument.conditions.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">Conditions ({selectedDocument.conditions.length}):</p>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {selectedDocument.conditions.map((condition, index) => (
+                      <div key={condition.id || index} className="p-2 bg-yellow-50 rounded text-sm">
+                        <p className="text-gray-900">{condition.text}</p>
+                        <p className="text-xs text-gray-500 mt-1">Type: {condition.type}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Raw Data */}
+        <div className="mt-6 bg-white p-6 rounded-lg shadow border">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Raw Document Data</h2>
+          <pre className="p-4 bg-gray-100 rounded text-xs overflow-x-auto max-h-60 overflow-y-auto">
+            {JSON.stringify(selectedDocument, null, 2)}
+          </pre>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 h-full flex flex-col">
+      {/* Header */}
       <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Document Management System</h1>
         <p className="text-gray-600">
-          This demo shows how the central entity management system works with real-time updates.
+          View and manage documents from all categories stored in the EntityStore via DocumentService.
         </p>
       </div>
 
       {/* Loading and Error States */}
       {loading && (
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-blue-800">Loading entities...</p>
+          <p className="text-blue-800">Loading documents...</p>
         </div>
       )}
 
@@ -226,19 +264,18 @@ const EntityDemo: React.FC = () => {
       {/* Statistics */}
       <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-lg shadow border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Statistics</h3>
-          <p className="text-sm text-gray-600">Total Entities: {stats.totalEntities}</p>
-          <p className="text-sm text-gray-600">Subscriptions: {stats.subscriptions}</p>
-          <p className="text-sm text-gray-600">Listeners: {stats.listeners}</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Overview</h3>
+          <p className="text-sm text-gray-600">Total Documents: {getTotalDocuments()}</p>
+          <p className="text-sm text-gray-600">Categories: {documentCategories.length}</p>
+          <p className="text-sm text-gray-600">Entity Store: {stats.totalEntities} entities</p>
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Entity Types</h3>
-          {stats.entityTypes.map((typeInfo: any) => (
-            <p key={typeInfo.type} className="text-sm text-gray-600">
-              {typeInfo.type}: {typeInfo.count}
-            </p>
-          ))}
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Document Status</h3>
+          <p className="text-sm text-gray-600">Draft: {statusCounts.draft}</p>
+          <p className="text-sm text-gray-600">Pending: {statusCounts.pending_review}</p>
+          <p className="text-sm text-gray-600">Approved: {statusCounts.approved}</p>
+          <p className="text-sm text-gray-600">Rejected: {statusCounts.rejected}</p>
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow border">
@@ -249,243 +286,82 @@ const EntityDemo: React.FC = () => {
                 {update}
               </p>
             ))}
+            {updates.length === 0 && (
+              <p className="text-xs text-gray-400">No recent updates</p>
+            )}
           </div>
         </div>
 
         <div className="bg-white p-4 rounded-lg shadow border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Audit Results</h3>
-          <p className="text-sm text-gray-600">Total: {auditResults.length}</p>
-          <p className="text-sm text-gray-600">
-            Successful: {auditResults.filter(a => a.isSuccess).length}
-          </p>
-          <p className="text-sm text-gray-600">
-            Failed: {auditResults.filter(a => !a.isSuccess).length}
-          </p>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="mb-6 space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Create Sample Entities</h3>
-          <div className="flex flex-wrap gap-2">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Actions</h3>
+          <div className="space-y-2">
             <button
-              onClick={createSampleDocument}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              onClick={refreshDocuments}
+              className="w-full px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
-              Add Document
+              Refresh Documents
             </button>
             <button
-              onClick={createSamplePerson}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              onClick={() => documentService.current.clearCache()}
+              className="w-full px-3 py-2 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
             >
-              Add Person
-            </button>
-            <button
-              onClick={createSampleTask}
-              className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
-            >
-              Add Task
-            </button>
-            <button
-              onClick={createSampleAuditResult}
-              className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
-            >
-              Add Audit Result
+              Clear Cache
             </button>
           </div>
         </div>
+      </div>
 
-        {selectedEntity && (
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Selected Entity Actions</h3>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={updateSelectedEntity}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors"
-              >
-                Update Selected
-              </button>
-              <button
-                onClick={deleteSelectedEntity}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-              >
-                Delete Selected
-              </button>
-            </div>
+      {/* Document Categories */}
+      <div className="flex-1 min-h-0">
+        {documentCategories.length === 0 ? (
+          <div className="bg-white p-8 rounded-lg shadow border text-center">
+            <p className="text-gray-500">No documents found in any category.</p>
+            <p className="text-sm text-gray-400 mt-2">Documents will appear here when they are loaded by DocumentService.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 h-full">
+            {documentCategories.map(({ category, documents }) => (
+              <div key={category} className="bg-white rounded-lg shadow border flex flex-col">
+                <div className="p-4 border-b">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {category} ({documents.length})
+                  </h3>
+                  <p className="text-sm text-gray-500">Category: {category}</p>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div className="space-y-3">
+                    {documents.map(doc => (
+                      <div
+                        key={doc.id}
+                        className="p-3 border rounded cursor-pointer transition-colors hover:bg-gray-50 hover:border-gray-300"
+                        onClick={() => handleDocumentClick(doc)}
+                      >
+                        <p className="font-medium text-sm text-gray-900 truncate">{doc.title}</p>
+                        <p className="text-xs text-gray-500 mt-1">ID: {doc.documentId}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                            doc.status === 'approved' ? 'bg-green-100 text-green-800' :
+                            doc.status === 'pending_review' ? 'bg-yellow-100 text-yellow-800' :
+                            doc.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {doc.status}
+                          </span>
+                          <span className="text-xs text-gray-400">v{doc.version}</span>
+                        </div>
+                        {doc.principal && (
+                          <p className="text-xs text-gray-500 mt-1">Principal: {doc.principal.fullName}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
-
-      {/* Entity Lists */}
-      <div className="flex-1 min-h-0">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-full">
-          {/* Documents */}
-          <div className="bg-white p-4 rounded-lg shadow border flex flex-col">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents ({documents.length})</h3>
-            <div className="space-y-2 flex-1 overflow-y-auto">
-              {documents.map(doc => (
-                <div
-                  key={doc.id}
-                  className={`p-3 border rounded cursor-pointer transition-colors ${
-                    selectedEntityId === doc.id 
-                      ? 'bg-blue-50 border-blue-300' 
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedEntityId(doc.id)}
-                >
-                  <p className="font-medium text-sm">{doc.title}</p>
-                  <p className="text-xs text-gray-500">Status: {doc.status}</p>
-                  <p className="text-xs text-gray-500">Type: {doc.documentType}</p>
-                </div>
-              ))}
-              {documents.length === 0 && (
-                <p className="text-gray-500 text-center py-8 text-sm">No documents yet</p>
-              )}
-            </div>
-          </div>
-
-          {/* Persons */}
-          <div className="bg-white p-4 rounded-lg shadow border flex flex-col">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Persons ({persons.length})</h3>
-            <div className="space-y-2 flex-1 overflow-y-auto">
-              {persons.map(person => (
-                <div
-                  key={person.id}
-                  className={`p-3 border rounded cursor-pointer transition-colors ${
-                    selectedEntityId === person.id 
-                      ? 'bg-green-50 border-green-300' 
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedEntityId(person.id)}
-                >
-                  <p className="font-medium text-sm">{person.firstName} {person.lastName}</p>
-                  <p className="text-xs text-gray-500">Role: {person.role}</p>
-                  <p className="text-xs text-gray-500">Email: {person.email || 'N/A'}</p>
-                </div>
-              ))}
-              {persons.length === 0 && (
-                <p className="text-gray-500 text-center py-8 text-sm">No persons yet</p>
-              )}
-            </div>
-          </div>
-
-          {/* Tasks */}
-          <div className="bg-white p-4 rounded-lg shadow border flex flex-col">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Tasks ({tasks.length})</h3>
-            <div className="space-y-2 flex-1 overflow-y-auto">
-              {tasks.map(task => (
-                <div
-                  key={task.id}
-                  className={`p-3 border rounded cursor-pointer transition-colors ${
-                    selectedEntityId === task.id 
-                      ? 'bg-purple-50 border-purple-300' 
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedEntityId(task.id)}
-                >
-                  <p className="font-medium text-sm">{task.title}</p>
-                  <p className="text-xs text-gray-500">Status: {task.status}</p>
-                  <p className="text-xs text-gray-500">Priority: {task.priority}</p>
-                </div>
-              ))}
-              {tasks.length === 0 && (
-                <p className="text-gray-500 text-center py-8 text-sm">No tasks yet</p>
-              )}
-            </div>
-          </div>
-
-          {/* Audit Results */}
-          <div className="bg-white p-4 rounded-lg shadow border flex flex-col">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Audit Results ({auditResults.length})</h3>
-            <div className="space-y-2 flex-1 overflow-y-auto">
-              {auditResults.map(audit => (
-                <div
-                  key={audit.id}
-                  className={`p-3 border rounded cursor-pointer transition-colors ${
-                    selectedEntityId === audit.id 
-                      ? 'bg-orange-50 border-orange-300' 
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => setSelectedEntityId(audit.id)}
-                >
-                  <p className="font-medium text-sm">Audit for Doc: {audit.documentId.slice(0, 8)}...</p>
-                  <p className={`text-xs font-medium ${audit.isSuccess ? 'text-green-600' : 'text-red-600'}`}>
-                    {audit.isSuccess ? 'Success' : 'Failed'}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {audit.hasErrors && `${audit.errors.length} errors`}
-                    {audit.hasWarnings && ` ${audit.warnings.length} warnings`}
-                    {audit.hasInformation && ` ${audit.information.length} info`}
-                  </p>
-                </div>
-              ))}
-              {auditResults.length === 0 && (
-                <p className="text-gray-500 text-center py-8 text-sm">No audit results yet</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Selected Entity Details */}
-      {selectedEntity && (
-        <div className="mt-6 bg-white p-6 rounded-lg shadow border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Selected Entity Details</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm font-medium text-gray-700">ID:</p>
-              <p className="text-sm text-gray-600 font-mono">{selectedEntity.id}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700">Type:</p>
-              <p className="text-sm text-gray-600">{selectedEntity.type}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700">Created:</p>
-              <p className="text-sm text-gray-600">{selectedEntity.createdAt.toLocaleString()}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700">Updated:</p>
-              <p className="text-sm text-gray-600">{selectedEntity.updatedAt.toLocaleString()}</p>
-            </div>
-          </div>
-
-          {/* Special handling for audit result entities */}
-          {selectedEntity.type === 'audit_result' && (
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">Audit Summary</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="font-medium text-gray-700">Status:</p>
-                  <p className={`${(selectedEntity as AuditResultEntity).isSuccess ? 'text-green-600' : 'text-red-600'}`}>
-                    {(selectedEntity as AuditResultEntity).isSuccess ? 'Success' : 'Failed'}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-700">Document ID:</p>
-                  <p className="text-gray-600 font-mono text-xs">{(selectedEntity as AuditResultEntity).documentId}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-700">Errors:</p>
-                  <p className="text-gray-600">{(selectedEntity as AuditResultEntity).errors.length}</p>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-700">Information:</p>
-                  <p className="text-gray-600">{(selectedEntity as AuditResultEntity).information.length}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-4">
-            <p className="text-sm font-medium text-gray-700">Raw Data:</p>
-            <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-x-auto max-h-40">
-              {JSON.stringify(selectedEntity, null, 2)}
-            </pre>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

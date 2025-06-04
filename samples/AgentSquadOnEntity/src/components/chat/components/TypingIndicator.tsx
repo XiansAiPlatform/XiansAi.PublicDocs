@@ -28,8 +28,10 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({ typingStage, onConten
   const handleActivityLogMessage = useCallback((message: any) => {
     console.log('[TypingIndicator] ActivityLog message received:', message);
     
-    // Extract ActivityLog details from multiple possible metadata locations
-    const activityData = message.data?.metadata || 
+    // First check if the message itself contains the ActivityLog data (top level)
+    // Then fall back to checking nested metadata locations
+    const activityData = message.messageType === 'ActivityLog' ? message :
+                        message.data?.metadata || 
                         message.metadata || 
                         message.data?.Metadata || 
                         message.Metadata ||
@@ -37,6 +39,7 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({ typingStage, onConten
     
     console.log('[TypingIndicator] 🔍 Extracted activityData:', activityData);
     console.log('[TypingIndicator] 📋 Available paths:', {
+      'message (top level)': message.messageType === 'ActivityLog' ? 'Found ActivityLog at top level' : 'Not ActivityLog at top level',
       'message.data?.metadata': message.data?.metadata,
       'message.metadata': message.metadata,
       'message.data?.Metadata': message.data?.Metadata,

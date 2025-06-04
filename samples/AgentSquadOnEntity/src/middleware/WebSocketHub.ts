@@ -1,8 +1,7 @@
-import { HubConnection } from '@microsoft/signalr';
-import { BotAgent, ConnectionState, HubEvent, OutboundMessage } from '../types';
+import { ConnectionState, HubEvent} from '../types';
 import { SettingsData } from '../context/SettingsContext';
 import { StepDefinition, Agent } from '../components/types';
-import { Agents, getAgentByWorkflowId, getAgentById, getAgentForStep } from '../modules/poa/steps';
+import { Agents, getAgentByWorkflowId, getAgentById, generateDefaultMetadata } from '../modules/poa/steps';
 import { ConnectionManager, ConnectionManagerEvents } from './ConnectionManager';
 import { MessageProcessor, MessageProcessorEvents, Message } from './MessageProcessor';
 import { MetadataMessageRouter } from './MetadataMessageRouter';
@@ -14,7 +13,7 @@ export interface SendMessageRequest {
   workflowType: string;
   workflowId: string;
   participantId: string;
-  content: string;
+  content?: string;
   metadata?: any;
 }
 
@@ -23,7 +22,6 @@ export interface HubEvents {
   message: HubEvent;
   connection_change: HubEvent;
   error: HubEvent;
-  system_message: HubEvent;
   thread_history: HubEvent;
 }
 
@@ -71,7 +69,6 @@ export class WebSocketHub {
         }
       }
     }
-    console.warn(`[WebSocketHub] getStepIndexForAgent: No step found for agentIndex ${agentIndex} (Agent: ${agent.title}, Workflow: ${agent.workflowId})`);
     return null;
   }
 
@@ -101,25 +98,6 @@ export class WebSocketHub {
         
         this.eventDispatcher.emit('message', {
           type: 'message',
-          stepIndex: finalStepIndex,
-          data: correctedMessage
-        });
-      },
-      onSystemMessage: (agentIndex, message) => {
-        // Same mapping logic for system messages
-        const correctStepIndex = this.getStepIndexForAgent(agentIndex);
-        const finalStepIndex = correctStepIndex !== null ? correctStepIndex : agentIndex;
-        
-        console.log(`[WebSocketHub] messageEvents.onSystemMessage: agentIndex=${agentIndex} -> correctStepIndex=${finalStepIndex}, message.stepIndex=${message.stepIndex}, type=${message.type}`);
-        
-        // Update the message's stepIndex to use the correct one
-        const correctedMessage = {
-          ...message,
-          stepIndex: finalStepIndex
-        };
-        
-        this.eventDispatcher.emit('system_message', {
-          type: 'system_message',
           stepIndex: finalStepIndex,
           data: correctedMessage
         });
@@ -216,31 +194,23 @@ export class WebSocketHub {
   }
 
   /**
-   * Send message through specific step connection
-   * Updated to work with new agent structure and step references
+   * Send metadata directly to an agent by ID
    */
-  async sendMessage(message: any, stepIndex: number): Promise<void> {
-    const step = this.steps[stepIndex];
-    if (!step?.botId) {
-      throw new Error(`No bot configured for step ${stepIndex}`);
-    }
-
-    const agent = getAgentById(step.botId);
+  async sendMetadataToAgent(metadata: any, agentId: string): Promise<void> {
+    const agent = getAgentById(agentId);
     if (!agent) {
-      throw new Error(`Agent not found for bot ID: ${step.botId}`);
+      throw new Error(`Agent not found for ID: ${agentId}`);
     }
 
     const agentIndex = this.agentIndexMap.get(agent.workflowId);
     if (agentIndex === undefined) {
-      throw new Error(`Agent index not found for workflow ID: ${agent.workflowId}`);
+      throw new Error(`Agent index not found for agent ID: ${agentId} (workflow ID: ${agent.workflowId})`);
     }
 
     const connection = this.connectionManager.getConnection(agentIndex);
     if (!connection || connection.state !== 'Connected') {
-      throw new Error(`No connection available for agent ${agentIndex} (${agent.workflowId})`);
+      throw new Error(`No connection available for agent ${agentId} (${agent.workflowId})`);
     }
-
-    const defaultMetadata = this.settings?.defaultMetadata ? JSON.parse(this.settings.defaultMetadata) : {};
 
     try {
       const request: SendMessageRequest = {
@@ -249,34 +219,37 @@ export class WebSocketHub {
         workflowType: agent.workflowType || '',
         workflowId: agent.workflowId,
         participantId: this.settings?.participantId || '',
-        content: typeof message === 'string' ? message : message.content,
-        metadata: defaultMetadata
+        metadata: metadata
       };
 
       await connection.invoke('SendInboundMessage', request);
-      console.log(`[WebSocketHub] Message sent successfully for step ${stepIndex} via agent ${agentIndex} (${agent.workflowId})`);
+      console.log(`[WebSocketHub] Message sent successfully to agent ${agentId} (${agent.workflowId})`);
     } catch (error) {
-      console.error(`[WebSocketHub] Error sending message for step ${stepIndex} via agent ${agentIndex}:`, error);
+      console.error(`[WebSocketHub] Error sending message to agent ${agentId}:`, error);
       throw error;
     }
   }
 
   /**
-   * Send message directly to an agent by workflow ID
+   * Send message directly to an agent by ID
    */
-  async sendMessageToAgent(message: any, workflowId: string): Promise<void> {
-    const agentIndex = this.agentIndexMap.get(workflowId);
-    if (agentIndex === undefined) {
-      throw new Error(`Agent not found for workflow ID: ${workflowId}`);
+  async sendMessageToAgent(message: any, agentId: string): Promise<void> {
+    const agent = getAgentById(agentId);
+    if (!agent) {
+      throw new Error(`Agent not found for ID: ${agentId}`);
     }
 
-    const agent = this.agents[agentIndex];
+    const agentIndex = this.agentIndexMap.get(agent.workflowId);
+    if (agentIndex === undefined) {
+      throw new Error(`Agent index not found for agent ID: ${agentId} (workflow ID: ${agent.workflowId})`);
+    }
+
     const connection = this.connectionManager.getConnection(agentIndex);
     if (!connection || connection.state !== 'Connected') {
-      throw new Error(`No connection available for agent ${workflowId}`);
+      throw new Error(`No connection available for agent ${agentId} (${agent.workflowId})`);
     }
 
-    const defaultMetadata = this.settings?.defaultMetadata ? JSON.parse(this.settings.defaultMetadata) : {};
+    const defaultMetadata = generateDefaultMetadata();
 
     try {
       const request: SendMessageRequest = {
@@ -290,9 +263,9 @@ export class WebSocketHub {
       };
 
       await connection.invoke('SendInboundMessage', request);
-      console.log(`[WebSocketHub] Message sent successfully to agent ${workflowId}`);
+      console.log(`[WebSocketHub] Message sent successfully to agent ${agentId} (${agent.workflowId})`);
     } catch (error) {
-      console.error(`[WebSocketHub] Error sending message to agent ${workflowId}:`, error);
+      console.error(`[WebSocketHub] Error sending message to agent ${agentId}:`, error);
       throw error;
     }
   }
@@ -430,20 +403,6 @@ export class WebSocketHub {
    */
   async disconnectAll(): Promise<void> {
     await this.connectionManager.disconnectAll();
-  }
-
-  /**
-   * Get all agents
-   */
-  getAgents(): Agent[] {
-    return [...this.agents];
-  }
-
-  /**
-   * Get agent by workflow ID
-   */
-  getAgent(workflowId: string): Agent | undefined {
-    return getAgentByWorkflowId(workflowId);
   }
 
   /**

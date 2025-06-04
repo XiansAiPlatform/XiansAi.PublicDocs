@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Representative } from '../types/representative.types';
 
 interface RepresentativeCardProps {
@@ -22,14 +22,34 @@ const RepresentativeCard: React.FC<RepresentativeCardProps> = ({
   onRemove,
   onExitEdit
 }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside to cancel edit mode
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isEditing && cardRef.current && !cardRef.current.contains(event.target as Node)) {
+        onExitEdit();
+      }
+    };
+
+    if (isEditing) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isEditing, onExitEdit]);
+
   const handleCardClick = () => {
-    if (!representative.id && !isEditing) {
+    if (!isEditing) {
       onToggleEdit(index);
     }
   };
 
   return (
     <div 
+      ref={cardRef}
       className={`border rounded-lg p-4 bg-white shadow-sm transition-all cursor-pointer ${
         isEditing 
           ? 'border-blue-500 ring-2 ring-blue-200' 
@@ -38,15 +58,8 @@ const RepresentativeCard: React.FC<RepresentativeCardProps> = ({
       onClick={handleCardClick}
     >
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-sm font-medium text-gray-900">
-          Representative {index + 1}
-        </h3>
+
         <div className="flex items-center space-x-2">
-          {representative.id && (
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-              ✓ Verified
-            </span>
-          )}
           {!representative.id && !isEditing && (
             <button
               className="text-gray-400 hover:text-blue-600 transition-colors p-1"

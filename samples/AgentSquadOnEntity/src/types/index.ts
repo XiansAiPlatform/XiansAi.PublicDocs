@@ -19,14 +19,7 @@ export interface ChatMessage {
   metadata?: any;
 }
 
-export interface SystemMessage {
-  type: 'UI_UPDATE' | 'STATE_CHANGE' | 'DATA' | 'ERROR' | 'INFO' | 'METADATA' | 'ENTITY_UPDATE';
-  stepIndex: number;
-  payload: any;
-  timestamp: Date;
-}
-
-export type Message = ChatMessage | SystemMessage;
+export type Message = ChatMessage;
 
 // Connection state
 export interface ConnectionState {
@@ -56,7 +49,7 @@ export interface OutboundMessage {
 }
 
 // Hub events
-export type HubEventType = 'message' | 'connection_change' | 'error' | 'system_message' | 'thread_history';
+export type HubEventType = 'message' | 'connection_change' | 'error' | 'thread_history';
 
 export interface HubEvent {
   type: HubEventType;

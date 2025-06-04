@@ -166,7 +166,7 @@ const EntityPane: React.FC = () => {
               Step {activeStep + 1} of {steps.length}
               {documentId && documentId !== 'new' && (
                 <span className="ml-2 text-xs text-blue-600">
-                  Document: {documentId.slice(0, 8)}...
+                  Document: {documentId}
                 </span>
               )}
             </p>
@@ -197,7 +197,7 @@ const EntityPane: React.FC = () => {
           </div>
         </div>
       </header>
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <Suspense fallback={<LoadingFallback />}>
           {componentLoader ? (
             <DynamicEntityComponent componentLoader={componentLoader} />

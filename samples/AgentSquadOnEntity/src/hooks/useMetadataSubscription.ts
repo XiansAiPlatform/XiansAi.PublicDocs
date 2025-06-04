@@ -14,7 +14,7 @@ export interface MetadataSubscriptionOptions {
  * This demonstrates how UI components can easily subscribe to the messages they're interested in
  */
 export function useMetadataSubscription(options: MetadataSubscriptionOptions) {
-  const { subscribeToMetadata, unsubscribeFromMetadata } = useWebSocketSteps();
+  const { subscribeToMetadata } = useWebSocketSteps();
   const [messages, setMessages] = useState<MetadataMessage[]>([]);
   const [latestMessage, setLatestMessage] = useState<MetadataMessage | null>(null);
 

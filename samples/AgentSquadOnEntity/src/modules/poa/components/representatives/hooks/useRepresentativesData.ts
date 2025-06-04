@@ -17,6 +17,7 @@ export const useRepresentativesData = () => {
     document, 
     loading: documentLoading, 
     error: documentError,
+    connectionStatus: documentConnectionStatus,
     representatives: documentRepresentatives 
   } = useDocumentData();
 
@@ -146,6 +147,7 @@ export const useRepresentativesData = () => {
     // Document-related data
     document,
     documentLoading,
-    documentError
+    documentError,
+    documentConnectionStatus
   };
 }; 

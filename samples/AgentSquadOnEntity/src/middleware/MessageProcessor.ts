@@ -1,5 +1,5 @@
-import { ChatMessage, SystemMessage } from '../types';
-import { MetadataMessage, MetadataMessageRouter } from './MetadataMessageRouter';
+import { ChatMessage } from '../types';
+import { MetadataMessageRouter } from './MetadataMessageRouter';
 
 export interface Message {
   content: string | null | undefined;
@@ -23,7 +23,6 @@ export interface ProcessedChatMessage extends ChatMessage {
 
 export interface MessageProcessorEvents {
   onChatMessage: (stepIndex: number, message: ProcessedChatMessage) => void;
-  onSystemMessage: (stepIndex: number, message: SystemMessage) => void;
   onThreadUpdate: (stepIndex: number, threadId: string) => void;
   onError: (stepIndex: number, error: any) => void;
 }
@@ -72,55 +71,27 @@ export class MessageProcessor {
   /**
    * Process metadata message and route to interested subscribers
    */
-  processMetadata(metadata: any, stepIndex: number): void {
-    console.log(`[MessageProcessor] Processing metadata for step ${stepIndex}:`, metadata);
+  processMetadata(message: any): void {
+    console.log(`[MessageProcessor] Processing metadata`, message);
 
     try {
-      // Create system message for backward compatibility
-      const systemMessage: SystemMessage = {
-        type: 'METADATA',
-        stepIndex,
-        payload: metadata,
-        timestamp: new Date()
-      };
-      this.events.onSystemMessage(stepIndex, systemMessage);
-
       // Extract messageType and route to specific subscribers
       // Check multiple possible locations for messageType
-      const messageType = metadata?.messageType || 
-                         metadata?.type || 
-                         metadata?.metadata?.messageType || 
-                         metadata?.metadata?.type ||
-                         metadata?.Metadata?.messageType ||
-                         metadata?.Metadata?.type ||
-                         'UNKNOWN';
+      const messageType = message?.metadata?.messageType || 'UNKNOWN';
       
-      console.log(`[MessageProcessor] 🔍 Extracted messageType: "${messageType}" for step ${stepIndex}`);
-      console.log(`[MessageProcessor] 📋 Available metadata paths:`, {
-        'metadata.messageType': metadata?.messageType,
-        'metadata.type': metadata?.type,
-        'metadata.metadata.messageType': metadata?.metadata?.messageType,
-        'metadata.metadata.type': metadata?.metadata?.type,
-        'metadata.Metadata.messageType': metadata?.Metadata?.messageType,
-        'metadata.Metadata.type': metadata?.Metadata?.type
-      });
-      
-      const metadataMessage: MetadataMessage = {
-        messageType,
-        stepIndex,
-        data: metadata,
-        timestamp: new Date(),
-        metadata: metadata
-      };
+      console.log(`[MessageProcessor] Extracted messageType: "${messageType}"`);
 
-      console.log(`[MessageProcessor] 📤 Routing metadata message:`, metadataMessage);
-      
+      if (message?.metadata === undefined || message?.metadata === null) {
+        console.warn(`[MessageProcessor] Metadata is undefined or null`);
+        return;
+      }
+
       // Route to interested subscribers
-      this.metadataRouter.routeMessage(metadataMessage);
+      this.metadataRouter.routeMessage(message.metadata);
 
     } catch (error) {
-      console.error(`[MessageProcessor] Error processing metadata for step ${stepIndex}:`, error);
-      this.events.onError(stepIndex, error);
+      console.error(`[MessageProcessor] Error processing metadata:`, error);
+      this.events.onError(0, error);
     }
   }
 
@@ -153,15 +124,6 @@ export class MessageProcessor {
    */
   processThreadUpdate(threadId: string, stepIndex: number): void {
     console.log(`[MessageProcessor] Thread ID updated for step ${stepIndex}: ${threadId}`);
-    
-    // Emit system message for thread update
-    const systemMessage: SystemMessage = {
-      type: 'INFO',
-      stepIndex,
-      payload: { threadId },
-      timestamp: new Date()
-    };
-    this.events.onSystemMessage(stepIndex, systemMessage);
     
     // Emit thread update event
     this.events.onThreadUpdate(stepIndex, threadId);

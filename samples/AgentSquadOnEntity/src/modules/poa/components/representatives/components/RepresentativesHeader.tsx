@@ -1,6 +1,6 @@
 import React from 'react';
 import { Representative, ActivityData } from '../types/representative.types';
-import { countRepresentativesWithNames, countVerifiedRepresentatives, getValidRepresentatives } from '../utils/representative.utils';
+import { countRepresentativesWithNames, getValidRepresentatives } from '../utils/representative.utils';
 
 interface RepresentativesHeaderProps {
   representatives: Representative[];
@@ -16,7 +16,6 @@ const RepresentativesHeader: React.FC<RepresentativesHeaderProps> = ({
   onSave
 }) => {
   const representativeCount = countRepresentativesWithNames(representatives);
-  const verifiedCount = countVerifiedRepresentatives(representatives);
   const hasValidData = getValidRepresentatives(representatives).length > 0;
 
   return (
@@ -29,11 +28,6 @@ const RepresentativesHeader: React.FC<RepresentativesHeaderProps> = ({
         <div className="flex items-center space-x-3">
           <div className="text-sm text-gray-600">
             {representativeCount} representative(s)
-            {representatives.some(r => r.id) && (
-              <span className="ml-1 text-green-600 font-medium">
-                ({verifiedCount} verified)
-              </span>
-            )}
           </div>
           
           {representatives.length > 1 && (

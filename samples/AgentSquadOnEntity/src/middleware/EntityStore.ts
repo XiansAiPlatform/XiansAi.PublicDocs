@@ -544,4 +544,36 @@ export class EntityStore {
     
     console.log(`[EntityStore] Cleared category ${category}: ${entities.length} entities removed`);
   }
+
+  // Get all categories with their entities
+  public getAllCategories(): Map<string, Map<string, BaseEntity>> {
+    return new Map(this.categories);
+  }
+
+  // Get all category names
+  public getCategoryNames(): string[] {
+    return Array.from(this.categories.keys());
+  }
+
+  // Get documents from all categories (assuming document-like entities)
+  public getAllDocumentCategories(): { category: string; documents: BaseEntity[] }[] {
+    const result: { category: string; documents: BaseEntity[] }[] = [];
+    
+    this.categories.forEach((entityMap, categoryName) => {
+      const documents = Array.from(entityMap.values()).filter(entity => 
+        entity.type === 'poa_document' || 
+        (entity as any).documentId || 
+        (entity as any).title
+      );
+      
+      if (documents.length > 0) {
+        result.push({
+          category: categoryName,
+          documents: documents
+        });
+      }
+    });
+    
+    return result;
+  }
 } 

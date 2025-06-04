@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { ChatMessage, SystemMessage, ConnectionState, InboundMessage, HubEvent } from '../types';
+import { ChatMessage, ConnectionState, InboundMessage, HubEvent } from '../types';
 import { WebSocketHub } from '../middleware/WebSocketHub';
 import { MetadataMessage } from '../middleware/MetadataMessageRouter';
-import { EntityStore } from '../middleware/EntityStore';
-import { DocumentService } from '../modules/poa/services/DocumentService';
 import { useSteps } from './StepsContext';
 import { useSettings } from './SettingsContext';
 import { getAgentForStep } from '../modules/poa/steps';
@@ -15,7 +13,6 @@ interface WebSocketStepsContextType {
   
   // Messages
   chatMessages: Map<number, ChatMessage[]>;
-  systemMessages: Map<number, SystemMessage[]>;
   
   // Actions
   connect: () => Promise<void>;
@@ -25,9 +22,6 @@ interface WebSocketStepsContextType {
   // Metadata subscription
   subscribeToMetadata: (subscriberId: string, messageTypes: string[], callback: (message: MetadataMessage) => void, stepIndex?: number) => () => void;
   unsubscribeFromMetadata: (subscriberId: string) => void;
-  
-  // UI State from system messages
-  uiState: Map<number, any>;
   
   // Statistics
   getStats: () => any;
@@ -53,14 +47,10 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   
   const [connectionStates, setConnectionStates] = useState<Map<number, ConnectionState>>(new Map());
   const [chatMessages, setChatMessages] = useState<Map<number, ChatMessage[]>>(new Map());
-  const [systemMessages, setSystemMessages] = useState<Map<number, SystemMessage[]>>(new Map());
   const [threadIds, setThreadIds] = useState<Map<number, string>>(new Map());
-  const [uiState, setUiState] = useState<Map<number, any>>(new Map());
   const [isConnected, setIsConnected] = useState(false);
   
   const hubRef = useRef<WebSocketHub | null>(null);
-  const entityStoreRef = useRef<EntityStore>(EntityStore.getInstance());
-  const documentServiceRef = useRef<DocumentService>(DocumentService.getInstance());
 
   // Helper functions for message management
   const addChatMessage = useCallback((message: ChatMessage) => {
@@ -74,15 +64,6 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
     if (message.threadId) {
       setThreadIds(prev => new Map(prev).set(message.stepIndex, message.threadId!));
     }
-  }, []);
-
-  const addSystemMessage = useCallback((message: SystemMessage) => {
-    setSystemMessages(prevSystemMessages => {
-      const newSystemMessagesMap = new Map(prevSystemMessages);
-      const existingMessages = newSystemMessagesMap.get(message.stepIndex) || [];
-      newSystemMessagesMap.set(message.stepIndex, [...existingMessages, message]);
-      return newSystemMessagesMap;
-    });
   }, []);
 
   const getThreadId = useCallback((stepIndex: number): string | undefined => {
@@ -111,47 +92,22 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
       addChatMessage(chatMessage);
     };
 
-    const handleSystemMessage = (event: HubEvent) => {
-      const systemMessage = event.data as SystemMessage;
-      addSystemMessage(systemMessage);
-      
-      if (systemMessage.type === 'UI_UPDATE') {
-        setUiState(prevUiState => {
-          const newUiStateMap = new Map(prevUiState);
-          newUiStateMap.set(systemMessage.stepIndex, systemMessage.payload);
-          return newUiStateMap;
-        });
-      }
-      
-      if (systemMessage.type === 'ENTITY_UPDATE' || systemMessage.type === 'DATA') {
-        entityStoreRef.current.handleSystemMessage(systemMessage);
-      }
-
-      if (systemMessage.payload && 
-          (systemMessage.payload.messageType === 'DocumentResponse' || 
-           systemMessage.payload.messageType === 'FetchDocumentResponse')) {
-        documentServiceRef.current.handleDocumentResponse(systemMessage.payload);
-      }
-    };
-
     const handleError = (event: HubEvent) => {
       console.error(`[WebSocketStepsContext] Event: error`, event.data);
     };
 
     hub.on('connection_change', handleConnectionChange);
     hub.on('message', handleMessage);
-    hub.on('system_message', handleSystemMessage);
     hub.on('error', handleError);
 
     // Cleanup function
     return () => {
       hub.off('connection_change', handleConnectionChange);
       hub.off('message', handleMessage);
-      hub.off('system_message', handleSystemMessage);
       hub.off('error', handleError);
       hubRef.current = null;
     };
-  }, [addChatMessage, addSystemMessage, steps.length]);
+  }, [addChatMessage, steps.length]);
 
   // Effect to initialize the hub when settings or steps change
   useEffect(() => {
@@ -224,33 +180,14 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
     };
     addChatMessage(userMessage);
 
-    // Prepare request using agent or fallback to bot
-    let request: InboundMessage;
-    if (agent) {
-      request = {
-        threadId: getThreadId(activeStep),
-        agent: agent.agent,
-        workflowType: agent.workflowType || '',
-        workflowId: agent.workflowId,
-        participantId: settings.participantId || '',
-        content,
-        metadata
-      };
-    } else {
-      // Fallback to old bot structure
-      request = {
-        threadId: getThreadId(activeStep),
-        agent: currentStepDetails.bot!.agent || '',
-        workflowType: currentStepDetails.bot!.workflowType || '',
-        workflowId: currentStepDetails.bot!.workflowId!,
-        participantId: settings.participantId || '',
-        content,
-        metadata
-      };
-    }
-    
     try {
-      await hub.sendMessage(request, activeStep);
+      if (agent) {
+        // Use the new sendMessageToAgent method
+        await hub.sendMessageToAgent(content, agent.id);
+      } else {
+        // This fallback path shouldn't be needed anymore, but keeping for safety
+        throw new Error('No agent found for current step.');
+      }
     } catch (error) {
       console.error(`[WebSocketStepsContext] Error sending message for step ${activeStep}:`, error);
       throw error;
@@ -304,47 +241,38 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   // Get statistics from all components
   const getStats = useCallback(() => {
     const hub = hubRef.current;
-    const entityStore = entityStoreRef.current;
     
     // Calculate message store stats directly from React state
     const messageStoreStats = {
-      totalSteps: Array.from(new Set([...chatMessages.keys(), ...systemMessages.keys()])).length,
+      totalSteps: Array.from(new Set([...chatMessages.keys()])).length,
       totalChatMessages: Array.from(chatMessages.values()).reduce((sum, msgs) => sum + msgs.length, 0),
-      totalSystemMessages: Array.from(systemMessages.values()).reduce((sum, msgs) => sum + msgs.length, 0),
-      stepStats: Array.from(new Set([...chatMessages.keys(), ...systemMessages.keys()])).reduce((acc, stepIndex) => {
+      stepStats: Array.from(new Set([...chatMessages.keys()])).reduce((acc, stepIndex) => {
         acc[stepIndex] = {
-          chat: chatMessages.get(stepIndex)?.length || 0,
-          system: systemMessages.get(stepIndex)?.length || 0
+          chat: chatMessages.get(stepIndex)?.length || 0
         };
         return acc;
-      }, {} as Record<number, { chat: number; system: number }>)
+      }, {} as Record<number, { chat: number }>)
     };
     
     return {
       hub: hub?.getStats() || null,
       messageStore: messageStoreStats,
-      entityStore: entityStore?.getStats() || null,
       context: {
         isConnected,
-        connectionStatesCount: connectionStates.size,
-        chatMessagesCount: Array.from(chatMessages.values()).reduce((sum, msgs) => sum + msgs.length, 0),
-        systemMessagesCount: Array.from(systemMessages.values()).reduce((sum, msgs) => sum + msgs.length, 0),
-        uiStateCount: uiState.size
+        connectionStatesCount: connectionStates.size
       }
     };
-  }, [isConnected, connectionStates, chatMessages, systemMessages, uiState]);
+  }, [isConnected, connectionStates, chatMessages]);
   
   const value: WebSocketStepsContextType = {
     connectionStates,
     isConnected,
     chatMessages,
-    systemMessages,
     connect: manualConnect,
     disconnect: manualDisconnect,
     sendMessage,
     subscribeToMetadata,
     unsubscribeFromMetadata,
-    uiState,
     getStats
   };
   

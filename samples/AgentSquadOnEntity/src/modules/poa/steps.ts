@@ -1,8 +1,10 @@
 import type { StepDefinition, Agent } from '../../components/types';
+import { useParams, matchPath } from 'react-router-dom';
 
 // Base URL configuration for Power of Attorney workflow
 export const POA_BASE_URL = '/poa';
 export const POA_ROUTE_PATTERN = `${POA_BASE_URL}/:documentId/:stepSlug`;
+
 
 // Agents collection - separated from steps for better management and websocket connections
 export const Agents: Agent[] = [
@@ -140,4 +142,22 @@ export const initializeAgentWebsockets = () => {
       workflowType: agent.workflowType
     };
   });
+};
+
+// Function to generate default metadata for POA workflow
+export const generateDefaultMetadata = () => {
+  // Use React Router's matchPath to extract documentId from current URL
+  const match = matchPath(
+    POA_ROUTE_PATTERN,
+    window.location.pathname
+  );
+  
+  if (match?.params?.documentId && match.params.documentId !== 'new') {
+    return {
+      documentId: match.params.documentId,
+      requestId: Date.now().toString() //generate unique id for the request
+    };
+  }
+  
+  return {};
 }; 

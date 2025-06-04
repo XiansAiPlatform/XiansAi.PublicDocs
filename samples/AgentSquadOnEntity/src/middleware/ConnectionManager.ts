@@ -196,10 +196,10 @@ export class ConnectionManager {
     });
 
     // Handle received metadata (delivered separately)
-    connection.on('ReceiveMetadata', (metadata: any) => {
-      console.log(`[ConnectionManager] 📊 ReceiveMetadata for agent ${agentIndex} (${agent?.title}):`, metadata);
-      console.log(`[ConnectionManager] 🔍 Metadata messageType:`, metadata?.Metadata?.messageType || metadata?.metadata?.messageType || 'NOT_FOUND');
-      this.messageProcessor.processMetadata(metadata, agentIndex);
+    connection.on('ReceiveMetadata', (message: any) => {
+      console.log(`[ConnectionManager] 📊 ReceiveMetadata for agent ${agentIndex} (${agent?.title}):`, message);
+      console.log(`[ConnectionManager] 🔍 Metadata messageType:`, message?.metadata?.messageType || 'NOT_FOUND');
+      this.messageProcessor.processMetadata(message);
     });
 
     // Handle thread ID updates
