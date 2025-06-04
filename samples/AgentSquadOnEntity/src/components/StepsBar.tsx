@@ -2,11 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { AiOutlineRobot } from 'react-icons/ai';
 import { useSteps } from '../context/StepsContext';
-import { getThemeColors } from './power-of-attorney/theme';
-import { getStepUrl } from './power-of-attorney/steps';
+import { getThemeColors } from './theme';
+import { getStepUrl } from '../modules/poa/steps';
 
 const StepsBar: React.FC = () => {
-  const { steps, activeStep, isInitialized } = useSteps();
+  const { steps, activeStep, documentId, isInitialized } = useSteps();
 
   // Don't render anything if steps are not initialized yet
   if (!isInitialized || steps.length === 0) {
@@ -27,7 +27,7 @@ const StepsBar: React.FC = () => {
           <React.Fragment key={step.title}>
             {/* Step Node */}
             <Link
-              to={getStepUrl(step)}
+              to={getStepUrl(step, documentId)}
               className="flex flex-col items-center focus:outline-none"
             >
               <div

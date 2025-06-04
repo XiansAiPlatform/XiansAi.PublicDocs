@@ -20,6 +20,7 @@ const ChatPane: React.FC = () => {
   // Custom hooks for state management
   const {
     currentStep,
+    currentAgent,
     hasBot,
     currentMessages,
     connectionState,
@@ -90,7 +91,7 @@ const ChatPane: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       <ChatHeader
-        bot={currentStep.bot!}
+        bot={currentAgent || currentStep.bot!}
         theme={currentStep.theme}
         connectionState={connectionState}
         isStepConnected={isStepConnected}
@@ -117,7 +118,7 @@ const ChatPane: React.FC = () => {
       )}
 
       <ChatInput
-        botTitle={currentStep.bot?.title}
+        botTitle={currentAgent?.title || currentStep.bot?.title}
         isStepConnected={isStepConnected}
         isTyping={isTyping}
         onSendMessage={handleSendMessage}

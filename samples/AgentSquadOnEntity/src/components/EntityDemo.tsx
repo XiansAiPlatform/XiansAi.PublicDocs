@@ -186,7 +186,7 @@ const EntityDemo: React.FC = () => {
       } else if (selectedEntity.type === 'task') {
         updates.status = 'in_progress';
       } else if (selectedEntity.type === 'audit_result') {
-        updates.isSuccess = !selectedEntity.isSuccess;
+        updates.isSuccess = true;
       }
       
       updateEntity(selectedEntity.id, updates);

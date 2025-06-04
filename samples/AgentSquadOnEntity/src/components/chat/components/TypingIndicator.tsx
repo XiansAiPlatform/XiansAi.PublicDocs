@@ -11,26 +11,41 @@ interface ActivityData {
   details?: string;
   success?: boolean;
   timestamp?: string;
+  id?: string; // Add unique identifier
 }
 
 const TypingIndicator: React.FC<TypingIndicatorProps> = ({ typingStage, onContentChange }) => {
-  const [latestActivity, setLatestActivity] = useState<ActivityData | null>(null);
+  const [activities, setActivities] = useState<ActivityData[]>([]);
 
   // Notify parent when content changes (height might change)
   useEffect(() => {
     if (onContentChange) {
       onContentChange();
     }
-  }, [latestActivity, onContentChange]);
+  }, [activities, onContentChange]);
 
   // Stable callback to prevent constant re-subscribing
   const handleActivityLogMessage = useCallback((message: any) => {
     console.log('[TypingIndicator] ActivityLog message received:', message);
     
-    // Extract ActivityLog details from the metadata
-    const activityData = message.data?.metadata || message.metadata;
+    // Extract ActivityLog details from multiple possible metadata locations
+    const activityData = message.data?.metadata || 
+                        message.metadata || 
+                        message.data?.Metadata || 
+                        message.Metadata ||
+                        message.data;
+    
+    console.log('[TypingIndicator] 🔍 Extracted activityData:', activityData);
+    console.log('[TypingIndicator] 📋 Available paths:', {
+      'message.data?.metadata': message.data?.metadata,
+      'message.metadata': message.metadata,
+      'message.data?.Metadata': message.data?.Metadata,
+      'message.Metadata': message.Metadata,
+      'message.data': message.data
+    });
+    
     if (activityData && activityData.messageType === 'ActivityLog') {
-      console.log('[TypingIndicator] ActivityLog details:', {
+      console.log('[TypingIndicator] ✅ ActivityLog details:', {
         summary: activityData.summary,
         details: activityData.details,
         success: activityData.success,
@@ -38,12 +53,20 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({ typingStage, onConten
         stepIndex: message.stepIndex
       });
       
-      // Update state with the latest activity
-      setLatestActivity({
+      // Add new activity to the list
+      const newActivity: ActivityData = {
         summary: activityData.summary,
         details: activityData.details,
         success: activityData.success,
-        timestamp: activityData.timestamp
+        timestamp: activityData.timestamp,
+        id: `${Date.now()}-${Math.random()}` // Simple unique ID
+      };
+      
+      setActivities(prev => [...prev, newActivity]);
+    } else {
+      console.log('[TypingIndicator] ❌ Not ActivityLog or no valid activityData:', {
+        messageType: activityData?.messageType,
+        hasActivityData: !!activityData
       });
     }
   }, []);
@@ -68,25 +91,29 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({ typingStage, onConten
   };
 
   const renderActivityContent = () => {
-    if (latestActivity?.summary) {
+    if (activities.length > 0) {
       return (
-        <div className="space-y-1">
-          <div className="flex items-center space-x-2">
-            <div className="flex space-x-1">
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '200ms' }}></div>
-              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></div>
+        <div className="space-y-2">
+          {activities.map((activity, index) => (
+            <div key={activity.id || index} className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <div className="flex space-x-1">
+                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
+                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '200ms' }}></div>
+                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></div>
+                </div>
+                <span className="text-blue-600 text-xs font-medium">
+                  {activity.success === false ? '⚠️ ' : ''}
+                  {activity.summary}
+                </span>
+              </div>
+              {activity.details && (
+                <div className="text-xs text-gray-500 ml-4 pl-2 border-l-2 border-gray-200">
+                  {activity.details}
+                </div>
+              )}
             </div>
-            <span className="text-blue-600 text-xs font-medium">
-              {latestActivity.success === false ? '⚠️ ' : ''}
-              {latestActivity.summary}
-            </span>
-          </div>
-          {latestActivity.details && (
-            <div className="text-xs text-gray-500 ml-4 pl-2 border-l-2 border-gray-200">
-              {latestActivity.details}
-            </div>
-          )}
+          ))}
         </div>
       );
     }
@@ -105,7 +132,7 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({ typingStage, onConten
 
   return (
     <div className={`mr-auto bg-white border text-gray-800 max-w-[85%] rounded-lg px-3 py-2 text-sm shadow transition-all duration-200 ${
-      latestActivity?.summary 
+      activities.length > 0 
         ? 'border-blue-200 bg-blue-50' 
         : 'border-gray-200'
     }`}>

@@ -18,6 +18,15 @@ export interface StepThemeColors {
   buttonSecondaryBorder: string;
 }
 
+export interface Agent {
+  id: string;
+  workflowId: string; // Unique identifier
+  title: string;
+  agent: string;
+  description?: string;
+  workflowType?: string;
+}
+
 export interface StepBot {
   title: string;
   id?: string;
@@ -32,5 +41,7 @@ export interface StepDefinition {
   slug: string;
   theme: StepTheme;
   componentLoader?: ComponentLoader;
-  bot?: StepBot;
+  botId?: string; // Reference to agent by id (preferred)
+  botWorkflowId?: string; // Reference to agent by workflowId (backward compatibility)
+  bot?: StepBot; // Keep for backward compatibility, but prefer botId
 } 

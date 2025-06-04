@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
-import { useMetadataSubscription } from '../../../../hooks/useMetadataSubscription';
+import { useState, useCallback, useEffect } from 'react';
+import { useMetadataSubscription } from '../../../../../hooks/useMetadataSubscription';
+import { useDocumentData } from './useDocumentData';
 import { Representative, ActivityData } from '../types/representative.types';
 import { 
   createEmptyRepresentative, 
@@ -10,6 +11,30 @@ export const useRepresentativesData = () => {
   const [representatives, setRepresentatives] = useState<Representative[]>([]);
   const [latestActivity, setLatestActivity] = useState<ActivityData | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  // Get document data and listen to updates
+  const { 
+    document, 
+    loading: documentLoading, 
+    error: documentError,
+    representatives: documentRepresentatives 
+  } = useDocumentData();
+
+  // Initialize representatives from document data when available
+  useEffect(() => {
+    if (documentRepresentatives && documentRepresentatives.length > 0) {
+      console.log('[useRepresentativesData] Initializing representatives from document:', documentRepresentatives);
+      const formattedReps = documentRepresentatives.map((rep: any) => ({
+        id: rep.id,
+        fullName: rep.fullName || '',
+        nationalId: rep.nationalId || '',
+        relationship: rep.relationship || ''
+      }));
+      setRepresentatives(formattedReps);
+      // Exit edit mode when document data is loaded
+      setEditingIndex(null);
+    }
+  }, [documentRepresentatives]);
 
   // Stable callback to prevent constant re-subscribing
   const handleActivityLogMessage = useCallback((message: any) => {
@@ -117,6 +142,10 @@ export const useRepresentativesData = () => {
     removeRepresentative,
     toggleEditMode,
     clearAllRepresentatives,
-    saveRepresentatives
+    saveRepresentatives,
+    // Document-related data
+    document,
+    documentLoading,
+    documentError
   };
 }; 

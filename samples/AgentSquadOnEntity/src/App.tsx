@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import StepsBar from './components/StepsBar';
 import ChatPane from './components/chat/ChatPane';
@@ -9,7 +9,7 @@ import { StepsProvider, useSteps } from './context/StepsContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { WebSocketStepsProvider } from './context/WebSocketStepsContext';
 import { EntityProvider } from './context/EntityContext';
-import { POA_ROUTE_PATTERN, getFirstStepUrl } from './components/power-of-attorney/steps';
+import { POA_ROUTE_PATTERN, getFirstStepUrl, getStepUrlBySlug } from './modules/poa/steps';
 
 const MainLayout: React.FC = () => {
   const { activeStep } = useSteps();
@@ -109,6 +109,15 @@ const MainLayout: React.FC = () => {
   );
 };
 
+// Backward compatibility redirect component
+const LegacyRedirect: React.FC = () => {
+  const { stepSlug } = useParams<{ stepSlug: string }>();
+  if (stepSlug) {
+    return <Navigate to={getStepUrlBySlug(stepSlug, 'new')} replace />;
+  }
+  return <Navigate to={getFirstStepUrl('new')} replace />;
+};
+
 const PowerOfAttorneyWorkflow: React.FC = () => (
   <StepsProvider>
     <EntityProvider>
@@ -123,14 +132,17 @@ const App: React.FC = () => (
   <SettingsProvider>
     <Router>
       <Routes>
-        {/* Redirect root to the first step */}
-        <Route path="/" element={<Navigate to={getFirstStepUrl()} replace />} />
+        {/* Redirect root to the first step with new document */}
+        <Route path="/" element={<Navigate to={getFirstStepUrl('new')} replace />} />
         
-        {/* Power of Attorney workflow routes */}
+        {/* Backward compatibility - redirect old URLs to new pattern */}
+        <Route path="/poa/step/:stepSlug" element={<LegacyRedirect />} />
+        
+        {/* Power of Attorney workflow routes with document ID */}
         <Route path={POA_ROUTE_PATTERN} element={<PowerOfAttorneyWorkflow />} />
         
-        {/* Catch-all redirect to first step */}
-        <Route path="*" element={<Navigate to={getFirstStepUrl()} replace />} />
+        {/* Catch-all redirect to first step with new document */}
+        <Route path="*" element={<Navigate to={getFirstStepUrl('new')} replace />} />
       </Routes>
     </Router>
   </SettingsProvider>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSteps } from '../context/StepsContext';
-import type { ComponentLoader } from './power-of-attorney/types';
-import { getThemeColors } from './power-of-attorney/theme';
+import type { ComponentLoader } from './types';
+import { getThemeColors } from './theme';
 
 // Generic dynamic component loader
 const DynamicEntityComponent: React.FC<{ componentLoader: ComponentLoader }> = ({ componentLoader }) => {
@@ -99,7 +99,7 @@ const LoadingFallback: React.FC = () => (
 
 // Main EntityPane component
 const EntityPane: React.FC = () => {
-  const { steps, activeStep, navigateToStepByIndex, isInitialized } = useSteps();
+  const { steps, activeStep, documentId, navigateToStepByIndex, isInitialized } = useSteps();
   
   // Show loading state if not initialized yet
   if (!isInitialized || steps.length === 0) {
@@ -156,65 +156,20 @@ const EntityPane: React.FC = () => {
 
   const componentLoader = currentStep.componentLoader;
 
-  if (!componentLoader) {
-    return (
-      <div className="h-full flex flex-col bg-white">
-        <header className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">{currentStep.title}</h2>
-              <p className="text-sm text-gray-600 mt-1">Step {activeStep + 1} of {steps.length}</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              {canGoPrevious && (
-                <button
-                  onClick={goToPreviousStep}
-                  className={`inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 focus:outline-none ${themeColors.buttonSecondary} ${themeColors.buttonSecondaryHover} ${themeColors.buttonSecondaryBorder}`}
-                >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Previous
-                </button>
-              )}
-              {canGoNext && (
-                <button
-                  onClick={goToNextStep}
-                  className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white focus:outline-none ${themeColors.buttonPrimary} ${themeColors.buttonPrimaryHover}`}
-                >
-                  Next
-                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              )}
-            </div>
-          </div>
-        </header>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center max-w-md p-6">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No UI Component Defined</h3>
-            <p className="text-gray-600">
-              This step doesn't have a UI component configured yet.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="h-full flex flex-col bg-white">
       <header className="px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">{currentStep.title}</h2>
-            <p className="text-sm text-gray-600 mt-1">Step {activeStep + 1} of {steps.length}</p>
+            <p className="text-sm text-gray-600 mt-1">
+              Step {activeStep + 1} of {steps.length}
+              {documentId && documentId !== 'new' && (
+                <span className="ml-2 text-xs text-blue-600">
+                  Document: {documentId.slice(0, 8)}...
+                </span>
+              )}
+            </p>
           </div>
           <div className="flex items-center space-x-2">
             {canGoPrevious && (
@@ -244,7 +199,16 @@ const EntityPane: React.FC = () => {
       </header>
       <div className="flex-1">
         <Suspense fallback={<LoadingFallback />}>
-          <DynamicEntityComponent componentLoader={componentLoader} />
+          {componentLoader ? (
+            <DynamicEntityComponent componentLoader={componentLoader} />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Component Available</h3>
+                <p className="text-gray-600">This step doesn't have a component configured.</p>
+              </div>
+            </div>
+          )}
         </Suspense>
       </div>
     </div>

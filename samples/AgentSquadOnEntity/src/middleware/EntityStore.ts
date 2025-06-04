@@ -17,6 +17,9 @@ export class EntityStore {
     error: null
   };
 
+  // Add categories support for organized entity storage
+  private categories: Map<string, Map<string, BaseEntity>> = new Map();
+
   private listeners: Array<(state: EntityStoreState) => void> = [];
 
   private constructor() {
@@ -354,32 +357,42 @@ export class EntityStore {
     };
   }
 
-  // Integration with system messages
+  // Integration with system messages - enhanced to support categories
   public handleSystemMessage(message: any): void {
     try {
       if (message.type === 'ENTITY_UPDATE' && message.payload) {
-        const { action, entity, entityId, entities } = message.payload;
+        const { action, entity, entityId, entities, category, key } = message.payload;
         
         switch (action) {
           case 'ADD':
-            if (entity) {
+            if (category && key && entity) {
+              this.addEntityToCategory(category, key, entity);
+            } else if (entity) {
               this.addEntity(entity);
             } else if (entities) {
               this.addEntities(entities);
             }
             break;
           case 'UPDATE':
-            if (entity && entityId) {
+            if (category && key && entity) {
+              this.updateEntityInCategory(category, key, entity);
+            } else if (entity && entityId) {
               this.updateEntity(entityId, entity);
             }
             break;
           case 'DELETE':
-            if (entityId) {
+            if (category && key) {
+              this.deleteEntityFromCategory(category, key);
+            } else if (entityId) {
               this.deleteEntity(entityId);
             }
             break;
           case 'CLEAR':
-            this.clearEntities(entity?.type);
+            if (category) {
+              this.clearCategory(category);
+            } else {
+              this.clearEntities(entity?.type);
+            }
             break;
         }
       }
@@ -387,5 +400,148 @@ export class EntityStore {
       console.error('[EntityStore] Error handling system message:', error);
       this.setError(`Failed to handle system message: ${error}`);
     }
+  }
+
+  // Category operations
+  public addEntityToCategory<T extends BaseEntity>(category: string, key: string, entity: T): void {
+    const now = new Date();
+    const entityWithTimestamp = {
+      ...entity,
+      updatedAt: now,
+      createdAt: entity.createdAt || now,
+      version: (entity.version || 0) + 1
+    };
+
+    // Ensure category exists
+    if (!this.categories.has(category)) {
+      this.categories.set(category, new Map());
+    }
+
+    const categoryMap = this.categories.get(category)!;
+    categoryMap.set(key, entityWithTimestamp);
+
+    // Also add to main entities store for backwards compatibility
+    this.state.entities.set(entity.id, entityWithTimestamp);
+    this.updateEntityTypeState(entity.type, 'ADD', entityWithTimestamp);
+    
+    const action: EntityAction<T> = {
+      type: 'ADD',
+      payload: { entity: entityWithTimestamp },
+      timestamp: now
+    };
+
+    this.notifySubscriptions([entityWithTimestamp], action);
+    this.notifyListeners();
+    
+    console.log(`[EntityStore] Added entity to category ${category} with key ${key}: ${entity.id} (type: ${entity.type})`);
+  }
+
+  public getEntityFromCategory<T extends BaseEntity>(category: string, key: string): T | undefined {
+    const categoryMap = this.categories.get(category);
+    if (!categoryMap) return undefined;
+    return categoryMap.get(key) as T;
+  }
+
+  public updateEntityInCategory<T extends BaseEntity>(category: string, key: string, updates: Partial<T>): void {
+    const categoryMap = this.categories.get(category);
+    if (!categoryMap) {
+      console.warn(`[EntityStore] Cannot update entity in non-existent category: ${category}`);
+      return;
+    }
+
+    const existingEntity = categoryMap.get(key);
+    if (!existingEntity) {
+      console.warn(`[EntityStore] Cannot update non-existent entity in category ${category} with key ${key}`);
+      return;
+    }
+
+    const now = new Date();
+    const updatedEntity = {
+      ...existingEntity,
+      ...updates,
+      id: existingEntity.id, // Ensure ID cannot be changed
+      updatedAt: now,
+      version: (existingEntity.version || 0) + 1
+    } as T;
+
+    categoryMap.set(key, updatedEntity);
+    
+    // Also update in main entities store
+    this.state.entities.set(existingEntity.id, updatedEntity);
+    this.updateEntityTypeState(existingEntity.type, 'UPDATE', updatedEntity);
+
+    const action: EntityAction<T> = {
+      type: 'UPDATE',
+      payload: { entity: updatedEntity },
+      timestamp: now
+    };
+
+    this.notifySubscriptions([updatedEntity], action);
+    this.notifyListeners();
+    
+    console.log(`[EntityStore] Updated entity in category ${category} with key ${key}: ${existingEntity.id} (type: ${existingEntity.type})`);
+  }
+
+  public deleteEntityFromCategory(category: string, key: string): void {
+    const categoryMap = this.categories.get(category);
+    if (!categoryMap) {
+      console.warn(`[EntityStore] Cannot delete entity from non-existent category: ${category}`);
+      return;
+    }
+
+    const entity = categoryMap.get(key);
+    if (!entity) {
+      console.warn(`[EntityStore] Cannot delete non-existent entity in category ${category} with key ${key}`);
+      return;
+    }
+
+    categoryMap.delete(key);
+    
+    // Also remove from main entities store
+    this.state.entities.delete(entity.id);
+    this.updateEntityTypeState(entity.type, 'DELETE', entity, entity.id);
+
+    const action: EntityAction = {
+      type: 'DELETE',
+      payload: { entityId: entity.id },
+      timestamp: new Date()
+    };
+
+    this.notifySubscriptions([entity], action);
+    this.notifyListeners();
+    
+    console.log(`[EntityStore] Deleted entity from category ${category} with key ${key}: ${entity.id} (type: ${entity.type})`);
+  }
+
+  public getEntitiesFromCategory<T extends BaseEntity>(category: string): Map<string, T> {
+    const categoryMap = this.categories.get(category);
+    if (!categoryMap) return new Map();
+    return new Map(categoryMap) as Map<string, T>;
+  }
+
+  public clearCategory(category: string): void {
+    const categoryMap = this.categories.get(category);
+    if (!categoryMap) return;
+
+    const entities = Array.from(categoryMap.values());
+    
+    // Remove from main entities store
+    entities.forEach(entity => {
+      this.state.entities.delete(entity.id);
+      this.updateEntityTypeState(entity.type, 'DELETE', entity, entity.id);
+    });
+
+    categoryMap.clear();
+
+    const action: EntityAction = {
+      type: 'CLEAR',
+      payload: { entityId: category },
+      timestamp: new Date()
+    };
+
+    this.notifySubscriptions(entities, action);
+    this.notifyListeners();
+    
+    console.log(`[EntityStore] Cleared category ${category}: ${entities.length} entities removed`);
   }
 } 

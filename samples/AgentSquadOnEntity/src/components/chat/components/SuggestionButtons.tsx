@@ -1,5 +1,5 @@
 import React from 'react';
-import { getThemeColors } from '../../power-of-attorney/theme';
+import { getThemeColors } from '../../theme';
 
 interface SuggestionButtonsProps {
   theme: string;

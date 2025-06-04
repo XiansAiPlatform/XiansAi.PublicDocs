@@ -90,10 +90,20 @@ export class MessageProcessor {
       const messageType = metadata?.messageType || 
                          metadata?.type || 
                          metadata?.metadata?.messageType || 
-                         metadata?.metadata?.type || 
+                         metadata?.metadata?.type ||
+                         metadata?.Metadata?.messageType ||
+                         metadata?.Metadata?.type ||
                          'UNKNOWN';
       
-      console.log(`[MessageProcessor] Extracted messageType: ${messageType} for step ${stepIndex}`);
+      console.log(`[MessageProcessor] 🔍 Extracted messageType: "${messageType}" for step ${stepIndex}`);
+      console.log(`[MessageProcessor] 📋 Available metadata paths:`, {
+        'metadata.messageType': metadata?.messageType,
+        'metadata.type': metadata?.type,
+        'metadata.metadata.messageType': metadata?.metadata?.messageType,
+        'metadata.metadata.type': metadata?.metadata?.type,
+        'metadata.Metadata.messageType': metadata?.Metadata?.messageType,
+        'metadata.Metadata.type': metadata?.Metadata?.type
+      });
       
       const metadataMessage: MetadataMessage = {
         messageType,
@@ -103,6 +113,8 @@ export class MessageProcessor {
         metadata: metadata
       };
 
+      console.log(`[MessageProcessor] 📤 Routing metadata message:`, metadataMessage);
+      
       // Route to interested subscribers
       this.metadataRouter.routeMessage(metadataMessage);
 

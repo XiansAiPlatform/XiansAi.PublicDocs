@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { steps, getStepUrlBySlug, getStepUrl } from '../components/power-of-attorney/steps';
-import { StepDefinition, StepTheme, StepBot } from '../components/power-of-attorney/types';
+import { steps, getStepUrlBySlug, getStepUrl } from '../modules/poa/steps';
+import { StepDefinition, StepTheme, StepBot } from '../components/types';
 
 // Re-export types for convenience
 export type { StepDefinition, StepTheme, StepBot };
@@ -9,6 +9,7 @@ export type { StepDefinition, StepTheme, StepBot };
 interface StepsContextValue {
   steps: StepDefinition[];
   activeStep: number;
+  documentId: string | undefined;
   setActiveStep: (index: number) => void;
   navigateToStep: (stepSlug: string) => void;
   navigateToStepByIndex: (index: number) => void;
@@ -19,6 +20,7 @@ interface StepsContextValue {
 const defaultContextValue: StepsContextValue = {
   steps: steps,
   activeStep: 0,
+  documentId: undefined,
   setActiveStep: () => {},
   navigateToStep: () => {},
   navigateToStepByIndex: () => {},
@@ -28,7 +30,7 @@ const defaultContextValue: StepsContextValue = {
 const StepsContext = createContext<StepsContextValue>(defaultContextValue);
 
 export const StepsProvider = ({ children }: { children: ReactNode }) => {
-  const { stepSlug } = useParams<{ stepSlug?: string }>();
+  const { stepSlug, documentId } = useParams<{ stepSlug?: string; documentId?: string }>();
   const navigate = useNavigate();
   
   // Find the active step based on URL slug
@@ -52,14 +54,14 @@ export const StepsProvider = ({ children }: { children: ReactNode }) => {
 
   const navigateToStep = (stepSlug: string) => {
     if (navigate) {
-      navigate(getStepUrlBySlug(stepSlug));
+      navigate(getStepUrlBySlug(stepSlug, documentId));
     }
   };
 
   const navigateToStepByIndex = (index: number) => {
     if (index >= 0 && index < steps.length && navigate) {
       const step = steps[index];
-      navigate(getStepUrl(step));
+      navigate(getStepUrl(step, documentId));
     }
   };
 
@@ -70,6 +72,7 @@ export const StepsProvider = ({ children }: { children: ReactNode }) => {
   const value: StepsContextValue = {
     steps,
     activeStep,
+    documentId,
     setActiveStep,
     navigateToStep,
     navigateToStepByIndex,
@@ -80,12 +83,9 @@ export const StepsProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useSteps = () => {
-  const ctx = useContext(StepsContext);
-  
-  // Only warn if we somehow get an invalid state
-  if (!ctx.isInitialized && ctx.steps.length === 0) {
-    console.warn('useSteps called with invalid context state');
+  const context = useContext(StepsContext);
+  if (!context) {
+    throw new Error('useSteps must be used within a StepsProvider');
   }
-  
-  return ctx;
+  return context;
 }; 

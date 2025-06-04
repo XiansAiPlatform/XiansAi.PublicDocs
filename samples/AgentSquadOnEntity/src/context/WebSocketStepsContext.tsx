@@ -4,8 +4,10 @@ import { WebSocketHub } from '../middleware/WebSocketHub';
 import { MessageStore, MessageStoreEvents } from '../middleware/MessageStore';
 import { MetadataMessage } from '../middleware/MetadataMessageRouter';
 import { EntityStore } from '../middleware/EntityStore';
+import { DocumentService } from '../modules/poa/services/DocumentService';
 import { useSteps } from './StepsContext';
 import { useSettings } from './SettingsContext';
+import { getAgentForStep } from '../modules/poa/steps';
 
 interface WebSocketStepsContextType {
   // Connection states
@@ -59,6 +61,7 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   const hubRef = useRef<WebSocketHub | null>(null);
   const storeRef = useRef<MessageStore | null>(null);
   const entityStoreRef = useRef<EntityStore>(EntityStore.getInstance());
+  const documentServiceRef = useRef<DocumentService>(DocumentService.getInstance());
   
   // Initialize MessageStore with events - but only once
   if (storeRef.current === null) {
@@ -92,7 +95,6 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
     };
     
     storeRef.current = new MessageStore(messageStoreEvents);
-    console.log('[WebSocketStepsContext] MessageStore instance created with events.');
   }
   const currentMessageStore = storeRef.current;
   
@@ -100,11 +102,8 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     // Only proceed if we have steps data available
     if (steps.length === 0) {
-      console.log('[WebSocketStepsContext] Waiting for steps data...');
       return;
     }
-    
-    console.log('[WebSocketStepsContext] Mount effect: Getting WebSocketHub singleton instance.');
     
     const hub = WebSocketHub.getInstance();
     hubRef.current = hub;
@@ -119,14 +118,12 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
     const handleMessage = (event: HubEvent) => {
       const chatMessage = event.data as ChatMessage;
       currentMessageStore.addChatMessage(chatMessage);
-      // State will be updated via MessageStore events
     };
 
     const handleSystemMessage = (event: HubEvent) => {
       const systemMessage = event.data as SystemMessage;
       currentMessageStore.addSystemMessage(systemMessage);
       
-      // Handle UI state updates
       if (systemMessage.type === 'UI_UPDATE') {
         setUiState(prevUiState => {
           const newUiStateMap = new Map(prevUiState);
@@ -135,13 +132,15 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
         });
       }
       
-      // Handle entity updates through EntityStore
       if (systemMessage.type === 'ENTITY_UPDATE' || systemMessage.type === 'DATA') {
-        console.log('[WebSocketStepsContext] Processing entity update from system message:', systemMessage);
         entityStoreRef.current.handleSystemMessage(systemMessage);
       }
-      
-      // State will be updated via MessageStore events
+
+      if (systemMessage.payload && 
+          (systemMessage.payload.messageType === 'DocumentResponse' || 
+           systemMessage.payload.messageType === 'FetchDocumentResponse')) {
+        documentServiceRef.current.handleDocumentResponse(systemMessage.payload);
+      }
     };
 
     const handleError = (event: HubEvent) => {
@@ -152,17 +151,14 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
     hub.on('message', handleMessage);
     hub.on('system_message', handleSystemMessage);
     hub.on('error', handleError);
-    console.log(`[WebSocketStepsContext] Event listeners attached to hub.`);
 
     // Cleanup function
     return () => {
-      console.log(`[WebSocketStepsContext] Unmount effect: Removing event listeners from WebSocketHub.`);
       hub.off('connection_change', handleConnectionChange);
       hub.off('message', handleMessage);
       hub.off('system_message', handleSystemMessage);
       hub.off('error', handleError);
       hubRef.current = null;
-      console.log(`[WebSocketStepsContext] Event listeners removed from hub.`);
     };
   }, [currentMessageStore, steps.length]);
 
@@ -170,7 +166,6 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     // Only proceed if we have steps data available
     if (steps.length === 0) {
-      console.log('[WebSocketStepsContext] Waiting for steps to be available...');
       return;
     }
     
@@ -182,10 +177,8 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
     const allSettingsPresent = settings.tenantId && settings.agentWebsocketUrl && settings.agentApiKey && settings.participantId;
 
     if (allSettingsPresent) {
-      console.log(`[WebSocketStepsContext] Initialize effect: Settings present. Calling hub.initialize.`);
       hub.initialize(settings, steps)
         .then(() => {
-          console.log(`[WebSocketStepsContext] Hub initialized successfully.`);
           const newConnectionStates = hub.getConnectionStates();
           setConnectionStates(new Map(newConnectionStates));
           const currentlyConnected = Array.from(newConnectionStates.values()).some(state => state.status === 'connected');
@@ -195,7 +188,6 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
           console.error(`[WebSocketStepsContext] Error initializing hub:`, error);
         });
     } else {
-      console.log(`[WebSocketStepsContext] Initialize effect: Settings not complete. Ensuring hub connections are down.`);
       hub.disconnectAll().then(() => {
         setConnectionStates(new Map());
         setIsConnected(false);
@@ -207,20 +199,26 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   const sendMessage = useCallback(async (content: string, metadata?: any) => {
     // Check if we have steps data
     if (steps.length === 0) {
-      console.error('Cannot send message: Steps not yet available.');
       throw new Error('Steps not yet available.');
     }
     
     const hub = hubRef.current;
     if (!hub) {
-      console.error('Cannot send message: WebSocketHub not initialized.');
       throw new Error('Not connected, hub instance not available.');
     }
     
     const currentStepDetails = steps[activeStep];
-    if (!currentStepDetails || !currentStepDetails.bot || !currentStepDetails.bot.workflowId) {
-      console.error('Cannot send message: Current step or bot configuration is invalid.');
-      throw new Error('Current step does not have a bot configured or workflowId is missing.');
+    if (!currentStepDetails) {
+      throw new Error('Current step not found.');
+    }
+
+    // Use new agent structure
+    const agent = getAgentForStep(currentStepDetails);
+    if (!agent) {
+      // Fallback to old bot structure for backward compatibility
+      if (!currentStepDetails.bot || !currentStepDetails.bot.workflowId) {
+        throw new Error('Current step does not have an agent or bot configured.');
+      }
     }
 
     // Optimistic UI Update
@@ -235,15 +233,30 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
     };
     currentMessageStore.addChatMessage(userMessage);
 
-    const request: InboundMessage = {
-      threadId: currentMessageStore.getThreadId(activeStep),
-      agent: currentStepDetails.bot.agent || '',
-      workflowType: currentStepDetails.bot.workflowType || '',
-      workflowId: currentStepDetails.bot.workflowId,
-      participantId: settings.participantId || '',
-      content,
-      metadata
-    };
+    // Prepare request using agent or fallback to bot
+    let request: InboundMessage;
+    if (agent) {
+      request = {
+        threadId: currentMessageStore.getThreadId(activeStep),
+        agent: agent.agent,
+        workflowType: agent.workflowType || '',
+        workflowId: agent.workflowId,
+        participantId: settings.participantId || '',
+        content,
+        metadata
+      };
+    } else {
+      // Fallback to old bot structure
+      request = {
+        threadId: currentMessageStore.getThreadId(activeStep),
+        agent: currentStepDetails.bot!.agent || '',
+        workflowType: currentStepDetails.bot!.workflowType || '',
+        workflowId: currentStepDetails.bot!.workflowId!,
+        participantId: settings.participantId || '',
+        content,
+        metadata
+      };
+    }
     
     try {
       await hub.sendMessage(request, activeStep);
@@ -257,7 +270,6 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   const subscribeToMetadata = useCallback((subscriberId: string, messageTypes: string[], callback: (message: MetadataMessage) => void, stepIndex?: number) => {
     const hub = hubRef.current;
     if (!hub) {
-      console.warn('[WebSocketStepsContext] Cannot subscribe to metadata: Hub not initialized');
       return () => {}; // Return empty unsubscribe function
     }
     
@@ -267,7 +279,6 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   const unsubscribeFromMetadata = useCallback((subscriberId: string) => {
     const hub = hubRef.current;
     if (!hub) {
-      console.warn('[WebSocketStepsContext] Cannot unsubscribe from metadata: Hub not initialized');
       return;
     }
     
@@ -277,13 +288,11 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   // Manual connect/disconnect for context consumers
   const manualConnect = useCallback(async () => {
     if (steps.length === 0) {
-      console.warn('[WebSocketStepsContext] Manual connect called, but steps not yet available.');
       return;
     }
     
     const hub = hubRef.current;
     if (hub && settings.tenantId && settings.agentWebsocketUrl) {
-      console.log(`[WebSocketStepsContext] Manual connect called. Re-initializing.`);
       await hub.initialize(settings, steps); 
     } else if (!hub) {
       console.warn('[WebSocketStepsContext] Manual connect called, but hub instance not yet created.');
@@ -295,7 +304,6 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   const manualDisconnect = useCallback(async () => {
     const hub = hubRef.current;
     if (hub) {
-      console.log(`[WebSocketStepsContext] Manual disconnect called.`);
       await hub.disconnectAll();
       setConnectionStates(new Map());
       setIsConnected(false);

@@ -1,30 +1,30 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { BotAgent, ConnectionState } from '../types';
 import { SettingsData } from '../context/SettingsContext';
-import { StepDefinition } from '../components/power-of-attorney/types';
+import { StepDefinition, Agent } from '../components/types';
 
 export interface SignalRConnection {
   connection: HubConnection;
-  stepIndex: number;
+  agentIndex: number;
   reconnectAttempts: number;
   threadId?: string;
 }
 
 export interface ConnectionManagerEvents {
-  onConnectionChange: (stepIndex: number, state: ConnectionState) => void;
-  onConnectionReady: (stepIndex: number, connection: HubConnection) => void;
-  onConnectionError: (stepIndex: number, error: any) => void;
+  onConnectionChange: (agentIndex: number, state: ConnectionState) => void;
+  onConnectionReady: (agentIndex: number, connection: HubConnection) => void;
+  onConnectionError: (agentIndex: number, error: any) => void;
 }
 
 /**
  * ConnectionManager handles SignalR connection lifecycle
- * Separated from message processing concerns
+ * Updated to work with Agent array instead of StepDefinition array
  */
 export class ConnectionManager {
   private connections: Map<number, SignalRConnection> = new Map();
   private connectionLocks: Map<number, Promise<void>> = new Map();
   private settings: SettingsData | null = null;
-  private steps: StepDefinition[] = [];
+  private agents: Agent[] = [];
   private events: ConnectionManagerEvents;
 
   constructor(events: ConnectionManagerEvents) {
@@ -32,56 +32,55 @@ export class ConnectionManager {
   }
 
   /**
-   * Initialize with settings and steps
+   * Initialize with settings and agents
    */
-  async initialize(settings: SettingsData, steps: StepDefinition[]): Promise<void> {
+  async initialize(settings: SettingsData, agents: Agent[]): Promise<void> {
     this.settings = settings;
-    this.steps = steps;
+    this.agents = agents;
     
-    // Connect to all steps that have bots
-    const connectionPromises = steps
-      .map((step, index) => ({ step, index }))
-      .filter(({ step }) => step.bot && step.bot.workflowId)
-      .map(({ step, index }) => this.connectToStep(step, index));
+    // Connect to all agents
+    const connectionPromises = agents.map((agent, index) => 
+      this.connectToAgent(agent, index)
+    );
     
     await Promise.allSettled(connectionPromises);
   }
 
   /**
-   * Connect to a specific step's bot
+   * Connect to a specific agent
    */
-  private async connectToStep(step: StepDefinition, stepIndex: number): Promise<void> {
-    if (!step.bot || !step.bot.workflowId) return;
+  private async connectToAgent(agent: Agent, agentIndex: number): Promise<void> {
+    if (!agent.workflowId) return;
     
-    // Check if there's already a connection attempt in progress for this step
-    const existingLock = this.connectionLocks.get(stepIndex);
+    // Check if there's already a connection attempt in progress for this agent
+    const existingLock = this.connectionLocks.get(agentIndex);
     if (existingLock) {
-      console.log(`[ConnectionManager] Connection attempt already in progress for step ${stepIndex}, waiting...`);
+      console.log(`[ConnectionManager] Connection attempt already in progress for agent ${agentIndex}, waiting...`);
       await existingLock;
       return;
     }
 
     // Create a connection lock to prevent concurrent attempts
-    const connectionPromise = this.doConnectToStep(step, stepIndex);
-    this.connectionLocks.set(stepIndex, connectionPromise);
+    const connectionPromise = this.doConnectToAgent(agent, agentIndex);
+    this.connectionLocks.set(agentIndex, connectionPromise);
     
     try {
       await connectionPromise;
     } finally {
-      this.connectionLocks.delete(stepIndex);
+      this.connectionLocks.delete(agentIndex);
     }
   }
 
   /**
    * Actual connection implementation
    */
-  private async doConnectToStep(step: StepDefinition, stepIndex: number): Promise<void> {
+  private async doConnectToAgent(agent: Agent, agentIndex: number): Promise<void> {
     // Disconnect existing connection if any
-    if (this.connections.has(stepIndex)) {
-      await this.disconnectStep(stepIndex);
+    if (this.connections.has(agentIndex)) {
+      await this.disconnectStep(agentIndex);
     }
 
-    this.emitConnectionChange(stepIndex, 'connecting');
+    this.emitConnectionChange(agentIndex, 'connecting');
 
     try {
       const hubUrl = this.buildHubUrl();
@@ -111,14 +110,14 @@ export class ConnectionManager {
       while (retries < maxRetries) {
         try {
           await connection.start();
-          console.log(`[ConnectionManager] Connected to SignalR hub for step ${stepIndex}`);
+          console.log(`[ConnectionManager] Connected to SignalR hub for agent ${agentIndex} (${agent.workflowId})`);
           break;
         } catch (startError) {
           retries++;
           if (retries >= maxRetries) {
             throw startError;
           }
-          console.warn(`[ConnectionManager] Connection attempt ${retries} failed for step ${stepIndex}, retrying...`);
+          console.warn(`[ConnectionManager] Connection attempt ${retries} failed for agent ${agentIndex}, retrying...`);
           await new Promise(resolve => setTimeout(resolve, 1000 * retries));
         }
       }
@@ -126,32 +125,32 @@ export class ConnectionManager {
       // Create and store the connection object
       const signalRConnection: SignalRConnection = {
         connection,
-        stepIndex,
+        agentIndex,
         reconnectAttempts: 0
       };
 
-      this.connections.set(stepIndex, signalRConnection);
-      this.setupConnectionHandlers(signalRConnection, step, stepIndex);
+      this.connections.set(agentIndex, signalRConnection);
+      this.setupConnectionHandlers(signalRConnection, agent, agentIndex);
       
-      this.emitConnectionChange(stepIndex, 'connected');
+      this.emitConnectionChange(agentIndex, 'connected');
       
       // Notify that connection is ready for message handling
-      this.events.onConnectionReady(stepIndex, connection);
+      this.events.onConnectionReady(agentIndex, connection);
       
       // Give the connection a moment to fully establish
       await new Promise(resolve => setTimeout(resolve, 100));
       
       // Subscribe to the agent after connection
       try {
-        await this.subscribeToAgent(step.bot!, stepIndex);
+        await this.subscribeToAgent(agent, agentIndex);
       } catch (error) {
-        console.warn(`[ConnectionManager] Failed to subscribe to agent for step ${stepIndex}:`, error);
+        console.warn(`[ConnectionManager] Failed to subscribe to agent ${agentIndex}:`, error);
       }
       
     } catch (error) {
-      console.error(`[ConnectionManager] Error connecting to SignalR hub for step ${stepIndex}:`, error);
-      this.emitConnectionChange(stepIndex, 'disconnected', error instanceof Error ? error.message : String(error));
-      this.events.onConnectionError(stepIndex, error);
+      console.error(`[ConnectionManager] Error connecting to SignalR hub for agent ${agentIndex}:`, error);
+      this.emitConnectionChange(agentIndex, 'disconnected', error instanceof Error ? error.message : String(error));
+      this.events.onConnectionError(agentIndex, error);
       throw error;
     }
   }
@@ -172,94 +171,105 @@ export class ConnectionManager {
   /**
    * Setup connection state change handlers
    */
-  private setupConnectionHandlers(signalRConnection: SignalRConnection, step: StepDefinition, stepIndex: number): void {
+  private setupConnectionHandlers(signalRConnection: SignalRConnection, agent: Agent, agentIndex: number): void {
     const { connection } = signalRConnection;
 
     connection.onreconnecting((error) => {
-      console.log(`[ConnectionManager] Reconnecting to step ${stepIndex}...`, error);
+      console.log(`[ConnectionManager] Reconnecting to agent ${agentIndex} (${agent.workflowId})...`, error);
       signalRConnection.reconnectAttempts++;
-      this.emitConnectionChange(stepIndex, 'connecting');
+      this.emitConnectionChange(agentIndex, 'connecting');
     });
 
     connection.onreconnected((connectionId) => {
-      console.log(`[ConnectionManager] Reconnected to step ${stepIndex}. Connection ID: ${connectionId}`);
+      console.log(`[ConnectionManager] Reconnected to agent ${agentIndex} (${agent.workflowId}). Connection ID: ${connectionId}`);
       signalRConnection.reconnectAttempts = 0;
-      this.emitConnectionChange(stepIndex, 'connected');
+      this.emitConnectionChange(agentIndex, 'connected');
       
       // Re-subscribe to agent after reconnection
-      if (step.bot) {
-        this.subscribeToAgent(step.bot, stepIndex);
-      }
+      this.subscribeToAgent(agent, agentIndex);
     });
 
     connection.onclose((error) => {
-      console.log(`[ConnectionManager] Connection closed for step ${stepIndex}`, error);
-      this.emitConnectionChange(stepIndex, 'disconnected', error?.toString());
+      console.log(`[ConnectionManager] Connection closed for agent ${agentIndex} (${agent.workflowId})`, error);
+      this.emitConnectionChange(agentIndex, 'disconnected', error?.toString());
     });
   }
 
   /**
-   * Subscribe to a specific agent
+   * Subscribe to agent workflow after connection is established
    */
-  private async subscribeToAgent(bot: BotAgent, stepIndex: number): Promise<void> {
-    const signalRConnection = this.connections.get(stepIndex);
-    if (!signalRConnection) {
-      console.error(`[ConnectionManager] No SignalR connection found for step ${stepIndex}`);
+  private async subscribeToAgent(agent: Agent, agentIndex: number): Promise<void> {
+    if (!this.settings?.participantId) {
+      console.warn(`[ConnectionManager] Cannot subscribe to agent ${agentIndex}: missing participantId`);
       return;
     }
 
-    const connectionState = signalRConnection.connection.state;
-    if (connectionState !== 'Connected' && connectionState !== 'Connecting') {
-      console.error(`[ConnectionManager] Connection not ready for step ${stepIndex}, state: ${connectionState}`);
-      return;
-    }
+    const connection = this.getConnection(agentIndex);
+    if (!connection) return;
 
     try {
-      await signalRConnection.connection.invoke('SubscribeToAgent',
-        bot.workflowId,
-        this.settings?.participantId,
-        this.settings?.tenantId
+      // Calculate what the group ID should be based on server logic
+      const expectedGroupId = agent.workflowId + this.settings.participantId + this.settings.tenantId;
+      
+      console.log(`[ConnectionManager] 🔍 Subscription Debug for agent ${agentIndex}:`);
+      console.log(`[ConnectionManager] - WorkflowId: "${agent.workflowId}"`);
+      console.log(`[ConnectionManager] - ParticipantId: "${this.settings.participantId}"`);
+      console.log(`[ConnectionManager] - TenantId: "${this.settings.tenantId}"`);
+      console.log(`[ConnectionManager] - Expected GroupId: "${expectedGroupId}"`);
+      
+      // Call the correct server method name with individual parameters
+      await connection.invoke('SubscribeToAgent', 
+        agent.workflowId,
+        this.settings.participantId,
+        this.settings.tenantId
       );
-      console.log(`[ConnectionManager] Subscribed to agent: ${bot.title} (${bot.workflowId})`);
+      
+      console.log(`[ConnectionManager] ✅ Successfully subscribed to agent ${agentIndex} (${agent.workflowId})`);
     } catch (error) {
-      console.error(`[ConnectionManager] Error subscribing to agent ${bot.title}:`, error);
+      console.error(`[ConnectionManager] ❌ Error subscribing to agent ${agentIndex} (${agent.workflowId}):`, error);
+      throw error;
     }
   }
 
   /**
-   * Get connection for a step
+   * Get connection for specific agent index
    */
-  getConnection(stepIndex: number): HubConnection | null {
-    return this.connections.get(stepIndex)?.connection || null;
+  getConnection(agentIndex: number): HubConnection | null {
+    const signalRConnection = this.connections.get(agentIndex);
+    return signalRConnection ? signalRConnection.connection : null;
   }
 
   /**
-   * Get thread ID for a step
+   * Get thread ID for specific agent index
    */
-  getThreadId(stepIndex: number): string | undefined {
-    return this.connections.get(stepIndex)?.threadId;
+  getThreadId(agentIndex: number): string | undefined {
+    const signalRConnection = this.connections.get(agentIndex);
+    return signalRConnection?.threadId;
   }
 
   /**
-   * Set thread ID for a step
+   * Set thread ID for specific agent index
    */
-  setThreadId(stepIndex: number, threadId: string): void {
-    const connection = this.connections.get(stepIndex);
-    if (connection) {
-      connection.threadId = threadId;
+  setThreadId(agentIndex: number, threadId: string): void {
+    const signalRConnection = this.connections.get(agentIndex);
+    if (signalRConnection) {
+      signalRConnection.threadId = threadId;
+      console.log(`[ConnectionManager] Thread ID set for agent ${agentIndex}: ${threadId}`);
     }
   }
 
   /**
-   * Get connection states for all steps
+   * Get all connection states
    */
   getConnectionStates(): Map<number, ConnectionState> {
     const states = new Map<number, ConnectionState>();
     
-    for (const [stepIndex, signalRConnection] of this.connections) {
-      states.set(stepIndex, {
-        stepIndex,
-        status: this.mapConnectionState(signalRConnection.connection.state)
+    for (const [agentIndex, { connection }] of this.connections) {
+      const agent = this.agents[agentIndex];
+      states.set(agentIndex, {
+        stepIndex: agentIndex, // Keep for backward compatibility
+        status: this.mapConnectionState(connection.state),
+        lastActivity: new Date()
       });
     }
     
@@ -267,15 +277,17 @@ export class ConnectionManager {
   }
 
   /**
-   * Get connection state for specific step
+   * Get connection state for specific agent
    */
-  getStepConnectionState(stepIndex: number): ConnectionState | null {
-    const signalRConnection = this.connections.get(stepIndex);
+  getStepConnectionState(agentIndex: number): ConnectionState | null {
+    const signalRConnection = this.connections.get(agentIndex);
     if (!signalRConnection) return null;
-    
+
+    const agent = this.agents[agentIndex];
     return {
-      stepIndex,
-      status: this.mapConnectionState(signalRConnection.connection.state)
+      stepIndex: agentIndex, // Keep for backward compatibility
+      status: this.mapConnectionState(signalRConnection.connection.state),
+      lastActivity: new Date()
     };
   }
 
@@ -295,40 +307,48 @@ export class ConnectionManager {
   }
 
   /**
-   * Disconnect specific step
+   * Disconnect specific agent
    */
-  async disconnectStep(stepIndex: number): Promise<void> {
-    const signalRConnection = this.connections.get(stepIndex);
-    if (signalRConnection) {
-      try {
-        await signalRConnection.connection.stop();
-      } catch (error) {
-        console.error(`[ConnectionManager] Error disconnecting step ${stepIndex}:`, error);
-      }
-      this.connections.delete(stepIndex);
-      this.emitConnectionChange(stepIndex, 'disconnected');
+  async disconnectStep(agentIndex: number): Promise<void> {
+    const signalRConnection = this.connections.get(agentIndex);
+    if (!signalRConnection) return;
+
+    try {
+      console.log(`[ConnectionManager] Disconnecting agent ${agentIndex}...`);
+      await signalRConnection.connection.stop();
+      this.connections.delete(agentIndex);
+      this.emitConnectionChange(agentIndex, 'disconnected');
+      console.log(`[ConnectionManager] Agent ${agentIndex} disconnected successfully`);
+    } catch (error) {
+      console.error(`[ConnectionManager] Error disconnecting agent ${agentIndex}:`, error);
+      throw error;
     }
   }
 
   /**
-   * Disconnect all steps
+   * Disconnect all agents
    */
   async disconnectAll(): Promise<void> {
-    const disconnectPromises = Array.from(this.connections.keys()).map(stepIndex => 
-      this.disconnectStep(stepIndex)
+    const disconnectPromises = Array.from(this.connections.keys()).map(agentIndex =>
+      this.disconnectStep(agentIndex)
     );
-    await Promise.all(disconnectPromises);
+    
+    await Promise.allSettled(disconnectPromises);
+    this.connections.clear();
+    console.log(`[ConnectionManager] All agents disconnected`);
   }
 
   /**
    * Emit connection state change
    */
-  private emitConnectionChange(stepIndex: number, status: ConnectionState['status'], error?: string): void {
+  private emitConnectionChange(agentIndex: number, status: ConnectionState['status'], error?: string): void {
     const state: ConnectionState = {
-      stepIndex,
+      stepIndex: agentIndex, // Keep for backward compatibility
       status,
-      ...(error && { lastError: error })
+      lastError: error,
+      lastActivity: new Date()
     };
-    this.events.onConnectionChange(stepIndex, state);
+    
+    this.events.onConnectionChange(agentIndex, state);
   }
 } 

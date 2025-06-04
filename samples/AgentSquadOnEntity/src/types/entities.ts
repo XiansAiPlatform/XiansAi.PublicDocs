@@ -51,34 +51,6 @@ export interface TaskEntity extends BaseEntity {
   stepIndex?: number; // Which workflow step this task belongs to
 }
 
-// Note Entity
-export interface NoteEntity extends BaseEntity {
-  type: 'note';
-  title: string;
-  content: string;
-  category: 'general' | 'legal_advice' | 'client_request' | 'internal' | 'reminder';
-  isPrivate: boolean;
-  attachments?: string[]; // File URLs or IDs
-  relatedEntityIds?: string[]; // IDs of related entities
-  author: string;
-  stepIndex?: number; // Which workflow step this note belongs to
-}
-
-// Workflow Step Entity
-export interface WorkflowStepEntity extends BaseEntity {
-  type: 'workflow_step';
-  stepIndex: number;
-  title: string;
-  description: string;
-  status: 'not_started' | 'in_progress' | 'completed' | 'skipped' | 'blocked';
-  completionPercentage: number;
-  startedAt?: Date;
-  completedAt?: Date;
-  requiredTasks?: string[]; // Task IDs that must be completed
-  requiredDocuments?: string[]; // Document IDs that must be present
-  assignedAgent?: string;
-}
-
 // Finding Entity (for legal findings, issues, recommendations)
 export interface FindingEntity extends BaseEntity {
   type: 'finding';
@@ -155,8 +127,6 @@ export type AppEntity =
   | DocumentEntity 
   | PersonEntity 
   | TaskEntity 
-  | NoteEntity 
-  | WorkflowStepEntity 
   | FindingEntity
   | AuditResultEntity;
 
@@ -180,22 +150,6 @@ export const createPersonEntity = (data: Omit<PersonEntity, 'id' | 'type' | 'cre
 export const createTaskEntity = (data: Omit<TaskEntity, 'id' | 'type' | 'createdAt' | 'updatedAt'>): TaskEntity => ({
   id: crypto.randomUUID(),
   type: 'task',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  ...data
-});
-
-export const createNoteEntity = (data: Omit<NoteEntity, 'id' | 'type' | 'createdAt' | 'updatedAt'>): NoteEntity => ({
-  id: crypto.randomUUID(),
-  type: 'note',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  ...data
-});
-
-export const createWorkflowStepEntity = (data: Omit<WorkflowStepEntity, 'id' | 'type' | 'createdAt' | 'updatedAt'>): WorkflowStepEntity => ({
-  id: crypto.randomUUID(),
-  type: 'workflow_step',
   createdAt: new Date(),
   updatedAt: new Date(),
   ...data

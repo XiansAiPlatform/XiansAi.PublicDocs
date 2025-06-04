@@ -45,9 +45,8 @@ interface BaseEntity {
 - **DocumentEntity**: Legal documents (POA, wills, contracts)
 - **PersonEntity**: People involved in legal processes
 - **TaskEntity**: Workflow tasks and assignments
-- **NoteEntity**: Notes and comments
-- **WorkflowStepEntity**: Workflow step status
 - **FindingEntity**: Legal findings and recommendations
+- **AuditResultEntity**: Document audit results
 
 ## Usage
 
