@@ -14,7 +14,7 @@ import SuggestionButtons from './components/SuggestionButtons';
 import ChatInput from './components/ChatInput';
 
 const ChatPane: React.FC = () => {
-  const { activeStep } = useSteps();
+  const { activeStep, isInitialized } = useSteps();
   const { chatMessages } = useWebSocketSteps();
   
   // Custom hooks for state management
@@ -40,6 +40,20 @@ const ChatPane: React.FC = () => {
 
   // Suggestions state
   const [showSuggestions, setShowSuggestions] = useState(true);
+
+  // Show loading state if not initialized or no currentStep
+  if (!isInitialized || !currentStep) {
+    return (
+      <div className="flex items-center justify-center h-full bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2"></div>
+          <div className="text-gray-500 text-sm">
+            {!isInitialized ? 'Initializing...' : 'Loading step data...'}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Auto-toggle suggestions visibility when step changes
   useEffect(() => {

@@ -1,14 +1,20 @@
 import type { StepDefinition } from './types';
 
+// Base URL configuration for Power of Attorney workflow
+export const POA_BASE_URL = '/poa/step';
+export const POA_ROUTE_PATTERN = `${POA_BASE_URL}/:stepSlug`;
+
 // Step definitions with simplified theme names
 export const steps: StepDefinition[] = [
   {
     title: "Scope",
+    slug: "scope",
     theme: "purple",
     componentLoader: () => import('./documentScope').then(m => m.default)
   },
   {
     title: "Representatives",
+    slug: "representatives",
     theme: "warm",
     bot: {
       title: "Representatives Agent",
@@ -17,10 +23,11 @@ export const steps: StepDefinition[] = [
       workflowType: "Power of Attorney Agent v2:Representative Bot",
       workflowId: "99x.io:Power of Attorney Agent v2:Representative Bot"
     },
-    componentLoader: () => import('./representatives').then(m => m.default)
+    componentLoader: () => import('./representatives/representatives').then(m => m.default)
   },
   {
     title: "Conditions",
+    slug: "conditions",
     theme: "lavender",
     bot: {
       title: "Conditions Agent",
@@ -34,6 +41,7 @@ export const steps: StepDefinition[] = [
   },
   {
     title: "Witnesses",
+    slug: "witnesses",
     theme: "blue",
     bot: {
       title: "Witnesses Agent",
@@ -47,9 +55,35 @@ export const steps: StepDefinition[] = [
   },
   {
     title: "Submit",
+    slug: "submit",
     theme: "green",
     componentLoader:  () => import('./submitDocument').then(m => m.default)
   }
 ];
 
-export default steps; 
+export default steps;
+
+// Utility functions for working with steps
+export const getStepBySlug = (slug: string): StepDefinition | undefined => {
+  return steps.find(step => step.slug === slug);
+};
+
+export const getStepIndexBySlug = (slug: string): number => {
+  return steps.findIndex(step => step.slug === slug);
+};
+
+export const getStepUrl = (step: StepDefinition): string => {
+  return `${POA_BASE_URL}/${step.slug}`;
+};
+
+export const getStepUrlBySlug = (slug: string): string => {
+  return `${POA_BASE_URL}/${slug}`;
+};
+
+export const getFirstStepUrl = (): string => {
+  return steps.length > 0 ? getStepUrl(steps[0]) : POA_BASE_URL;
+};
+
+export const getAllStepSlugs = (): string[] => {
+  return steps.map(step => step.slug);
+}; 

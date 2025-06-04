@@ -3,6 +3,7 @@ import { ChatMessage, SystemMessage, ConnectionState, InboundMessage, HubEvent }
 import { WebSocketHub } from '../middleware/WebSocketHub';
 import { MessageStore, MessageStoreEvents } from '../middleware/MessageStore';
 import { MetadataMessage } from '../middleware/MetadataMessageRouter';
+import { EntityStore } from '../middleware/EntityStore';
 import { useSteps } from './StepsContext';
 import { useSettings } from './SettingsContext';
 
@@ -46,7 +47,7 @@ interface Props {
 }
 
 export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
-  const { steps, activeStep } = useSteps();
+  const { steps, activeStep, isInitialized } = useSteps();
   const { settings } = useSettings();
   
   const [connectionStates, setConnectionStates] = useState<Map<number, ConnectionState>>(new Map());
@@ -57,8 +58,9 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   
   const hubRef = useRef<WebSocketHub | null>(null);
   const storeRef = useRef<MessageStore | null>(null);
+  const entityStoreRef = useRef<EntityStore>(EntityStore.getInstance());
   
-  // Initialize MessageStore with events
+  // Initialize MessageStore with events - but only once
   if (storeRef.current === null) {
     const messageStoreEvents: MessageStoreEvents = {
       onMessageAdded: (stepIndex, message) => {
@@ -96,6 +98,12 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   
   // Effect to create and manage the WebSocketHub instance and its listeners
   useEffect(() => {
+    // Only proceed if we have steps data available
+    if (steps.length === 0) {
+      console.log('[WebSocketStepsContext] Waiting for steps data...');
+      return;
+    }
+    
     console.log('[WebSocketStepsContext] Mount effect: Getting WebSocketHub singleton instance.');
     
     const hub = WebSocketHub.getInstance();
@@ -126,6 +134,13 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
           return newUiStateMap;
         });
       }
+      
+      // Handle entity updates through EntityStore
+      if (systemMessage.type === 'ENTITY_UPDATE' || systemMessage.type === 'DATA') {
+        console.log('[WebSocketStepsContext] Processing entity update from system message:', systemMessage);
+        entityStoreRef.current.handleSystemMessage(systemMessage);
+      }
+      
       // State will be updated via MessageStore events
     };
 
@@ -149,10 +164,16 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
       hubRef.current = null;
       console.log(`[WebSocketStepsContext] Event listeners removed from hub.`);
     };
-  }, [currentMessageStore]);
+  }, [currentMessageStore, steps.length]);
 
   // Effect to initialize the hub when settings or steps change
   useEffect(() => {
+    // Only proceed if we have steps data available
+    if (steps.length === 0) {
+      console.log('[WebSocketStepsContext] Waiting for steps to be available...');
+      return;
+    }
+    
     const hub = hubRef.current;
     if (!hub) {
       return;
@@ -184,6 +205,12 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
 
   // sendMessage using the new architecture
   const sendMessage = useCallback(async (content: string, metadata?: any) => {
+    // Check if we have steps data
+    if (steps.length === 0) {
+      console.error('Cannot send message: Steps not yet available.');
+      throw new Error('Steps not yet available.');
+    }
+    
     const hub = hubRef.current;
     if (!hub) {
       console.error('Cannot send message: WebSocketHub not initialized.');
@@ -249,6 +276,11 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
 
   // Manual connect/disconnect for context consumers
   const manualConnect = useCallback(async () => {
+    if (steps.length === 0) {
+      console.warn('[WebSocketStepsContext] Manual connect called, but steps not yet available.');
+      return;
+    }
+    
     const hub = hubRef.current;
     if (hub && settings.tenantId && settings.agentWebsocketUrl) {
       console.log(`[WebSocketStepsContext] Manual connect called. Re-initializing.`);
@@ -274,10 +306,12 @@ export const WebSocketStepsProvider: React.FC<Props> = ({ children }) => {
   const getStats = useCallback(() => {
     const hub = hubRef.current;
     const store = storeRef.current;
+    const entityStore = entityStoreRef.current;
     
     return {
       hub: hub?.getStats() || null,
       messageStore: store?.getStats() || null,
+      entityStore: entityStore?.getStats() || null,
       context: {
         isConnected,
         connectionStatesCount: connectionStates.size,

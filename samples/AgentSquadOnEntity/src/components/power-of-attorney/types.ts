@@ -29,6 +29,7 @@ export interface StepBot {
 
 export interface StepDefinition {
   title: string;
+  slug: string;
   theme: StepTheme;
   componentLoader?: ComponentLoader;
   bot?: StepBot;

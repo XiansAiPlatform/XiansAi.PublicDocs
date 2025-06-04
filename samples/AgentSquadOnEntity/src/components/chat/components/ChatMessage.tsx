@@ -15,13 +15,125 @@ interface ChatMessageProps {
   message: Message;
 }
 
+// Function to format message content with line breaks and basic markdown
+const formatMessageContent = (content: string): JSX.Element => {
+  // Split by line breaks and process each line
+  const lines = content.split('\n');
+  
+  return (
+    <>
+      {lines.map((line, lineIndex) => {
+        if (line.trim() === '') {
+          return <br key={lineIndex} />;
+        }
+        
+        // Process markdown-like formatting within each line
+        let formattedLine: (string | JSX.Element)[] = [line];
+        
+        // Bold text **text** or __text__
+        formattedLine = formattedLine.flatMap((segment, segIndex) => {
+          if (typeof segment !== 'string') return segment;
+          
+          const boldRegex = /(\*\*|__)(.*?)\1/g;
+          const parts: (string | JSX.Element)[] = [];
+          let lastIndex = 0;
+          let match;
+          
+          while ((match = boldRegex.exec(segment)) !== null) {
+            if (match.index > lastIndex) {
+              parts.push(segment.slice(lastIndex, match.index));
+            }
+            parts.push(
+              <strong key={`${lineIndex}-${segIndex}-bold-${match.index}`}>
+                {match[2]}
+              </strong>
+            );
+            lastIndex = match.index + match[0].length;
+          }
+          
+          if (lastIndex < segment.length) {
+            parts.push(segment.slice(lastIndex));
+          }
+          
+          return parts.length > 0 ? parts : [segment];
+        });
+        
+        // Italic text *text* or _text_
+        formattedLine = formattedLine.flatMap((segment, segIndex) => {
+          if (typeof segment !== 'string') return segment;
+          
+          const italicRegex = /(?<!\*)\*(?!\*)([^*]+)\*(?!\*)|(?<!_)_(?!_)([^_]+)_(?!_)/g;
+          const parts: (string | JSX.Element)[] = [];
+          let lastIndex = 0;
+          let match;
+          
+          while ((match = italicRegex.exec(segment)) !== null) {
+            if (match.index > lastIndex) {
+              parts.push(segment.slice(lastIndex, match.index));
+            }
+            parts.push(
+              <em key={`${lineIndex}-${segIndex}-italic-${match.index}`}>
+                {match[1] || match[2]}
+              </em>
+            );
+            lastIndex = match.index + match[0].length;
+          }
+          
+          if (lastIndex < segment.length) {
+            parts.push(segment.slice(lastIndex));
+          }
+          
+          return parts.length > 0 ? parts : [segment];
+        });
+        
+        // Code text `code`
+        formattedLine = formattedLine.flatMap((segment, segIndex) => {
+          if (typeof segment !== 'string') return segment;
+          
+          const codeRegex = /`([^`]+)`/g;
+          const parts: (string | JSX.Element)[] = [];
+          let lastIndex = 0;
+          let match;
+          
+          while ((match = codeRegex.exec(segment)) !== null) {
+            if (match.index > lastIndex) {
+              parts.push(segment.slice(lastIndex, match.index));
+            }
+            parts.push(
+              <code 
+                key={`${lineIndex}-${segIndex}-code-${match.index}`}
+                className="bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-xs font-mono"
+              >
+                {match[1]}
+              </code>
+            );
+            lastIndex = match.index + match[0].length;
+          }
+          
+          if (lastIndex < segment.length) {
+            parts.push(segment.slice(lastIndex));
+          }
+          
+          return parts.length > 0 ? parts : [segment];
+        });
+        
+        return (
+          <div key={lineIndex} className={lineIndex > 0 ? "mt-1" : ""}>
+            {formattedLine}
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
 const ChatMessageDisplay: React.FC<ChatMessageProps> = ({ message }) => {
   // console.log(`[ChatMessageDisplay] Rendering message ID: ${message.id}, direction: ${message.direction}`);
   if (message.direction === 'Handover') {
     return (
       <div className="flex justify-center my-4">
         <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-medium">
-          {message.content}
+          {formatMessageContent(message.content)}
         </div>
       </div>
     );
@@ -38,7 +150,7 @@ const ChatMessageDisplay: React.FC<ChatMessageProps> = ({ message }) => {
             : 'bg-white border border-gray-200 text-gray-800 max-w-[85%]'
         }`}
       >
-        {message.content}
+        {formatMessageContent(message.content)}
       </div>
     </div>
   );

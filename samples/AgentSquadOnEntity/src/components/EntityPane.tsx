@@ -99,7 +99,27 @@ const LoadingFallback: React.FC = () => (
 
 // Main EntityPane component
 const EntityPane: React.FC = () => {
-  const { steps, activeStep, setActiveStep } = useSteps();
+  const { steps, activeStep, navigateToStepByIndex, isInitialized } = useSteps();
+  
+  // Show loading state if not initialized yet
+  if (!isInitialized || steps.length === 0) {
+    return (
+      <div className="h-full flex flex-col bg-white">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {!isInitialized ? 'Initializing' : 'Loading Steps'}
+            </h3>
+            <p className="text-gray-600">
+              {!isInitialized ? 'Setting up the application...' : 'Please wait while we load the workflow steps...'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   const currentStep = steps[activeStep];
 
   // Get theme colors from the theme name
@@ -108,13 +128,13 @@ const EntityPane: React.FC = () => {
   // Navigation functions
   const goToPreviousStep = () => {
     if (activeStep > 0) {
-      setActiveStep(activeStep - 1);
+      navigateToStepByIndex(activeStep - 1);
     }
   };
 
   const goToNextStep = () => {
     if (activeStep < steps.length - 1) {
-      setActiveStep(activeStep + 1);
+      navigateToStepByIndex(activeStep + 1);
     }
   };
 

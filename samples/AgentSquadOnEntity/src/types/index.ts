@@ -20,7 +20,7 @@ export interface ChatMessage {
 }
 
 export interface SystemMessage {
-  type: 'UI_UPDATE' | 'STATE_CHANGE' | 'DATA' | 'ERROR' | 'INFO' | 'METADATA';
+  type: 'UI_UPDATE' | 'STATE_CHANGE' | 'DATA' | 'ERROR' | 'INFO' | 'METADATA' | 'ENTITY_UPDATE';
   stepIndex: number;
   payload: any;
   timestamp: Date;
@@ -71,4 +71,58 @@ export interface AppConfig {
   tenantId: string;
   participantId: string;
   metadata?: any;
+}
+
+// Entity Management Types
+export interface BaseEntity {
+  id: string;
+  type: string;
+  createdAt: Date;
+  updatedAt: Date;
+  version?: number;
+  metadata?: Record<string, any>;
+}
+
+export interface EntityState<T extends BaseEntity = BaseEntity> {
+  entities: Map<string, T>;
+  loading: boolean;
+  error: string | null;
+  lastUpdated: Date | null;
+}
+
+export interface EntityAction<T extends BaseEntity = BaseEntity> {
+  type: 'ADD' | 'UPDATE' | 'DELETE' | 'CLEAR' | 'SET_LOADING' | 'SET_ERROR';
+  payload?: {
+    entity?: T;
+    entities?: T[];
+    entityId?: string;
+    error?: string;
+    loading?: boolean;
+  };
+  timestamp: Date;
+}
+
+export interface EntitySubscription {
+  id: string;
+  entityTypes?: string[];
+  entityIds?: string[];
+  callback: (entities: BaseEntity[], action: EntityAction) => void;
+}
+
+export interface EntityQueryOptions {
+  type?: string;
+  ids?: string[];
+  filter?: (entity: BaseEntity) => boolean;
+  sortBy?: keyof BaseEntity | ((entity: BaseEntity) => any);
+  sortOrder?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+}
+
+export interface EntityStoreState {
+  entities: Map<string, BaseEntity>;
+  entityTypes: Map<string, EntityState>;
+  subscriptions: Map<string, EntitySubscription>;
+  loading: boolean;
+  error: string | null;
 } 

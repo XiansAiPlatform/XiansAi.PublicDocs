@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import StepsBar from './components/StepsBar';
 import ChatPane from './components/chat/ChatPane';
@@ -7,6 +8,8 @@ import FindingsPane from './components/FindingsPane';
 import { StepsProvider, useSteps } from './context/StepsContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { WebSocketStepsProvider } from './context/WebSocketStepsContext';
+import { EntityProvider } from './context/EntityContext';
+import { POA_ROUTE_PATTERN, getFirstStepUrl } from './components/power-of-attorney/steps';
 
 const MainLayout: React.FC = () => {
   const { activeStep } = useSteps();
@@ -106,13 +109,30 @@ const MainLayout: React.FC = () => {
   );
 };
 
-const App: React.FC = () => (
-  <SettingsProvider>
-    <StepsProvider>
+const PowerOfAttorneyWorkflow: React.FC = () => (
+  <StepsProvider>
+    <EntityProvider>
       <WebSocketStepsProvider>
         <MainLayout />
       </WebSocketStepsProvider>
-    </StepsProvider>
+    </EntityProvider>
+  </StepsProvider>
+);
+
+const App: React.FC = () => (
+  <SettingsProvider>
+    <Router>
+      <Routes>
+        {/* Redirect root to the first step */}
+        <Route path="/" element={<Navigate to={getFirstStepUrl()} replace />} />
+        
+        {/* Power of Attorney workflow routes */}
+        <Route path={POA_ROUTE_PATTERN} element={<PowerOfAttorneyWorkflow />} />
+        
+        {/* Catch-all redirect to first step */}
+        <Route path="*" element={<Navigate to={getFirstStepUrl()} replace />} />
+      </Routes>
+    </Router>
   </SettingsProvider>
 );
 
