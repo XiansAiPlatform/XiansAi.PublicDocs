@@ -1,6 +1,7 @@
 import React from 'react';
 import { Representative, ActivityData } from '../types/representative.types';
 import { countRepresentativesWithNames, getValidRepresentatives } from '../utils/representative.utils';
+import { getThemeColors } from '../../../../../components/theme';
 
 interface RepresentativesHeaderProps {
   representatives: Representative[];
@@ -11,12 +12,14 @@ interface RepresentativesHeaderProps {
 
 const RepresentativesHeader: React.FC<RepresentativesHeaderProps> = ({
   representatives,
-  latestActivity,
   onClearAll,
   onSave
 }) => {
   const representativeCount = countRepresentativesWithNames(representatives);
   const hasValidData = getValidRepresentatives(representatives).length > 0;
+  
+  const successTheme = getThemeColors('warm');   // Using blue for success/save actions
+  const errorTheme = getThemeColors('error');    // Using semantic error for destructive actions
 
   return (
     <header className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
@@ -33,7 +36,7 @@ const RepresentativesHeader: React.FC<RepresentativesHeaderProps> = ({
           {representatives.length > 1 && (
             <button
               onClick={onClearAll}
-              className="px-3 py-2 text-sm text-gray-600 hover:text-red-600 border border-gray-300 rounded-md hover:border-red-300 transition-colors"
+              className={`px-3 py-2 text-sm text-gray-600 hover:${errorTheme.bg.replace('bg-', 'text-')} border border-gray-300 hover:${errorTheme.border} rounded-md transition-colors`}
             >
               Clear All
             </button>
@@ -44,7 +47,7 @@ const RepresentativesHeader: React.FC<RepresentativesHeaderProps> = ({
             disabled={!hasValidData}
             className={`px-4 py-2 text-sm rounded-md transition-colors flex items-center space-x-2 ${
               hasValidData
-                ? 'bg-green-600 text-white hover:bg-green-700'
+                ? `${successTheme.buttonPrimary} text-white ${successTheme.buttonPrimaryHover}`
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >

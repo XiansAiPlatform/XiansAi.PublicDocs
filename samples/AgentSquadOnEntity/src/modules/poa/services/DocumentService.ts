@@ -255,10 +255,15 @@ export class DocumentService {
   private subscribeToDocumentResponses(): void {
     this.unsubscribeFromMetadata = this.webSocketHub.subscribeToMetadata(
       'document_service',
-      ['DocumentResponse'], // Listen for these message types
+      ['DocumentResponse', 'ActivityLog'], // Listen for these message types
       (message) => {
         console.log('[DocumentService] Received metadata message:', message);
-        this.handleDocumentResponse(message);
+        if (message.messageType === 'ActivityLog') {
+          console.log('[DocumentService] Received ActivityLog message:', message);
+          this.handleActivityLog(message);
+        } else {
+          this.handleDocumentResponse(message);
+        }
       }
     );
     console.log('[DocumentService] Subscribed to document response metadata messages');
@@ -334,6 +339,100 @@ export class DocumentService {
         clearTimeout(firstPendingRequest.timeout);
         firstPendingRequest.reject(new Error(`Document parsing error: ${error}`));
       }
+    }
+  }
+
+  /**
+   * Handle ActivityLog messages from WebSocket
+   */
+  private handleActivityLog(metadata: any): void {
+    try {
+      const { messageType, summary, details, auditResult, success, timestamp, requestId } = metadata;
+
+      if (messageType !== 'ActivityLog') {
+        console.warn(`[DocumentService] Received unexpected message type for ActivityLog: ${messageType}`);
+        return;
+      }
+
+      console.log(`[DocumentService] ActivityLog received: ${summary}`, {
+        details,
+        success,
+        timestamp,
+        requestId
+      });
+
+      // If auditResult contains document updates, process them
+      if (auditResult?.document) {
+        const rawDocument = auditResult.document;
+        console.log('[DocumentService] ActivityLog contains document update:', rawDocument);
+
+        // Get documentId from URL or from the document itself
+        const urlDocumentId = this.extractDocumentIdFromURL();
+        const serverDocumentId = rawDocument?.documentId || rawDocument?.id;
+        const documentId = urlDocumentId || serverDocumentId;
+
+        if (documentId) {
+          // Check if we have an existing document to update
+          let existingDocument = this.findExistingDocument(documentId);
+          
+          // Create or update the document with new data
+          const updatedDocument: Document = {
+            id: existingDocument?.id || rawDocument?.id || documentId,
+            documentId: documentId,
+            type: 'poa_document',
+            title: existingDocument?.title || rawDocument?.title || 'Untitled Document',
+            content: existingDocument?.content || rawDocument?.content || {},
+            status: rawDocument?.status || existingDocument?.status || 'draft',
+            createdAt: existingDocument?.createdAt || (rawDocument?.createdAt ? new Date(rawDocument.createdAt) : new Date()),
+            updatedAt: new Date(), // Always update the timestamp
+            version: (existingDocument?.version || 0) + 1, // Increment version
+            metadata: {
+              ...existingDocument?.metadata,
+              lastActivityLog: {
+                summary,
+                details,
+                timestamp,
+                requestId
+              }
+            },
+            principal: rawDocument?.principal || existingDocument?.principal,
+            scope: rawDocument?.scope || existingDocument?.scope,
+            representatives: rawDocument?.representatives || existingDocument?.representatives || [],
+            conditions: rawDocument?.conditions || existingDocument?.conditions || [],
+            witnesses: rawDocument?.witnesses || existingDocument?.witnesses || []
+          };
+
+          // Store/update in EntityStore under 'poa' category
+          this.entityStore.addEntityToCategory('poa', documentId, updatedDocument);
+
+          console.log(`[DocumentService] Document updated from ActivityLog: ${documentId}`, {
+            version: updatedDocument.version,
+            representativesCount: updatedDocument.representatives?.length || 0,
+            conditionsCount: updatedDocument.conditions?.length || 0,
+            witnessesCount: updatedDocument.witnesses?.length || 0
+          });
+
+          // Log audit findings if present
+          if (auditResult.findings && auditResult.findings.length > 0) {
+            console.log(`[DocumentService] Audit findings received:`, auditResult.findings);
+            auditResult.findings.forEach((finding: any) => {
+              const level = finding.type === 0 ? 'ERROR' : finding.type === 1 ? 'WARNING' : 'INFO';
+              console.log(`[DocumentService] ${level}: ${finding.message}`);
+            });
+          }
+
+          if (auditResult.hasErrors) {
+            console.warn(`[DocumentService] Document has validation errors`);
+          }
+        } else {
+          console.warn('[DocumentService] ActivityLog document update received but no documentId found');
+        }
+      } else {
+        console.log(`[DocumentService] ActivityLog received without document update: ${summary}`);
+      }
+
+    } catch (error) {
+      console.error('[DocumentService] Error handling ActivityLog:', error);
     }
   }
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSteps } from '../context/StepsContext';
 import type { ComponentLoader } from './types';
-import { getThemeColors } from './theme';
+import { getThemeColors, ThemeName } from './theme';
 
 // Generic dynamic component loader
 const DynamicEntityComponent: React.FC<{ componentLoader: ComponentLoader }> = ({ componentLoader }) => {
@@ -123,7 +123,7 @@ const EntityPane: React.FC = () => {
   const currentStep = steps[activeStep];
 
   // Get theme colors from the theme name
-  const themeColors = currentStep ? getThemeColors(currentStep.theme) : null;
+  const themeColors = currentStep ? getThemeColors(currentStep.theme as ThemeName) : null;
 
   // Navigation functions
   const goToPreviousStep = () => {
@@ -186,7 +186,7 @@ const EntityPane: React.FC = () => {
             {canGoNext && (
               <button
                 onClick={goToNextStep}
-                className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white focus:outline-none ${themeColors.buttonPrimary} ${themeColors.buttonPrimaryHover}`}
+                className={`inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 focus:outline-none ${themeColors.buttonSecondary} ${themeColors.buttonSecondaryHover} ${themeColors.buttonSecondaryBorder}`}
               >
                 Next
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

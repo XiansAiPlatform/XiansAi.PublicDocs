@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { DocumentService, Document } from '../services/DocumentService';
 import { useSteps } from '../../../context/StepsContext';
-import { getThemeColors } from '../../../components/theme';
+import { getThemeColors, ThemeName } from '../../../components/theme';
 import { WebSocketHub } from '../../../middleware/WebSocketHub';
 import { getAgentById } from '../steps';
 
@@ -19,7 +19,7 @@ const DocumentScope: React.FC = () => {
   // Get theme colors
   const { steps, activeStep } = useSteps();
   const currentStep = steps[activeStep];
-  const themeColors = currentStep ? getThemeColors(currentStep.theme) : null;
+  const themeColors = currentStep ? getThemeColors(currentStep.theme as ThemeName) : null;
 
   // Check connection readiness for document data flow agent
   const checkConnectionReadiness = (): boolean => {

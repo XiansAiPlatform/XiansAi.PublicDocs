@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
+import { FiTrash2 } from 'react-icons/fi';
 import { Representative } from '../types/representative.types';
+import { getThemeColors } from '../../../../../components/theme';
 
 interface RepresentativeCardProps {
   representative: Representative;
@@ -23,6 +25,9 @@ const RepresentativeCard: React.FC<RepresentativeCardProps> = ({
   onExitEdit
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
+  const theme = getThemeColors('purple');  // Primary theme using custom purple
+  const successTheme = getThemeColors('blue');  // Success actions using blue
+  const errorTheme = getThemeColors('error');  // Error actions using semantic error
 
   // Handle click outside to cancel edit mode
   useEffect(() => {
@@ -52,7 +57,7 @@ const RepresentativeCard: React.FC<RepresentativeCardProps> = ({
       ref={cardRef}
       className={`border rounded-lg p-4 bg-white shadow-sm transition-all cursor-pointer ${
         isEditing 
-          ? 'border-blue-500 ring-2 ring-blue-200' 
+          ? `${theme.border.replace('-200', '-500')} ring-2 ${theme.border.replace('border-', 'ring-')}`
           : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
       }`}
       onClick={handleCardClick}
@@ -62,7 +67,7 @@ const RepresentativeCard: React.FC<RepresentativeCardProps> = ({
         <div className="flex items-center space-x-2">
           {!representative.id && !isEditing && (
             <button
-              className="text-gray-400 hover:text-blue-600 transition-colors p-1"
+              className={`text-gray-400 hover:${theme.bg.replace('bg-', 'text-')} transition-colors p-1`}
               title="Click to edit"
             >
               <svg 
@@ -86,7 +91,7 @@ const RepresentativeCard: React.FC<RepresentativeCardProps> = ({
                 e.stopPropagation();
                 onExitEdit();
               }}
-              className="text-green-600 hover:text-green-800 text-xs px-2 py-1 bg-green-50 rounded"
+              className={`${successTheme.bg.replace('bg-', 'text-')} hover:${successTheme.bgDark.replace('bg-', 'text-')} text-xs px-2 py-1 ${successTheme.bgLight} rounded border ${successTheme.border}`}
               title="Save and exit edit mode"
             >
               ✓ Done
@@ -98,10 +103,10 @@ const RepresentativeCard: React.FC<RepresentativeCardProps> = ({
                 e.stopPropagation();
                 onRemove(index);
               }}
-              className="text-red-600 hover:text-red-800 text-xs p-1"
+              className={`${errorTheme.bg.replace('bg-', 'text-')} hover:${errorTheme.bgDark.replace('bg-', 'text-')} text-xs p-1 rounded`}
               title="Remove representative"
             >
-              ✕
+              <FiTrash2 size={14} />
             </button>
           )}
         </div>
@@ -126,62 +131,66 @@ interface EditModeProps {
   onUpdate: (index: number, field: keyof Representative, value: string) => void;
 }
 
-const EditMode: React.FC<EditModeProps> = ({ representative, index, onUpdate }) => (
-  <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
-    <div>
-      <label className="block text-xs font-medium text-gray-700 mb-1">
-        Full Name *
-      </label>
-      <input
-        type="text"
-        value={representative.fullName}
-        onChange={(e) => onUpdate(index, 'fullName', e.target.value)}
-        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-        placeholder="Enter full name"
-        autoFocus
-      />
+const EditMode: React.FC<EditModeProps> = ({ representative, index, onUpdate }) => {
+  const theme = getThemeColors('purple');
+  
+  return (
+    <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Full Name *
+        </label>
+        <input
+          type="text"
+          value={representative.fullName}
+          onChange={(e) => onUpdate(index, 'fullName', e.target.value)}
+          className={`w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 ${theme.buttonPrimaryFocus.replace('focus:', '')} bg-white`}
+          placeholder="Enter full name"
+          autoFocus
+        />
+      </div>
+      
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          National ID *
+        </label>
+        <input
+          type="text"
+          value={representative.nationalId}
+          onChange={(e) => onUpdate(index, 'nationalId', e.target.value)}
+          className={`w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 ${theme.buttonPrimaryFocus.replace('focus:', '')} bg-white`}
+          placeholder="Enter national ID"
+        />
+      </div>
+      
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Relationship *
+        </label>
+        <input
+          type="text"
+          value={representative.relationship}
+          onChange={(e) => onUpdate(index, 'relationship', e.target.value)}
+          className={`w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 ${theme.buttonPrimaryFocus.replace('focus:', '')} bg-white`}
+          placeholder="e.g., Backup Fullmektig"
+        />
+      </div>
+      
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Email
+        </label>
+        <input
+          type="email"
+          value={representative.email || ''}
+          onChange={(e) => onUpdate(index, 'email', e.target.value)}
+          className={`w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 ${theme.buttonPrimaryFocus.replace('focus:', '')} bg-white`}
+          placeholder="email@example.com"
+        />
+      </div>
     </div>
-    
-    <div>
-      <label className="block text-xs font-medium text-gray-700 mb-1">
-        National ID *
-      </label>
-      <input
-        type="text"
-        value={representative.nationalId}
-        onChange={(e) => onUpdate(index, 'nationalId', e.target.value)}
-        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-        placeholder="Enter national ID"
-      />
-    </div>
-    
-    <div>
-      <label className="block text-xs font-medium text-gray-700 mb-1">
-        Relationship *
-      </label>
-      <input
-        type="text"
-        value={representative.relationship}
-        onChange={(e) => onUpdate(index, 'relationship', e.target.value)}
-        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-        placeholder="e.g., Backup Fullmektig"
-      />
-    </div>
-    
-    <div>
-      <label className="block text-xs font-medium text-gray-700 mb-1">
-        Email
-      </label>
-      <input
-        type="email"
-        value={representative.email || ''}
-        onChange={(e) => onUpdate(index, 'email', e.target.value)}
-        className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-        placeholder="email@example.com"
-      />
-    </div>
-  </div>
-);
+  );
+};
 
 interface ViewModeProps {
   representative: Representative;
