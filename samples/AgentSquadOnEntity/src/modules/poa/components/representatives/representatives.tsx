@@ -18,7 +18,6 @@ const Representatives: React.FC = () => {
     toggleEditMode,
     clearAllRepresentatives,
     saveRepresentatives,
-    document,
     documentLoading,
     documentError,
     documentConnectionStatus
@@ -70,7 +69,6 @@ const Representatives: React.FC = () => {
         <RepresentativesHeader
           representatives={[]}
           latestActivity={null}
-          onClearAll={clearAllRepresentatives}
           onSave={saveRepresentatives}
         />
         <div className="flex-1 flex items-center justify-center">
@@ -98,7 +96,6 @@ const Representatives: React.FC = () => {
         <RepresentativesHeader
           representatives={representatives}
           latestActivity={latestActivity}
-          onClearAll={clearAllRepresentatives}
           onSave={saveRepresentatives}
         />
         <div className="flex-1 flex items-center justify-center">
@@ -148,7 +145,6 @@ const Representatives: React.FC = () => {
       <RepresentativesHeader
         representatives={representatives}
         latestActivity={latestActivity}
-        onClearAll={clearAllRepresentatives}
         onSave={saveRepresentatives}
       />
 

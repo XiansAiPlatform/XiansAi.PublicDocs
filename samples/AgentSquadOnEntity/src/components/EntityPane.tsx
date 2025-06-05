@@ -162,14 +162,6 @@ const EntityPane: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">{currentStep.title}</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Step {activeStep + 1} of {steps.length}
-              {documentId && documentId !== 'new' && (
-                <span className="ml-2 text-xs text-blue-600">
-                  Document: {documentId}
-                </span>
-              )}
-            </p>
           </div>
           <div className="flex items-center space-x-2">
             {canGoPrevious && (

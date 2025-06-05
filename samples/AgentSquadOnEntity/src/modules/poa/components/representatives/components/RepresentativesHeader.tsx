@@ -6,41 +6,29 @@ import { getThemeColors } from '../../../../../components/theme';
 interface RepresentativesHeaderProps {
   representatives: Representative[];
   latestActivity: ActivityData | null;
-  onClearAll: () => void;
   onSave: () => void;
 }
 
 const RepresentativesHeader: React.FC<RepresentativesHeaderProps> = ({
   representatives,
-  onClearAll,
   onSave
 }) => {
   const representativeCount = countRepresentativesWithNames(representatives);
   const hasValidData = getValidRepresentatives(representatives).length > 0;
   
   const successTheme = getThemeColors('warm');   // Using blue for success/save actions
-  const errorTheme = getThemeColors('error');    // Using semantic error for destructive actions
 
   return (
     <header className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-gray-600 mt-1">Define the representatives for each party</p>
+          <p className="text-sm text-gray-600 mt-1">Manage the representatives</p>
         </div>
         
         <div className="flex items-center space-x-3">
           <div className="text-sm text-gray-600">
             {representativeCount} representative(s)
           </div>
-          
-          {representatives.length > 1 && (
-            <button
-              onClick={onClearAll}
-              className={`px-3 py-2 text-sm text-gray-600 hover:${errorTheme.bg.replace('bg-', 'text-')} border border-gray-300 hover:${errorTheme.border} rounded-md transition-colors`}
-            >
-              Clear All
-            </button>
-          )}
           
           <button
             onClick={onSave}
