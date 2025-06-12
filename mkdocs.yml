@@ -56,7 +56,9 @@ nav:
     - Unit Testing Activities: n-encyclopedia/unit-testing-activities.md
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
     - Access Agents via WebSocket: n-encyclopedia/access-agents-via-websocket.md
- 
+  - Setup Guide:
+    - Start: setting-up/setup.md
+
 markdown_extensions:
   - tables
   - admonition
