@@ -37,11 +37,12 @@ public class HandoffCapabilities
     [Returns("Name of the bot that took over the conversation")]
     public string HandoffToSpecializedBot(string originalUserMessage)
     {
-        _messageThread.Handoff(originalUserMessage, typeof(SpecializedBot));
+        _messageThread.SendHandoff(typeof(SpecializedBot), originalUserMessage);
         return typeof(SpecializedBot).Name;
     }
 }
 ```
+You can also pass a `targetWorkflowId` instead of `workflowType` to enable a handoff to a specific workflow instance.
 
 ### Important Implementation Notes
 
