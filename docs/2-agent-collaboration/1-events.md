@@ -42,8 +42,7 @@ To receive events in a flow, subscribe to them in the flow's constructor using t
 ```csharp
 public class NewsReportFlow : FlowBase
 {
-    public const string SendSummaryReportEvent = "SendSummaryReport";
-    private readonly Queue<NewsReportRequest> _eventQueue = new Queue<NewsReportRequest>();
+    private readonly Queue<NewsReportRequest> _newsRequests = new Queue<NewsReportRequest>();
 
     public NewsReportFlow()
     {
@@ -51,7 +50,7 @@ public class NewsReportFlow : FlowBase
         {
             if (args.Payload != null)
             {
-                _eventQueue.Enqueue(args.Payload);
+                _newsRequests.Enqueue(args.Payload);
             }
         });
     }
@@ -85,8 +84,7 @@ public static string SendSummaryReport(string url, string recipientEmail)
 [Workflow("News Report Flow")]
 public class NewsReportFlow : FlowBase
 {
-    public const string SendSummaryReportEvent = "SendSummaryReport";
-    private readonly Queue<NewsReportRequest> _eventQueue = new Queue<NewsReportRequest>();
+    private readonly Queue<NewsReportRequest> _newsRequests = new Queue<NewsReportRequest>();
 
     public NewsReportFlow()
     {
@@ -94,7 +92,7 @@ public class NewsReportFlow : FlowBase
         {
             if (args.Payload != null)
             {
-                _eventQueue.Enqueue(args.Payload);
+                _newsRequests.Enqueue(args.Payload);
             }
         });
     }
@@ -146,7 +144,8 @@ The `MessageHub` class provides two ways to subscribe to events:
 ```csharp
 _messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
 {
-    // process
+    // Handle event asynchronously
+    await ProcessEventAsync(metadata, payload);
 });
 ```
 
@@ -155,7 +154,8 @@ _messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
 ```csharp
 _messageHub.SubscribeFlowMessageHandler<NewsReportRequest>((args) =>
 {
-    // process
+    // Handle event synchronously
+    ProcessEvent(metadata, payload);
 });
 ```
 
