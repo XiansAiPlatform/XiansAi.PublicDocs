@@ -6,7 +6,7 @@ Events provide a powerful mechanism for communication between different flows in
 
 Events in XiansAI allow flows to:
 
-- Send events to other flows using `MessageHub.SendFlowMessage` method
+- Send events to other flows
 - Subscribe to and handle events from other flows
 - Pass data between flows asynchronously
 
@@ -43,18 +43,22 @@ To receive events in a flow, subscribe to them in the flow's constructor using t
 public class NewsReportFlow : FlowBase
 {
     public const string SendSummaryReportEvent = "SendSummaryReport";
-    Queue<NewsReportRequest> _newsRequests = new();
+    private readonly Queue<NewsReportRequest> _eventQueue = new Queue<NewsReportRequest>();
 
     public NewsReportFlow()
     {
-        var handlerCalled = false;
-            
-        ConversationReceivedAsyncHandler handler = _ => 
+        _messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
         {
-            handlerCalled = true;
-            return Task.CompletedTask;
-        };
-        _messageHub.SubscribeAsyncFlowMessageHandler(handler);
+            try
+            {
+                _eventQueue.Enqueue(args.Payload);
+            }
+            catch (Exception ex)
+            {
+                // Log other errors during enqueuing
+                _logger.LogError($"Error enqueuing event: {ex.Message}", ex);
+            }
+        });
     }
 }
 ```
@@ -87,18 +91,22 @@ public static string SendSummaryReport(string url, string recipientEmail)
 public class NewsReportFlow : FlowBase
 {
     public const string SendSummaryReportEvent = "SendSummaryReport";
-    Queue<NewsReportRequest> _newsRequests = new();
+    private readonly Queue<NewsReportRequest> _eventQueue = new Queue<NewsReportRequest>();
 
     public NewsReportFlow()
     {
-        var handlerCalled = false;
-            
-        ConversationReceivedAsyncHandler handler = _ => 
+        _messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
         {
-            handlerCalled = true;
-            return Task.CompletedTask;
-        };
-        _messageHub.SubscribeAsyncFlowMessageHandler(handler);
+            try
+            {
+                _eventQueue.Enqueue(args.Payload);
+            }
+            catch (Exception ex)
+            {
+                // Log other errors during enqueuing
+                _logger.LogError($"Error enqueuing event: {ex.Message}", ex);
+            }
+        });
     }
 
     [WorkflowRun]
@@ -146,21 +154,33 @@ The `MessageHub` class provides two ways to subscribe to events:
 1. **Async Handler**:
 
 ```csharp
-var asyncHandlerCalled = false;
-ConversationReceivedAsyncHandler asyncHandler = _ => 
+_messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
 {
-    asyncHandlerCalled = true;
-    return Task.CompletedTask;
-};
-_messageHub.SubscribeAsyncFlowMessageHandler(asyncHandler);
+    try
+    {
+        // process
+    }
+    catch (Exception ex)
+    {
+        // Log other errors during enqueuing
+    }
+});
 ```
 
 2. **Sync Handler**:
 
 ```csharp
-var syncHandlerCalled = false;
-FlowMessageReceivedHandler syncHandler = _ => syncHandlerCalled = true;
-_messageHub.SubscribeFlowMessageHandler(syncHandler);
+_messageHub.SubscribeFlowMessageHandler<NewsReportRequest>((args) =>
+{
+    try
+    {
+        // process
+    }
+    catch (Exception ex)
+    {
+        // Log other errors during enqueuing
+    }
+});
 ```
 
 #### Unsubscribing from Events
@@ -169,8 +189,6 @@ To remove event handlers:
 
 ```csharp
 // Remove async handler
-var handlerCallCount = 0;
-FlowMessageReceivedHandler handler = _ => handlerCallCount++;
 _messageHub.UnsubscribeAsyncFlowMessageHandler(handler);
 
 // Remove sync handler
