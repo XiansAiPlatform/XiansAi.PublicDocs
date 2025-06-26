@@ -49,14 +49,9 @@ public class NewsReportFlow : FlowBase
     {
         _messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
         {
-            try
+            if (args.Payload != null)
             {
                 _eventQueue.Enqueue(args.Payload);
-            }
-            catch (Exception ex)
-            {
-                // Log other errors during enqueuing
-                _logger.LogError($"Error enqueuing event: {ex.Message}", ex);
             }
         });
     }
@@ -97,14 +92,9 @@ public class NewsReportFlow : FlowBase
     {
         _messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
         {
-            try
+            if (args.Payload != null)
             {
                 _eventQueue.Enqueue(args.Payload);
-            }
-            catch (Exception ex)
-            {
-                // Log other errors during enqueuing
-                _logger.LogError($"Error enqueuing event: {ex.Message}", ex);
             }
         });
     }
@@ -156,14 +146,7 @@ The `MessageHub` class provides two ways to subscribe to events:
 ```csharp
 _messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
 {
-    try
-    {
-        // process
-    }
-    catch (Exception ex)
-    {
-        // Log other errors during enqueuing
-    }
+    // process
 });
 ```
 
@@ -172,14 +155,7 @@ _messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
 ```csharp
 _messageHub.SubscribeFlowMessageHandler<NewsReportRequest>((args) =>
 {
-    try
-    {
-        // process
-    }
-    catch (Exception ex)
-    {
-        // Log other errors during enqueuing
-    }
+    // process
 });
 ```
 
@@ -189,10 +165,10 @@ To remove event handlers:
 
 ```csharp
 // Remove async handler
-_messageHub.UnsubscribeAsyncFlowMessageHandler(handler);
+_messageHub.UnsubscribeAsyncFlowMessageHandler<NewsReportRequest>(asyncHandler);
 
 // Remove sync handler
-_messageHub.UnsubscribeFlowMessageHandler(handler);
+_messageHub.UnsubscribeFlowMessageHandler<NewsReportRequest>(syncHandler);
 ```
 
 ### Event Metadata
