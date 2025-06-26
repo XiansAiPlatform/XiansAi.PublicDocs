@@ -6,7 +6,7 @@ Events provide a powerful mechanism for communication between different flows in
 
 Events in XiansAI allow flows to:
 
-- Send events to other flows
+- Send events to other flows using `MessageHub.SendFlowMessage` method
 - Subscribe to and handle events from other flows
 - Pass data between flows asynchronously
 
@@ -37,7 +37,7 @@ MessageHub.SendFlowMessage(
 
 ## Receiving Events
 
-To receive events in a flow, subscribe to them in the flow's constructor using the `_messageHub.SubscribeAsyncChatHandler` method:
+To receive events in a flow, subscribe to them in the flow's constructor using the `_messageHub.SubscribeFlowMessageHandler` method:
 
 ```csharp
 public class NewsReportFlow : FlowBase
@@ -54,7 +54,7 @@ public class NewsReportFlow : FlowBase
             handlerCalled = true;
             return Task.CompletedTask;
         };
-        _messageHub.SubscribeAsyncChatHandler(handler);
+        _messageHub.SubscribeAsyncFlowMessageHandler(handler);
     }
 }
 ```
@@ -98,7 +98,7 @@ public class NewsReportFlow : FlowBase
             handlerCalled = true;
             return Task.CompletedTask;
         };
-        _messageHub.SubscribeAsyncChatHandler(handler);
+        _messageHub.SubscribeAsyncFlowMessageHandler(handler);
     }
 
     [WorkflowRun]
@@ -152,15 +152,15 @@ ConversationReceivedAsyncHandler asyncHandler = _ =>
     asyncHandlerCalled = true;
     return Task.CompletedTask;
 };
-_messageHub.SubscribeAsyncChatHandler(asyncHandler);
+_messageHub.SubscribeAsyncFlowMessageHandler(asyncHandler);
 ```
 
 2. **Sync Handler**:
 
 ```csharp
 var syncHandlerCalled = false;
-ConversationReceivedHandler syncHandler = _ => syncHandlerCalled = true;
-_messageHub.SubscribeChatHandler(syncHandler);
+FlowMessageReceivedHandler syncHandler = _ => syncHandlerCalled = true;
+_messageHub.SubscribeFlowMessageHandler(syncHandler);
 ```
 
 #### Unsubscribing from Events
@@ -170,11 +170,11 @@ To remove event handlers:
 ```csharp
 // Remove async handler
 var handlerCallCount = 0;
-ConversationReceivedHandler handler = _ => handlerCallCount++;
-_messageHub.UnsubscribeAsyncChatHandler(handler);
+FlowMessageReceivedHandler handler = _ => handlerCallCount++;
+_messageHub.UnsubscribeAsyncFlowMessageHandler(handler);
 
 // Remove sync handler
-_messageHub.UnsubscribeChatHandler(handler);
+_messageHub.UnsubscribeFlowMessageHandler(handler);
 ```
 
 ### Event Metadata
