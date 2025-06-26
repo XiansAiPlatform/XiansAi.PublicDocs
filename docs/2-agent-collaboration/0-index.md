@@ -4,13 +4,6 @@ The message communication structure between users, agents, and workflows in the 
 
 Collaboration in XiansAI happens in following scenarios:
 
-- Inter-flow Communication
-    - Collaboration between agents across different workflows.
-- Agent Initiated Messaging
-    - Interaction between a user and an agent within a conversation thread.
-- Agent Handoff
-    - Transition where the current workflow control is passed to a new agent workflow.
-
 ## Inter-flow Communication
 
 - Agents communicate with other agents via their respective workflows.
@@ -19,11 +12,11 @@ Collaboration in XiansAI happens in following scenarios:
 
 ## Agent Initiated Message
 
-- An agent interacts with a user through a Workflow, and all messages are grouped under a `MessageThread`.
+- Interaction between a user and an agent within a `MessageThread`.
 - Messages are received through either a WebSocket or a WebHook, based on the system’s configuration.
 - This collaboration can be as, 
     - `SendChat` - Sends plain text messages.
-    - `SendData` - Sends a structured data object .
+    - `SendData` - Sends a structured data object.
 
 ## Agent Handoff
 
