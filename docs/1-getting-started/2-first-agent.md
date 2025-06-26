@@ -56,7 +56,7 @@ public class NewsReaderBot : FlowBase
     public async Task Run()
     {
         string sysPrompt = "You are a news reader bot.";
-        await InitUserConversation(sysPrompt);
+        await InitConversation(sysPrompt);
     }
 }
 
@@ -71,7 +71,12 @@ Notes:
 
 - The `[WorkflowRun]` and `[Workflow]` attributes are required to mark the method as the entry points for the workflow. You can see more about the Temporal.io workflow engine [here](https://docs.temporal.io).
 
-- InitUserConversation is a method that initializes the conversation with the user. It is a method that is provided by the XiansAi.Flow library.
+- InitConversation is a method that initializes the conversation with the user. It is a method that is provided by the XiansAi.Flow library.
+
+- The InitConversation function is designed for flexibility and supports two usage patterns:
+    -   Providing a system prompt (string): Users can directly pass a system prompt to define the initial context or instructions for the conversation.
+    - Providing a knowledge object: Users can specify a Knowledge object that includes a knowledge name, allowing the conversation to be initialized based on a predefined knowledge base or content source.
+
 
 ## Testing Your Setup
 

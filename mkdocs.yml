@@ -36,13 +36,14 @@ nav:
       - Business Process Flow: 1-getting-started/4-new-business-process.md
       - Adding Activities: 1-getting-started/5-adding-activities.md
   - Agent Collaboration:
+    - Introduction: 2-agent-collaboration/0-index.md
     - Events:
       - Inter-flow Communication: 2-agent-collaboration/1-events.md
-    - Handoffs:
-      - Handoff to Another Agent: 2-agent-collaboration/3-handoffs.md
     - Messaging:
       - Agent Initiated Message: 2-agent-collaboration/2-messaging.md
       - Responding to a User: 2-agent-collaboration/4-responding.md
+    - Handoffs:
+      - Handoff to Another Agent: 2-agent-collaboration/3-handoffs.md
   - Agent Knowledge:
     - Managing Knowledge: 3-knowledge/1-using-portal.md
     - Accessing Knowledge: 3-knowledge/2-accessing-knowledge.md

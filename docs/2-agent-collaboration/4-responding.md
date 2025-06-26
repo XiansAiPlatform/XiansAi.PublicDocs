@@ -23,18 +23,18 @@ public class ResponseCapabilities
     [Parameter("content", "The message content to send")]
     [Parameter("metadata", "Optional metadata to include with the response")]
     [Returns("The response ID if successful, null otherwise")]
-    public async Task<string?> SendFormattedResponse(string content, string? metadata = null)
+    public async Task<string?> SendFormattedResponse(string content, object? data = null)
     {
-        return await _messageThread.Respond(content, metadata);
+        return await _messageThread.SendChat(content, data);
     }
 
     [Capability("Send a structured data response")]
     [Parameter("data", "The data to send")]
     [Returns("The response ID if successful, null otherwise")]
-    public async Task<string?> SendDataResponse(string data)
+    public async Task<string?> SendDataResponse(object data)
     {
         ...
-        await _messageThread.Respond(data);
+        await _messageThread.SendData(data);
         ...
     }
 }
