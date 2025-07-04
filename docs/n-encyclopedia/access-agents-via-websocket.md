@@ -31,6 +31,7 @@ API_KEY=your-api-key
 TENANT_ID=your-tenant-id
 PARTICIPANT_ID=your-participant-id
 ```
+The api-key can be generated from the Xians portal. Navigate to Settings > API Keys tab > Create API Key. 
 
 ## Setup Websocket Connection
 
@@ -153,9 +154,6 @@ The message history is received through the Websocket connection in the followin
    - Parameters required:
      ```csharp
      await connection.InvokeAsync("GetThreadHistory",
-         agent.Agent,        // Agent identifier
-         agent.WorkflowType, // Workflow type
-         participantId,      // Your participant ID
          1,                  // Page number
          20                  // Page size
      );
@@ -389,12 +387,7 @@ class Program
         {
             try
             {
-                await _connection.InvokeAsync("GetThreadHistory",
-                    agent.Agent,
-                    agent.WorkflowType,
-                    _participantId,
-                    1,
-                    20);
+                await _connection.InvokeAsync("GetThreadHistory", 1, 20);
             }
             catch (Exception ex)
             {
