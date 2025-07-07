@@ -51,7 +51,6 @@ nav:
     - Local Development: 3-knowledge/3-local-dev.md
   - Encyclopedia:
     - Multi-flow Agents: n-encyclopedia/multi-flow-agents.md
-    - Signaling Agent Workflows: n-encyclopedia/signaling-agent-workflows.md
     - Retry Policy: n-encyclopedia/retry-policy.md
     - Logging: n-encyclopedia/logging.md
     - Unit Testing Activities: n-encyclopedia/unit-testing-activities.md
