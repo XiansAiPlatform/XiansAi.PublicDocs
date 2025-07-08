@@ -272,6 +272,9 @@ The message history is received through the Websocket connection in the followin
 ### 1. Main Program Implementation
 
 ```csharp
+using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json;
+
 class Program
 {
     private static HubConnection _connection;
