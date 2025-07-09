@@ -1,0 +1,20 @@
+﻿[
+  {
+    "id": "99x.io:Example Agent1:Example Bot1",
+    "name": "Example Bot1",
+    "agent": "Example Agent1",
+    "workflowType": "Example Agent1:Example Bot1"
+  },
+  {
+    "id": "99x.io:Example Agent2:Example Bot2",
+    "name": "Example Bot2",
+    "agent": "Example Agent2",
+    "workflowType": "Example Agent2:Example Bot2"
+  },
+  {
+    "id": "99x.io:Example3 Agent:Example Bot3",
+    "name": "Example Bot3",
+    "agent": "Example Agent3",
+    "workflowType": "Example Agent3:Example Bot3"
+  }
+]
