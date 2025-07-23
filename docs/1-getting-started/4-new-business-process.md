@@ -66,7 +66,7 @@ using Microsoft.Extensions.Logging;
 using Temporalio.Workflows;
 using XiansAi.Flow;
 
-[Workflow("News Report Flow")]
+[Workflow("News Agent:News Report Flow")]
 public class NewsReportFlow : FlowBase
 {
     [WorkflowRun]

@@ -12,9 +12,11 @@ Events in XiansAI allow flows to:
 
 ## Sending Events
 
-To send an event from one flow to another, use the `EventHub.Publish` method. Here's how to implement it:
+To send an event from one flow to another, use the `MessageHub.SendFlowMessage` method. Here's how to implement it:
 
 ```csharp
+using XiansAi.Messaging;
+
 // Define an event payload class
 public class NewsReportRequest
 {
@@ -26,9 +28,8 @@ public class NewsReportRequest
 }
 
 // Send an event
-EventHub.Publish(
+MessageHub.SendFlowMessage(
     typeof(NewsReportFlow),  // Target flow type
-    NewsReportFlow.SendSummaryReportEvent,  // Event name
     new NewsReportRequest {  // Event payload
         Url = url, 
         RecipientEmail = recipientEmail 
@@ -38,22 +39,22 @@ EventHub.Publish(
 
 ## Receiving Events
 
-To receive events in a flow, subscribe to them in the flow's constructor using the `_eventHub.Subscribe` method:
+To receive events in a flow, subscribe to them in the flow's constructor using the `_messageHub.SubscribeFlowMessageHandler` method:
 
 ```csharp
+using XiansAi.Flow;
+
 public class NewsReportFlow : FlowBase
 {
-    public const string SendSummaryReportEvent = "SendSummaryReport";
-    Queue<NewsReportRequest> _newsRequests = new();
+    private readonly Queue<NewsReportRequest> _newsRequests = new Queue<NewsReportRequest>();
 
     public NewsReportFlow()
     {
-        _eventHub.Subscribe<NewsReportRequest>((metadata, payload) =>
+        _messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
         {
-            Workflow.Logger.LogInformation("Received News Report Request for URL: {Url}", payload?.Url);
-            if (payload != null)
+            if (args.Payload != null)
             {
-                _newsRequests.Enqueue(payload);
+                _newsRequests.Enqueue(args.Payload);
             }
         });
     }
@@ -67,15 +68,17 @@ Here's a complete example showing how two flows can communicate using events:
 1. **Sending Flow (Capabilities.cs)**:
 
 ```csharp
+using XiansAi.Flow.Router.Plugins;
+using XiansAi.Messaging;
+
 [Capability("Send summary report")]
 [Parameter("url", "URL of the news article")]
 [Parameter("recipientEmail", "Email address of the recipient")]
 [Returns("Success message")]
 public static string SendSummaryReport(string url, string recipientEmail)
 {
-    EventHub.Send(
+    MessageHub.SendFlowMessage(
         typeof(NewsReportFlow), 
-        NewsReportFlow.SendSummaryReportEvent, 
         new NewsReportRequest { Url = url, RecipientEmail = recipientEmail }
     );
     return "Success";
@@ -85,20 +88,21 @@ public static string SendSummaryReport(string url, string recipientEmail)
 2. **Receiving Flow (NewsReportFlow.cs)**:
 
 ```csharp
+using XiansAi.Flow;
+using XiansAi.Messaging;
+
 [Workflow("News Report Flow")]
 public class NewsReportFlow : FlowBase
 {
-    public const string SendSummaryReportEvent = "SendSummaryReport";
-    Queue<NewsReportRequest> _newsRequests = new();
+    private readonly Queue<NewsReportRequest> _newsRequests = new Queue<NewsReportRequest>();
 
     public NewsReportFlow()
     {
-        _eventHub.Subscribe<NewsReportRequest>((metadata, payload) =>
+        _messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
         {
-            Workflow.Logger.LogInformation("Received News Report Request for URL: {Url}", payload?.Url);
-            if (payload != null)
+            if (args.Payload != null)
             {
-                _newsRequests.Enqueue(payload);
+                _newsRequests.Enqueue(args.Payload);
             }
         });
     }
@@ -117,7 +121,7 @@ public class NewsReportFlow : FlowBase
 
 ## Event Flow
 
-1. A capability or flow sends an event using `EventHub.Send`
+1. A capability or flow sends an event using ` MessageHub.SendFlowMessage`
 2. The target flow receives the event through its subscription
 3. The receiving flow processes the event in its workflow
 4. The workflow can wait for events using `Workflow.WaitConditionAsync`
@@ -126,43 +130,29 @@ This event-based communication pattern enables loose coupling between flows whil
 
 ## SDK Reference
 
-### EventHub Class
+### MessageHub Class
 
-The `EventHub` class provides the core functionality for event-based communication between flows.
+The `MessageHub` class provides the core functionality for event-based communication between flows.
 
-#### Publishing Events
+#### Sending flow messages Events
 
-There are two ways to publish events:
-
-1. **Using Flow Type**:
+**Using Flow Type**:
 
 ```csharp
-await EventHub.Publish(
+await MessageHub.SendFlowMessage(
     typeof(NewsReportFlow),  // Target flow type
-    "EventName",            // Event type
     payload                 // Optional payload object
-);
-```
-
-2. **Using Workflow ID and Type**:
-
-```csharp
-await EventHub.Publish(
-    "target-workflow-id",   // Target workflow ID
-    "target-workflow-type", // Target workflow type
-    "EventName",           // Event type
-    payload                // Optional payload object
 );
 ```
 
 #### Subscribing to Events
 
-The `EventHub` class provides two ways to subscribe to events:
+The `MessageHub` class provides two ways to subscribe to events:
 
 1. **Async Handler**:
 
 ```csharp
-_eventHub.Subscribe<NewsReportRequest>(async (metadata, payload) =>
+_messageHub.SubscribeAsyncFlowMessageHandler<NewsReportRequest>(async (args) =>
 {
     // Handle event asynchronously
     await ProcessEventAsync(metadata, payload);
@@ -172,7 +162,7 @@ _eventHub.Subscribe<NewsReportRequest>(async (metadata, payload) =>
 2. **Sync Handler**:
 
 ```csharp
-_eventHub.Subscribe<NewsReportRequest>((metadata, payload) =>
+_messageHub.SubscribeFlowMessageHandler<NewsReportRequest>((args) =>
 {
     // Handle event synchronously
     ProcessEvent(metadata, payload);
@@ -185,10 +175,10 @@ To remove event handlers:
 
 ```csharp
 // Remove async handler
-_eventHub.Unsubscribe<NewsReportRequest>(asyncHandler);
+_messageHub.UnsubscribeAsyncFlowMessageHandler<NewsReportRequest>(asyncHandler);
 
 // Remove sync handler
-_eventHub.Unsubscribe<NewsReportRequest>(syncHandler);
+_messageHub.UnsubscribeFlowMessageHandler<NewsReportRequest>(syncHandler);
 ```
 
 ### Event Metadata
@@ -198,7 +188,6 @@ Each event includes metadata about its source:
 ```csharp
 public class EventMetadata
 {
-    public required string EventType { get; set; }
     public required string SourceWorkflowId { get; set; }
     public required string SourceWorkflowType { get; set; }
     public required string SourceAgent { get; set; }

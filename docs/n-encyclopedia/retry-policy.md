@@ -87,6 +87,10 @@ RetryPolicy = new RetryPolicy
 Here's a complete example of a workflow using activity options with retry policy:
 
 ```csharp
+using Temporalio.Common;
+using Temporalio.Workflows;
+using XiansAi.Flow;
+
 [Workflow("Example Workflow")]
 public class ExampleWorkflow : FlowBase
 {

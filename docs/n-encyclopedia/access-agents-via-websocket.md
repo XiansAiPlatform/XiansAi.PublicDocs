@@ -31,43 +31,7 @@ API_KEY=your-api-key
 TENANT_ID=your-tenant-id
 PARTICIPANT_ID=your-participant-id
 ```
-
-## Setup Websocket Connection
-
-Before subscribing to agents, you need to establish a websocket connection. Here's how to set up and start the connection:
-
-```csharp
-private static async Task SetupWebsocketConnection()
-{
-    // Create the connection with authentication
-    _connection = new HubConnectionBuilder()
-        .WithUrl($"{_webSocketUrl}?tenantId={_tenantId}", options =>
-        {
-            options.Headers.Add("Authorization", $"Bearer {_apiKey}");
-        })
-        .WithAutomaticReconnect()  // Enable automatic reconnection
-        .Build();
-
-    try
-    {
-        // Start the connection
-        await _connection.StartAsync();
-        Console.WriteLine("Connected to Websocket hub");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error connecting to Websocket hub: {ex.Message}");
-        throw;
-    }
-}
-```
-
-Important notes:
-- The connection requires a valid WebSocket URL, API key, and tenant ID
-- The connection includes automatic reconnection capability
-- Message handlers should be set up before starting the connection
-- Always handle connection errors appropriately
-- The connection must be established before attempting to subscribe to agents
+ API key can be generated from the Xians portal. Navigate to Settings > API Keys tab > Create API Key (only Tenant or System admins have access to generate API keys).
 
 ## Agent Configuration
 
@@ -87,449 +51,226 @@ Important notes:
 ```csharp
 public class AgentConfig
 {
-    public string Id { get; set; }           // Unique identifier for the agent
-    public string Name { get; set; }         // Display name of the agent
-    public string Agent { get; set; }        // Agent identifier
-    public string WorkflowType { get; set; } // Type of workflow the agent handles
+    public required string Id { get; set; }           // Unique identifier for the agent
+    public required string Name { get; set; }         // Display name of the agent
+    public required string Agent { get; set; }        // Agent identifier
+    public required string WorkflowType { get; set; } // Type of workflow the agent handles
 }
 ```
 
-Required parameters:
-- `id`: Unique identifier in format "tenant:agent-name:workflow-name, also refered to workflowId"
-- `name`: Display name for the agent
-- `agent`: Agent identifier
-- `workflowType`: Type of workflow the agent handles
+## Message Model (Recieved message format via websocket)
 
-### Subscribing to Agents
+Use the following model for Coversation and to receive messages from the agent via websocket:
+```csharp
+public class Message
+{
+    public string Id { get; set; } = null!;
+    public required string ThreadId { get; set; }
+    public required string TenantId { get; set; }
+    public required DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public required string CreatedBy { get; set; }
+    public required string Direction { get; set; } // Incoming or Outgoing
+    public string? Text { get; set; }
+    public string? Status { get; set; } // FailedToDeliverToWorkflow or DeliveredToWorkflow
+    public object? Data { get; set; }
+    public required string ParticipantId { get; set; }
+    public required string WorkflowId { get; set; }
+    public required string WorkflowType { get; set; }
+    public string? MessageType { get; set; } // Chat, Data, or Handoff
+}
+```
 
-To subscribe to agents, you need to call the `SubscribeToAgent` method through the Websocket connection. This establishes a connection between your client and the specified agent.
+## Send Message Request Model
+
+Use to send messages to the agent via websocket:
+```csharp
+public class SendMessageRequest
+{
+    public required string ParticipantId { get; set; }
+    public string? WorkflowId { get; set; }
+    public required string WorkflowType { get; set; }
+    public required string Agent { get; set; }
+    public object? Data { get; set; }
+    public string? Text { get; set; }
+    public string? ThreadId { get; set; }
+    public string? Authorization { get; set; }
+}
+```
+
+## Setup Websocket Connection
+
+Before subscribing to agents, you need to establish a Websocket connection. Here's how to set up and start the connection:
 
 ```csharp
-// Example of subscribing to an agent
-await connection.InvokeAsync("SubscribeToAgent", 
-    agentId,        // The agent's unique identifier
-    participantId,  // Your participant ID
-    tenantId        // Your tenant ID
+private static async Task SetupWebsocketConnection()
+{
+    _connection = new HubConnectionBuilder()
+        .WithUrl($"{_webSocketUrl}?tenantId={_tenantId}", options =>
+        {
+            options.Headers.Add("Authorization", $"Bearer {_apiKey}");
+        })
+        .WithAutomaticReconnect()
+        .Build();
+
+    // Setup message handlers
+    _connection.On<Message>("ReceiveMessage", HandleReceivedMessage);
+    _connection.On<string>("InboundProcessed", HandleInboundProcessed);
+    _connection.On<List<Message>>("ThreadHistory", HandleThreadHistory);
+
+    try
+    {
+        await _connection.StartAsync();
+        Console.WriteLine("Connected to SignalR hub");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error connecting to SignalR hub: {ex.Message}");
+        throw;
+    }
+}
+```
+
+**Important notes:**
+- The connection requires a valid WebSocket URL, API key, and tenant ID.
+- The connection includes automatic reconnection capability.
+- Message handlers should be set up before starting the connection.
+- Always handle connection errors appropriately.
+- The connection must be established before attempting to subscribe to agents.
+
+## Subscribing to Agents
+
+To subscribe to agents, call the `SubscribeToAgent` method through the SignalR connection:
+
+```csharp
+await _connection.InvokeAsync("SubscribeToAgent",
+    agent.Id,        // The agent's unique identifier (workflowId)
+    _participantId,  // Your participant ID
+    _tenantId        // Your tenant ID
 );
 ```
 
-Here's a complete example of subscribing to multiple agents:
+## Loading Initial Chat History
+
+The initial chat history is loaded for each agent using:
 
 ```csharp
-private static async Task SubscribeToAgents()
+await _connection.InvokeAsync("GetThreadHistory",
+    agent.WorkflowType, // Workflow type
+    _participantId,     // Participant ID
+    1,                  // Page number
+    20                  // Page size
+);
+```
+
+## Sending and Receiving Messages
+
+- Messages are sent using the `SendInboundMessage` method.
+- The request model uses the `Text` property for message content.
+- The method signature is:
+  ```csharp
+  await _connection.InvokeAsync("SendInboundMessage", request, "Chat");
+  ```
+- Wait for a response using a `TaskCompletionSource` with a 15-second timeout.
+
+Example:
+```csharp
+var request = new SendMessageRequest
 {
-    foreach (var agent in _agents)
-    {
-        try
-        {
-            await _connection.InvokeAsync("SubscribeToAgent", 
-                agent.Id, 
-                _participantId, 
-                _tenantId);
-            Console.WriteLine($"Subscribed to agent: {agent.Name}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error subscribing to agent {agent.Name}: {ex.Message}");
-        }
-    }
+    ThreadId = _currentThreadId,
+    Agent = selectedAgent.Agent,
+    WorkflowType = selectedAgent.WorkflowType,
+    WorkflowId = selectedAgent.Id,
+    ParticipantId = _participantId,
+    Text = input,
+    Data = null
+};
+
+_messageResponseReceived = new TaskCompletionSource<bool>();
+await _connection.InvokeAsync("SendInboundMessage", request, "Chat");
+Console.WriteLine("Message sent successfully");
+
+using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+try
+{
+    await _messageResponseReceived.Task.WaitAsync(cts.Token);
+}
+catch (OperationCanceledException)
+{
+    Console.WriteLine("No response received within 15 seconds");
 }
 ```
 
-Important notes:
-- Make sure you have established the Websocket connection before subscribing
-- Each agent needs to be subscribed individually
-- The subscription is required to receive messages from the agent
-- If the subscription fails, you won't be able to communicate with that agent
-
-## Message Flow
-
-The message history is received through the Websocket connection in the following way:
-
-### 1. Initial History Load
-
-   - When the application starts, it calls `GetThreadHistory` for each agent
-   - This request is made through the Websocket connection
-   - Parameters required:
-     ```csharp
-     await connection.InvokeAsync("GetThreadHistory",
-         agent.Agent,        // Agent identifier
-         agent.WorkflowType, // Workflow type
-         participantId,      // Your participant ID
-         1,                  // Page number
-         20                  // Page size
-     );
-     ```
-
-### 2. History Reception
-
-   - The server responds with a `ThreadHistory` event
-   - This event contains a list of messages for the specified agent
-   - Messages are received in the `HandleThreadHistory` method:
-     ```csharp
-     _connection.On<List<Message>>("ThreadHistory", HandleThreadHistory);
-     ```
-
-### 3. Message Structure
-
-   Use the following model to represent a Message. Each message in the history contains:
-   ```csharp
-   public class Message
-   {
-       public string Content { get; set; }      // Message content
-       public string Direction { get; set; }    // Message direction (Incoming/Outgoing)
-       public DateTime CreatedAt { get; set; }  // Message creation timestamp
-       public string WorkflowId { get; set; }   // Agent workflow ID
-       public string ThreadId { get; set; }     // Conversation thread ID
-       public string ParticipantId { get; set; }// Participant ID
-       public object Metadata { get; set; }     // Additional metadata
-   }
-   ```
-
-### 4. Message Sending and Receiving
-
-   - Messages are sent using the Websocket connection's `SendInboundMessage` method
-   - The application waits for a response before continuing
-   - When sending messages, use the following request model:
-   ```csharp
-   public class SendMessageRequest
-   {
-       public string ThreadId { get; set; }      // Conversation thread ID
-       public string Agent { get; set; }         // Agent identifier
-       public string WorkflowType { get; set; }  // Type of workflow
-       public string WorkflowId { get; set; }    // Workflow ID
-       public string ParticipantId { get; set; } // Participant ID
-       public string Content { get; set; }       // Message content
-       public object Metadata { get; set; }      // Additional metadata
-   }
-   ```
-
-   Example code for sending and receiving messages:
-   ```csharp
-   // Setup message handler
-   _connection.On<Message>("ReceiveMessage", message => {
-       Console.WriteLine($"Received: {message.Content}");
-       _messageResponseReceived?.TrySetResult(true);
-   });
-
-   // Send a message
-   async Task SendMessage(string currentThreadId, string content, string agentName, string workflowType, string WorkflowId, string participantId )
-   {
-       var request = new SendMessageRequest
-       {
-           ThreadId = currentThreadId,
-           Agent = agentName,
-           WorkflowType = workflowType,
-           WorkflowId = WorkflowId,
-           ParticipantId = participantId,
-           Content = content,
-           Metadata = null
-       };
-
-       try
-       {
-           // Create a new TaskCompletionSource for this message
-           _messageResponseReceived = new TaskCompletionSource<bool>();
-           
-           // Send the message
-           await _connection.InvokeAsync("SendInboundMessage", request);
-           Console.WriteLine("Message sent successfully");
-           
-           // Wait for response (30 second timeout)
-           using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-           await _messageResponseReceived.Task.WaitAsync(cts.Token);
-       }
-       catch (OperationCanceledException)
-       {
-           Console.WriteLine("No response received within 30 seconds");
-       }
-   }
-
-   // Usage example
-   await SendMessage("Hello, how are you?", "my-agent-name");
-   ```
-
-### 5. History Storage
-
-   - Messages are stored in the `_chatHistories` dictionary
-   - Key: Agent's WorkflowId
-   - Value: List of messages for that agent
-   ```csharp
-   private static Dictionary<string, List<Message>> _chatHistories;
-   ```
-
-### 6. Pagination
-
-   - History is loaded in pages of 20 messages
-   - More messages can be loaded by incrementing the page number
-
-### 7. Real-time Updates
-
-   - New messages are received through the `ReceiveMessage` event
-   - Make sure the Messages are automatically added to the chat history
-   - Make sure the history is maintained in chronological order
-
-## Implementation
-
-### 1. Main Program Implementation
+- To send a Data object use the below method signature;
+  ```csharp
+  await _connection.InvokeAsync("SendInboundMessage", request, "Data");
+  ```
+Example:
 
 ```csharp
-class Program
+var request = new SendMessageRequest
 {
-    private static HubConnection _connection;
-    private static List<AgentConfig> _agents;
-    private static Dictionary<string, List<Message>> _chatHistories;
-    private static string _currentThreadId;
-    private static string _selectedAgentId;
-    private static TaskCompletionSource<bool> _messageResponseReceived;
+    ThreadId = _currentThreadId,
+    Agent = selectedAgent.Agent,
+    WorkflowType = selectedAgent.WorkflowType,
+    WorkflowId = selectedAgent.Id,
+    ParticipantId = _participantId,
+    Text = null,
+    Data = new ExampleDataModel {ExampleName:"hi", ExampleAge:23 }
+};
 
-    // Global configuration variables
-    private static string _webSocketUrl;
-    private static string _apiKey;
-    private static string _tenantId;
-    private static string _participantId;
+_messageResponseReceived = new TaskCompletionSource<bool>();
+await _connection.InvokeAsync("SendInboundMessage", request, "Data");
+Console.WriteLine("Message sent successfully");
 
-    static async Task Main(string[] args)
-    {
-        // Load environment variables
-        DotNetEnv.Env.Load();
-        
-        // Initialize configuration
-        _webSocketUrl = Environment.GetEnvironmentVariable("WEBSOCKET_URL") 
-            ?? throw new InvalidOperationException("WEBSOCKET_URL is not configured");
-        _apiKey = Environment.GetEnvironmentVariable("API_KEY") 
-            ?? throw new InvalidOperationException("API_KEY is not configured");
-        _tenantId = Environment.GetEnvironmentVariable("TENANT_ID") 
-            ?? throw new InvalidOperationException("TENANT_ID is not configured");
-        _participantId = Environment.GetEnvironmentVariable("PARTICIPANT_ID") 
-            ?? throw new InvalidOperationException("PARTICIPANT_ID is not configured");
-        
-        _chatHistories = new Dictionary<string, List<Message>>();
-        
-        // Load agent configurations
-        await LoadAgentConfigurations();
-        
-        // Setup SignalR connection
-        await SetupWebsocketConnection();
-        
-        // Subscribe to agents
-        await SubscribeToAgents();
-        
-        // Load initial chat history
-        await LoadInitialChatHistory();
-        
-        // Start message loop
-        await StartMessageLoop();
-    }
-
-    private static async Task LoadAgentConfigurations()
-    {
-        try
-        {
-            string json = await File.ReadAllTextAsync("<agents.json File Path>");
-            _agents = JsonConvert.DeserializeObject<List<AgentConfig>>(json);
-            Console.WriteLine($"Loaded {_agents.Count} agents");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading agent configurations: {ex.Message}");
-            throw;
-        }
-    }
-
-    private static async Task SetupWebsocketConnection()
-    {
-        _connection = new HubConnectionBuilder()
-            .WithUrl($"{_webSocketUrl}?tenantId={_tenantId}", options =>
-            {
-                options.Headers.Add("Authorization", $"Bearer {_apiKey}");
-            })
-            .WithAutomaticReconnect()
-            .Build();
-
-        // Setup message handlers
-        _connection.On<Message>("ReceiveMessage", HandleReceivedMessage);
-        _connection.On<string>("InboundProcessed", HandleInboundProcessed);
-        _connection.On<List<Message>>("ThreadHistory", HandleThreadHistory);
-
-        try
-        {
-            await _connection.StartAsync();
-            Console.WriteLine("Connected to Websocket hub");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error connecting to Websocket hub: {ex.Message}");
-            throw;
-        }
-    }
-
-    private static async Task SubscribeToAgents()
-    {
-        foreach (var agent in _agents)
-        {
-            try
-            {
-                await _connection.InvokeAsync("SubscribeToAgent", 
-                    agent.Id, 
-                    _participantId, 
-                    _tenantId);
-                Console.WriteLine($"Subscribed to agent: {agent.Name}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error subscribing to agent {agent.Name}: {ex.Message}");
-            }
-        }
-    }
-
-    private static async Task LoadInitialChatHistory()
-    {
-        foreach (var agent in _agents)
-        {
-            try
-            {
-                await _connection.InvokeAsync("GetThreadHistory",
-                    agent.Agent,
-                    agent.WorkflowType,
-                    _participantId,
-                    1,
-                    20);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error loading history for agent {agent.Name}: {ex.Message}");
-            }
-        }
-    }
-
-    private static void HandleReceivedMessage(Message message)
-    {
-        Console.WriteLine($"Received message from {message.WorkflowId}: {message.Content}");
-        
-        if (!_chatHistories.ContainsKey(message.WorkflowId))
-        {
-            _chatHistories[message.WorkflowId] = new List<Message>();
-        }
-        
-        _chatHistories[message.WorkflowId].Add(message);
-
-        // Signal that we've received a response
-        _messageResponseReceived?.TrySetResult(true);
-    }
-
-    private static void HandleInboundProcessed(string threadId)
-    {
-        _currentThreadId = threadId;
-        Console.WriteLine($"Thread ID updated: {threadId}");
-    }
-
-    private static void HandleThreadHistory(List<Message> history)
-    {
-        if (history == null || !history.Any()) return;
-
-        string agentId = history[0].WorkflowId;
-        Console.WriteLine($"Received {history.Count} messages for agent {agentId}");
-
-        if (!_chatHistories.ContainsKey(agentId))
-        {
-            _chatHistories[agentId] = new List<Message>();
-        }
-
-        _chatHistories[agentId].AddRange(history);
-    }
-
-    private static async Task StartMessageLoop()
-    {
-        while (true)
-        {
-            // Display available agents
-            Console.WriteLine("\nAvailable Agents:");
-            for (int i = 0; i < _agents.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}. {_agents[i].Name}");
-            }
-            Console.WriteLine("0. Exit");
-
-            // Get agent selection
-            Console.Write("\nSelect an agent (number): ");
-            string selection = Console.ReadLine();
-
-            if (selection == "0")
-                break;
-
-            if (!int.TryParse(selection, out int agentIndex) || 
-                agentIndex < 1 || 
-                agentIndex > _agents.Count)
-            {
-                Console.WriteLine("Invalid selection. Please try again.");
-                continue;
-            }
-
-            // Set selected agent
-            _selectedAgentId = _agents[agentIndex - 1].Id;
-            Console.WriteLine($"\nSelected agent: {_agents[agentIndex - 1].Name}");
-            Console.WriteLine("Type 'back' to select another agent or 'exit' to quit");
-
-            // Message input loop for selected agent
-            while (true)
-            {
-                Console.Write("\nEnter message: ");
-                string input = Console.ReadLine();
-
-                if (input?.ToLower() == "exit")
-                    return;
-
-                if (input?.ToLower() == "back")
-                    break;
-
-                if (string.IsNullOrEmpty(input))
-                    continue;
-
-                var selectedAgent = _agents.FirstOrDefault(a => a.Id == _selectedAgentId);
-                if (selectedAgent == null)
-                    continue;
-
-                var request = new SendMessageRequest
-                {
-                    ThreadId = _currentThreadId,
-                    Agent = selectedAgent.Agent,
-                    WorkflowType = selectedAgent.WorkflowType,
-                    WorkflowId = selectedAgent.Id,
-                    ParticipantId = _participantId,
-                    Content = input,
-                    Metadata = null
-                };
-
-                try
-                {
-                    // Create a new TaskCompletionSource for this message
-                    _messageResponseReceived = new TaskCompletionSource<bool>();
-                    
-                    // Send the message
-                    await _connection.InvokeAsync("SendInboundMessage", request);
-                    Console.WriteLine("Message sent successfully");
-                    
-                    // Wait for the response with a timeout
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-                    try
-                    {
-                        await _messageResponseReceived.Task.WaitAsync(cts.Token);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        Console.WriteLine("No response received within 30 seconds");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error sending message: {ex.Message}");
-                }
-            }
-        }
-    }
+using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+try
+{
+    await _messageResponseReceived.Task.WaitAsync(cts.Token);
+}
+catch (OperationCanceledException)
+{
+    Console.WriteLine("No response received within 15 seconds");
 }
 ```
+
+## Message Handlers
+
+- `ReceiveMessage`: Handles incoming messages.
+```csharp 
+_connection.On<Message>("ReceiveMessage", HandleReceivedMessage); 
+```
+
+- `InboundProcessed`: Updates the current thread ID.
+```csharp 
+_connection.On<string>("InboundProcessed", HandleInboundProcessed);
+```
+
+- `ThreadHistory`: Loads message history for an agent.
+```csharp 
+_connection.On<List<Message>>("ThreadHistory", HandleThreadHistory);
+```
+
+## Chat History Storage
+
+- Messages are stored in the `_chatHistories` dictionary.
+- Key: Agent's WorkflowId.
+- Value: List of messages for that agent.
+
+```csharp
+private static Dictionary<string, List<Message>> _chatHistories;
+```
+
+## Example Console App Project
+
+The main program structure is as follows (see your console app for the full implementation):
+
+[Console Application Code](https://github.com/XiansAiPlatform/XiansAi.PublicDocs/tree/main/samples/XiansAIWebsocketConsoleApp)
+
+- Loads environment variables and agent configurations.
+- Sets up the SignalR connection and message handlers.
+- Subscribes to agents and loads initial chat history.
+- Provides a console-based message loop for interacting with agents.
 
 ## Usage
 
@@ -538,42 +279,29 @@ class Program
 ```bash
 dotnet run
 ```
-### 2. Console Application
-
-![Websocket Application Interface](./img/websocket-console-app-output.png)
 
 ## Key Features
 
-### 1. Connection Management
-   - Automatic reconnection
-   - API key authentication
-   - Tenant ID support
-
-### 2. Message Handling
-   - Real-time message reception
-   - Message history loading
-   - Thread ID tracking
-
-### 3. Agent Management
-   - Multiple agent support
-   - Agent subscription
-   - Separate chat histories
+- Automatic reconnection and API key authentication.
+- Real-time message reception and message history loading.
+- Multiple agent support and separate chat histories.
+- Updated message and request models.
 
 ## Troubleshooting
 
 Common issues and solutions:
 
 ### 1. Connection Issues
-   - Verify API key and tenant ID in .env file
-   - Check network connectivity
-   - Ensure hub URL is correct
+- Verify API key and tenant ID in `.env` file.
+- Check network connectivity.
+- Ensure hub URL is correct.
 
 ### 2. Message Delivery Issues
-   - Verify agent configuration
-   - Check message format
-   - Validate thread ID
+- Verify agent configuration.
+- Check message format (use `Text` property).
+- Validate thread ID.
 
 ### 3. History Loading Issues
-   - Verify agent subscription
-   - Check pagination parameters
-   - Validate agent IDs
+- Verify agent subscription.
+- Check pagination parameters.
+- Validate agent IDs.

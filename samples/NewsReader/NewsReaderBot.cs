@@ -9,6 +9,6 @@ public class NewsReaderBot : FlowBase
     public async Task Run()
     {
         string sysPrompt = "You are a news reader bot.";
-        await InitUserConversation(sysPrompt);
+        await InitConversation(sysPrompt);
     }
 }
