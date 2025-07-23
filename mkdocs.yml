@@ -26,8 +26,11 @@ extra_css:
   - stylesheets/extra.css
 
 nav:
+  - Architecture:
+    - Why Xians Platform: 0-architecture/1-why-xians-platform.md
+    - Platform Components: 0-architecture/2-platform-components.md
+    - Core Features: 0-architecture/3-xians-core-features.md
   - Quick Start: 
-    - Introduction: 1-getting-started/0-index.md
     - Setting Up: 1-getting-started/1-setting-up.md
     - Non-Deterministic:
       - Conversational Flow: 1-getting-started/2-first-agent.md
