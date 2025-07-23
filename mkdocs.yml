@@ -27,9 +27,9 @@ extra_css:
 
 nav:
   - Architecture:
-    - Why Xians Platform: 0-architecture/1-why-xians-platform.md
-    - Platform Components: 0-architecture/2-platform-components.md
-    - Core Features: 0-architecture/3-xians-core-features.md
+    - Why Agentic Platforms: 0-architecture/1-why-xians-platform.md
+    - Xians Platform Components: 0-architecture/2-platform-components.md
+    - Xians Platform Features: 0-architecture/3-xians-core-features.md
   - Quick Start: 
     - Setting Up: 1-getting-started/1-setting-up.md
     - Non-Deterministic:
@@ -60,8 +60,8 @@ nav:
     - Unit Testing Activities: n-encyclopedia/unit-testing-activities.md
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
     - Access Agents via WebSocket: n-encyclopedia/access-agents-via-websocket.md
-  - Setup Guide:
-    - Start: setting-up/setup.md
+  - Platform Development:
+    - Start: platform-development/setup.md
 
 markdown_extensions:
   - tables

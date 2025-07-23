@@ -1,51 +1,83 @@
-# What is Xians Agent Development Kit (ADK)?
+# Why Agentic Platforms are Needed?
 
-Xians Agent Development Kit (ADK) is a powerful, flexible framework for creating, deploying, and orchestrating AI agents. Our platform-agnostic approach lets you build sophisticated agent systems while remaining model-independent and infrastructure-flexible. Xians ADK bridges the gap between traditional software development and AI agent creation, enabling developers to construct everything from simple task-oriented agents to complex multi-agent systems with enterprise-grade reliability.
+Future software will be very different to Conventional software created so far.
 
-## Get Started
+There are 3 areas of main differences:
 
-```bash
-dotnet add package XiansAi.Lib
-```
+## 1. Drive of Process
 
-## Core Features
+![Driver of Business Processes](../images/driver-of-process.png)
 
-### **Enterprise-Grade Workflow Engine**
+| Traditional Software | Agentic Software (Xians Platform) |
+|---------------------|-----------------------------------|
+| Users drive the business processes forward (doer role) | AI agents self-drive the process with defined goals |
+| Manual process execution and decision-making | Autonomous process execution and optimization |
+| Human-centric workflow management | Users take on approver role when needed |
+| Users responsible for each step of the process | AI involves users strategically rather than for every step |
+| | Goal-oriented automation with human oversight |
 
-Xians ADK leverages temporal.io workflow engine to execute agent activities, making your applications fault-tolerant, scalable, and capable of managing long-running processes that can operate for months or years. Combine generative orchestration with deterministic workflows to create applications that are both adaptive and produce consistent, reliable results.
+## 2. System Evolution
 
-### **Intuitive Agent Architecture**
+![System Evolution](../images/system-evolution.png)
 
-Design agents using familiar software development patterns. Our structured approach makes agent creation more predictable and maintainable while supporting both assistive and autonomous execution modes to suit your business requirements.
+| Traditional Software | Agentic Software (Xians Platform) |
+|---------------------|-----------------------------------|
+| Static intelligence systems | Dynamic learning systems |
+| Rule-based engines with fixed logic | Agent-environment feedback loops |
+| Intelligence remains unchanged unless software/data is manually upgraded | Continuous learning, adjustment, and improvement |
+| Predetermined decision paths and responses | Adaptive intelligence that evolves through experience |
+| | State and reward-based optimization |
+| | Self-improving capabilities over time |
 
-### **Composable Multi-Agent Systems**
+## 3. User Interaction
 
-Build sophisticated systems by combining specialized agents in collaborative structures (not just hierarchical). Coordinate complex tasks through explicit workflows or emergent agent cooperation. Xians enables peer-to-peer agent handoffs and team-based collaboration where agents are aware of each other's capabilities.
+![User Interaction](../images/user-interactions.png)
 
-### **Event-Driven Agent Communication**
+| Traditional Software | Agentic Software (Xians Platform) |
+|---------------------|-----------------------------------|
+| Users often misused as data entry operators | Users engage through natural and adaptive means |
+| Form-based interfaces and manual input requirements | AI reaches out through user's preferred channels of choice |
+| Limited interaction paradigms | Multi-modal communication (Teams, Gmail, Phone, etc.) |
+| Technology-centric user experience | Context-aware and personalized interactions |
+| | Human-centric communication patterns |
 
-Agents communicate seamlessly among themselves and within internal subprocesses through sophisticated event mechanisms, enabling complex coordination without tight coupling.
+## Architecture Requirements
 
-### **Comprehensive Tooling Framework**
+To support these capabilities a new type of architecture is needed. This is where agentic platform architecture comes into play.
 
-Extend agent capabilities with our extensive tool ecosystem. Integrate with pre-built utilities, create custom tools, leverage third-party libraries, or use other agents as tools to create powerful composable solutions.
+## Platform Capabilities That Enable Agentic Software
 
-### **Complete Management Platform**
+### Autonomous Process Execution
 
-Xians ADK includes a full-featured Agent Management Portal and built-in Agent run UI, providing total visibility into agent definitions, processes, activities, logs, and a knowledge management portal for agent use. This comprehensive platform approach eliminates the need to build custom interfaces for agent management.
+The platform provides several technical capabilities that enable AI agents to drive processes autonomously:
 
-### **Multi-Tenant Architecture**
+- **Enterprise-Grade Workflow Engine**: Built on [temporal.io](https://temporal.io), providing fault-tolerant, long-running process execution that can operate for months or years
+- **Multi-Agent Systems**: Peer-to-peer agent collaboration where agents coordinate complex tasks through explicit workflows or emergent cooperation
+- **Event-Driven Communication**: Agents communicate through sophisticated event mechanisms (`SendFlowMessage`, `SubscribeFlowMessageHandler`) enabling complex coordination without tight coupling
 
-Built from the ground up for multi-tenancy, Xians ADK is the most suitable platform for sophisticated product development and enterprise deployments where isolation and customization per tenant are critical requirements.
+### Adaptive Intelligence
 
-### **Simplified Deployment**
+Technical features that support continuous learning and adaptation:
 
-Deploy your agents anywhere with our flexible deployment options. Run locally during development, scale in cloud environments, or integrate into existing infrastructure with container support and standardized interfaces. Xians ADK ensures no vendor lock-in, whether to a specific LLM model, provider, or cloud platform.
+- **Knowledge Management System**: Dynamic knowledge bases that can be updated without code changes, allowing agents to evolve their behavior through the portal interface
+- **Capabilities Framework**: Extensible tool ecosystem where agents can acquire new abilities through custom capabilities, third-party libraries, or other agents as tools
+- **Flow Types**: Support for both deterministic business processes and non-deterministic conversational flows, enabling different levels of autonomy based on requirements
 
-### **Built-in Observability**
+### Natural User Interaction
 
-Monitor and debug your agents with comprehensive tracing, logging, and evaluation capabilities.
+Platform features that enable human-centric communication:
 
-### **Enterprise-Ready Security**
+- **Multi-Modal Communication**: Native integration with WebSocket, REST APIs, and webhooks for reaching users through their preferred channels
+- **Agent Handoffs**: Seamless transfer of conversations between specialized agents (`SendHandoff`) when different expertise is required
+- **Message Threading**: Structured conversation management with support for both text (`SendChat`) and structured data (`SendData`) communication
 
-Build agents that meet organizational requirements with our security-first design. Implement fine-grained permissions, input validation, and output filtering to create trustworthy AI systems.
+### Technical Implementation Details
+
+The platform architecture supports these capabilities through:
+
+- **Multi-Tenant Ready**: Built-in isolation and customization per tenant for enterprise deployments
+- **Platform Agnostic**: No vendor lock-in to specific LLMs, providers, or cloud platforms
+- **Built-in Observability**: Comprehensive tracing, logging, and evaluation for monitoring agent behavior
+- **Simplified Deployment**: Container support with standardized interfaces for flexible deployment options
+
+These technical capabilities work together to enable the fundamental shift from traditional software patterns to autonomous, adaptive, and naturally interactive agentic systems.
