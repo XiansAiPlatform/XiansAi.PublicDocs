@@ -31,7 +31,8 @@ nav:
     - Xians Platform Components: 0-architecture/2-platform-components.md
     - Xians Platform Features: 0-architecture/3-xians-core-features.md
   - Quick Start: 
-    - Setting Up: 1-getting-started/1-setting-up.md
+    - Platform Setup: 1-getting-started/0-platform-setup.md
+    - Agent Project Setup: 1-getting-started/1-agent-project-setting-up.md
     - Non-Deterministic:
       - Conversational Flow: 1-getting-started/2-first-agent.md
       - Adding Capabilities: 1-getting-started/3-adding-capabilities.md

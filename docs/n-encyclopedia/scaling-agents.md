@@ -33,4 +33,3 @@ The visualization server is responsible for visualizing the agents and the workf
 ## Database
 
 The database is responsible for storing the data of the agents and the workflows. It is a PostgreSQL database that is running in the cloud.
-

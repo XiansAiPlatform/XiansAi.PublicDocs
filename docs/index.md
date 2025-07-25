@@ -14,15 +14,10 @@ Understand the foundations and components of the Xians.ai platform:
 
 New to Xians.ai? Start here to get up and running quickly:
 
-- **[Setting Up](1-getting-started/1-setting-up.md)** - Install and configure your development environment
-- **[First Agent](1-getting-started/2-first-agent.md)** - Create your first conversational agent
+- **[Platform Setup](1-getting-started/0-platform-setup.md)** - Install and configure your development environment
+- **[Agent Project Setup](1-getting-started/1-agent-project-setting-up.md)** - Create your first conversational agent
+- **[Non-Deterministic Flows](1-getting-started/2-first-agent.md)** - Create your first conversational agent
 - **[Adding Capabilities](1-getting-started/3-adding-capabilities.md)** - Extend your agent with custom capabilities
-
-## 📚 Main Sections
-
-### 🤖 Agent Development
-
-- **[Non-Deterministic Flows](1-getting-started/2-first-agent.md)** - Build conversational and adaptive agents
 - **[Deterministic Flows](1-getting-started/4-new-business-process.md)** - Create structured business process flows
 - **[Adding Activities](1-getting-started/5-adding-activities.md)** - Extend your workflows with custom activities
 
@@ -69,7 +64,7 @@ Advanced topics and detailed guides:
 
 ## 🎯 Next Steps
 
-1. **[Set up your development environment](1-getting-started/1-setting-up.md)**
-2. **[Create your first agent](1-getting-started/2-first-agent.md)**
+1. **[Set up your development environment](1-getting-started/0-platform-setup.md)**
+2. **[Create your first agent](1-getting-started/1-agent-project-setting-up.md)**
 3. **[Explore the samples](https://github.com/XiansAiPlatform/XiansAi.PublicDocs/tree/main/samples)**
 

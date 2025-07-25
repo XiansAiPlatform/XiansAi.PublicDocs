@@ -16,6 +16,14 @@ There are 3 areas of main differences:
 | Users responsible for each step of the process | AI involves users strategically rather than for every step |
 | | Goal-oriented automation with human oversight |
 
+### Autonomous Process Execution in Xians
+
+The platform provides several technical capabilities that enable AI agents to drive processes autonomously:
+
+- **Enterprise-Grade Workflow Engine**: Built on [temporal.io](https://temporal.io), providing fault-tolerant, long-running process execution that can operate for months or years
+- **Multi-Agent Systems**: Peer-to-peer agent collaboration where agents coordinate complex tasks through explicit workflows or emergent cooperation. Agents communicate through sophisticated event mechanisms enabling complex coordination without tight coupling
+- **Flow Types**: Support for both deterministic business processes and non-deterministic conversational flows, enabling different levels of autonomy based on requirements
+
 ## 2. System Evolution
 
 ![System Evolution](../images/system-evolution.png)
@@ -28,6 +36,14 @@ There are 3 areas of main differences:
 | Predetermined decision paths and responses | Adaptive intelligence that evolves through experience |
 | | State and reward-based optimization |
 | | Self-improving capabilities over time |
+
+### Adaptive Intelligence in Xians
+
+Technical features that support continuous learning and adaptation:
+
+- **Knowledge Management System**: Dynamic knowledge bases that can be updated without code changes, allowing agents to evolve their behavior through the portal interface as well as through the API.
+- **Agent Memory Types**: CAG Knowledge Prompts (Cache Augmented Generation), RAG (Retrieval Augmented Generation), and Cache-Memory are built in for Agents to use.
+- **Capabilities Framework**: Extensible tool ecosystem where agents can acquire new abilities through MCPs, custom capabilities, third-party libraries, or other agents as tools
 
 ## 3. User Interaction
 
@@ -45,39 +61,13 @@ There are 3 areas of main differences:
 
 To support these capabilities a new type of architecture is needed. This is where agentic platform architecture comes into play.
 
-## Platform Capabilities That Enable Agentic Software
-
-### Autonomous Process Execution
-
-The platform provides several technical capabilities that enable AI agents to drive processes autonomously:
-
-- **Enterprise-Grade Workflow Engine**: Built on [temporal.io](https://temporal.io), providing fault-tolerant, long-running process execution that can operate for months or years
-- **Multi-Agent Systems**: Peer-to-peer agent collaboration where agents coordinate complex tasks through explicit workflows or emergent cooperation
-- **Event-Driven Communication**: Agents communicate through sophisticated event mechanisms (`SendFlowMessage`, `SubscribeFlowMessageHandler`) enabling complex coordination without tight coupling
-
-### Adaptive Intelligence
-
-Technical features that support continuous learning and adaptation:
-
-- **Knowledge Management System**: Dynamic knowledge bases that can be updated without code changes, allowing agents to evolve their behavior through the portal interface
-- **Capabilities Framework**: Extensible tool ecosystem where agents can acquire new abilities through custom capabilities, third-party libraries, or other agents as tools
-- **Flow Types**: Support for both deterministic business processes and non-deterministic conversational flows, enabling different levels of autonomy based on requirements
-
-### Natural User Interaction
+### Natural User Interaction in Xians
 
 Platform features that enable human-centric communication:
 
-- **Multi-Modal Communication**: Native integration with WebSocket, REST APIs, and webhooks for reaching users through their preferred channels
-- **Agent Handoffs**: Seamless transfer of conversations between specialized agents (`SendHandoff`) when different expertise is required
-- **Message Threading**: Structured conversation management with support for both text (`SendChat`) and structured data (`SendData`) communication
-
-### Technical Implementation Details
-
-The platform architecture supports these capabilities through:
-
-- **Multi-Tenant Ready**: Built-in isolation and customization per tenant for enterprise deployments
-- **Platform Agnostic**: No vendor lock-in to specific LLMs, providers, or cloud platforms
-- **Built-in Observability**: Comprehensive tracing, logging, and evaluation for monitoring agent behavior
-- **Simplified Deployment**: Container support with standardized interfaces for flexible deployment options
+- **Multi-Channel Communication**: Native integration with WebSocket (Real time), REST APIs (Synchronous and Asynchronous), and webhooks (Listens to events and messages) for reaching users through their preferred channels
+- **Agent Handoffs**: Seamless transfer of conversations between specialized agents when different expertise is required
+- **Agent Hierarchies**: Support for agent hierarchies, where agents can be grouped into teams and sub-teams, and can be assigned to different levels of the hierarchy
+- **Sophisticated Message Passing**: Structured conversation management with support for both text (`Chat`) and structured data (`Data`) communication
 
 These technical capabilities work together to enable the fundamental shift from traditional software patterns to autonomous, adaptive, and naturally interactive agentic systems.
