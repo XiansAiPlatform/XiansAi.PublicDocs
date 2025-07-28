@@ -1,6 +1,10 @@
 # Xians.ai Public Docs
 
-Documents are at [docs](docs) folder.
+This is the public documentation for the Xians.ai platform. Documents are at [docs](docs) folder.
+
+## Hosted on GitHub Pages
+
+[https://xiansaiplatform.github.io/XiansAi.PublicDocs/](https://xiansaiplatform.github.io/XiansAi.PublicDocs/)
 
 ## Create Python vertual environment
 

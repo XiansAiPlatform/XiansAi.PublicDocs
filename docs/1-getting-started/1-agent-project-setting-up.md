@@ -25,7 +25,11 @@ dotnet add package XiansAi.Lib
 
 ## Agent Configuration
 
-Your agent needs to be configured with the agent server. This is done by obtaining the required settings from the Xians.ai portal's `Settings` page. You should configure these settings in one of the following 3 ways in your `Program.cs` file:
+Your agent needs to be configured with the agent server. This is done by obtaining the required settings from the Xians.ai portal's `Tenant Settings` page.
+
+![Tenant Settings](../images/portal-settings.png)
+
+You should configure these settings in one of the following 3 ways in your `Program.cs` file:
 
 ### Configuration alternative 1 (hardcode values)
 

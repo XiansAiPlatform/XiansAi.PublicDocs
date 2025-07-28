@@ -51,12 +51,14 @@ using XiansAi.Flow;
 [Workflow("News Agent:News Reader Bot")]
 public class NewsReaderBot : FlowBase
 {
+    public NewsReaderBot(){
+        SystemPrompt = "You are a news reader bot.";
+    }
 
     [WorkflowRun]
     public async Task Run()
     {
-        string sysPrompt = "You are a news reader bot.";
-        await InitConversation(sysPrompt);
+        await InitConversation();
     }
 }
 
