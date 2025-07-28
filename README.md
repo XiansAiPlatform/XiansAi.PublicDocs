@@ -6,13 +6,22 @@ This is the public documentation for the Xians.ai platform. Documents are at [do
 
 [https://xiansaiplatform.github.io/XiansAi.PublicDocs/](https://xiansaiplatform.github.io/XiansAi.PublicDocs/)
 
-## Create Python vertual environment
+## Contributing Guide
+
+To contribute to the documentation, you can fork the repository and create a pull request.
+
+### Prerequisites
+
+- [Python](https://www.python.org/downloads/)
+- [mkdocs](https://www.mkdocs.org/getting-started/)
+
+### Create Python vertual environment
 
 ```bash
 python -m venv .venv
 ```
 
-## Activate the virtual environment
+### Activate the virtual environment
 
 macOS/Linux
 
@@ -26,13 +35,13 @@ Windows
 .venv/Scripts/activate
 ```
 
-## Install dependencies
+### Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Run the server
+### Run the server
 
 ```bash
 mkdocs serve
