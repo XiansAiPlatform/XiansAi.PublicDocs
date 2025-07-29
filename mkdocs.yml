@@ -47,6 +47,7 @@ nav:
       - Agent Initiated Message: 2-agent-collaboration/2-messaging.md
       - Responding to a User: 2-agent-collaboration/4-responding.md
       - Sending a Message to Agent via REST: 2-agent-collaboration/5-sending-message-via-rest.md
+      - Inter-Bot Communication with ForwardMessage: 2-agent-collaboration/6-forward-message.md
     - Handoffs:
       - Handoff to Another Agent: 2-agent-collaboration/3-handoffs.md
   - Agent Knowledge:
