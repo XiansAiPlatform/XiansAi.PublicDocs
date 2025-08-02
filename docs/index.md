@@ -15,38 +15,65 @@ Understand the foundations and components of the Xians.ai platform:
 New to Xians.ai? Start here to get up and running quickly:
 
 - **[Platform Setup](1-getting-started/0-platform-setup.md)** - Install and configure your development environment
-- **[Agent Project Setup](1-getting-started/1-agent-project-setting-up.md)** - Create your first conversational agent
-- **[Non-Deterministic Flows](1-getting-started/2-first-agent.md)** - Create your first conversational agent
+- **[Agent Project Setup](1-getting-started/1-agent-project-setting-up.md)** - Create your first agent project
+
+### Non-Deterministic Agents
+- **[Conversational Flow](1-getting-started/2-first-agent.md)** - Create your first conversational agent
 - **[Adding Capabilities](1-getting-started/3-adding-capabilities.md)** - Extend your agent with custom capabilities
-- **[Deterministic Flows](1-getting-started/4-new-business-process.md)** - Create structured business process flows
+
+### Deterministic Agents  
+- **[Business Process Flow](1-getting-started/4-new-business-process.md)** - Create structured business process flows
 - **[Adding Activities](1-getting-started/5-adding-activities.md)** - Extend your workflows with custom activities
 
-### 🔄 Agent Collaboration
+## 🔄 Agent Communication
 
-- **[Inter-flow Communication](2-agent-collaboration/1-events.md)** - Enable agents to communicate through events
-- **[Agent Handoffs](2-agent-collaboration/3-handoffs.md)** - Transfer control between different agents
-- **[Messaging](2-agent-collaboration/2-messaging.md)** - Send and receive messages between agents
-- **[User Responses](2-agent-collaboration/4-responding.md)** - Handle user interactions effectively
+Learn how agents communicate with users and each other:
 
-### 🧠 Knowledge Management
+- **[Introduction](2-agent-communication/0-index.md)** - Overview of agent communication patterns
+- **[Message Types](https://github.com/XiansAiPlatform/sdk-web-typescript/blob/main/docs/message-types.md)** - Chat & Data Types documentation
 
-- **[Using the Portal](3-knowledge/1-using-portal.md)** - Manage agent knowledge through the web interface
+### User to Agent Communication
+- **[TypeScript SDK](https://github.com/XiansAiPlatform/sdk-web-typescript)** - Web SDK for user interactions
+- **[HTTP APIs](https://github.com/XiansAiPlatform/XiansAi.Server/blob/main/XiansAi.Server.Src/docs/user-api/index.md)** - REST API documentation
+
+### Agent to User Communication
+- **[Send Message](2-agent-communication/2-messaging.md)** - Send messages to users
+- **[Manual Responding](2-agent-communication/4-responding.md)** - Handle user interactions manually
+- **[Skip LLM Response](2-agent-communication/5-skip-llm-response.md)** - Bypass LLM for direct responses
+
+### Chat Interceptors
+- **[Intercept Chat](2-agent-communication/7-chat-interceptors.md)** - Modify or redirect chat messages
+
+### Agent to Agent Communication
+- **[Event Passing](2-agent-communication/1-events.md)** - Enable agents to communicate through events
+- **[Handoffs](2-agent-communication/3-handoffs.md)** - Transfer control between different agents
+- **[Forwarding](2-agent-communication/6-forward-message.md)** - Forward messages between agents
+
+## 🧠 Agent Knowledge
+
+Manage and utilize knowledge within your agents:
+
+- **[Managing Knowledge](3-knowledge/1-using-portal.md)** - Manage agent knowledge through the web interface
 - **[Accessing Knowledge](3-knowledge/2-accessing-knowledge.md)** - Retrieve and use knowledge in your agents
 - **[Capabilities as Knowledge](3-knowledge/3-capabilities.md)** - Store and share agent capabilities
 - **[Local Development](3-knowledge/3-local-dev.md)** - Work with knowledge in your local environment
 
-### 📖 Encyclopedia
+## 📖 Encyclopedia
 
 Advanced topics and detailed guides:
 
 - **[Multi-flow Agents](n-encyclopedia/multi-flow-agents.md)** - Build agents with multiple workflow types
-- **[WebSocket Access](n-encyclopedia/access-agents-via-websocket.md)** - Connect to agents via WebSocket
-- **[Retry Policies](n-encyclopedia/retry-policy.md)** - Handle failures and retries gracefully
+- **[Retry Policy](n-encyclopedia/retry-policy.md)** - Handle failures and retries gracefully
 - **[Logging](n-encyclopedia/logging.md)** - Monitor and debug your agents
-- **[Unit Testing](n-encyclopedia/unit-testing-activities.md)** - Test your agent activities
-- **[Best Practices](n-encyclopedia/wf-best-practices.md)** - Follow proven patterns and practices
+- **[Workflow Best Practices](n-encyclopedia/wf-best-practices.md)** - Follow proven patterns and practices
 
-## 🛠️ Key Features
+## 🛠️ Platform Development
+
+Contribute to the Xians.ai platform:
+
+- **[Setup](platform-development/setup.md)** - Set up your development environment for platform contributions
+
+## ⭐ Key Features
 
 - **Enterprise-Grade Workflow Engine** - Built on temporal.io for fault-tolerant, scalable execution
 - **Multi-Agent Systems** - Create collaborative agent teams with peer-to-peer communication

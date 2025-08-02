@@ -1,4 +1,4 @@
-# Why Agentic Platforms are Needed?
+# Why Agentic Software is Different?
 
 Future software will be very different to Conventional software created so far.
 

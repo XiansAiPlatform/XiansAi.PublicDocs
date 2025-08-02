@@ -37,6 +37,9 @@ public class HandoffCapabilities
     [Returns("Name of the bot that took over the conversation")]
     public string HandoffToSpecializedBot(string originalUserMessage)
     {
+        // Skip response to prevent duplicate messages (silent handoff)
+        _messageThread.SkipResponse = true;
+        
         _messageThread.SendHandoff(typeof(SpecializedBot), originalUserMessage);
         return typeof(SpecializedBot).Name;
     }
@@ -74,4 +77,5 @@ await agent.RunAsync();
 ## Best Practices
 
 1. **Clear Handoff Triggers**: Implement clear conditions for when a handoff should occur
-2. **User Consent**: Consider asking for user confirmation before performing a handoff
+2. **Silent Handoffs**: Always set `_messageThread.SkipResponse = true` when performing handoffs to prevent the current agent from sending a response after the handoff. See [Skipping Semantic Kernel Response](5-skip-llm-response.md#1-silent-handoffs) for detailed examples.
+3. **User Consent**: Consider asking for user confirmation before performing a handoff

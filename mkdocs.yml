@@ -29,7 +29,7 @@ nav:
   - Architecture:
     - Why Agentic Platforms: 0-architecture/1-why-xians-platform.md
     - Xians Platform Components: 0-architecture/2-platform-components.md
-    - Xians Platform Features: 0-architecture/3-xians-core-features.md
+    - Xians Features: 0-architecture/3-xians-core-features.md
   - Quick Start: 
     - Platform Setup: 1-getting-started/0-platform-setup.md
     - Agent Project Setup: 1-getting-started/1-agent-project-setting-up.md
@@ -39,17 +39,23 @@ nav:
     - Deterministic:
       - Business Process Flow: 1-getting-started/4-new-business-process.md
       - Adding Activities: 1-getting-started/5-adding-activities.md
-  - Agent Collaboration:
-    - Introduction: 2-agent-collaboration/0-index.md
-    - Events:
-      - Inter-flow Communication: 2-agent-collaboration/1-events.md
-    - Messaging:
-      - Agent Initiated Message: 2-agent-collaboration/2-messaging.md
-      - Responding to a User: 2-agent-collaboration/4-responding.md
-      - Sending a Message to Agent via REST: 2-agent-collaboration/5-sending-message-via-rest.md
-      - Inter-Bot Communication with ForwardMessage: 2-agent-collaboration/6-forward-message.md
-    - Handoffs:
-      - Handoff to Another Agent: 2-agent-collaboration/3-handoffs.md
+  - Agent Communication:
+    - Introduction: 2-agent-communication/0-index.md
+    - MessageTypes:
+      - Chat & Data Types: https://github.com/XiansAiPlatform/sdk-web-typescript/blob/main/docs/message-types.md
+    - User 2 Agent:
+      - TypeScript SDK: https://github.com/XiansAiPlatform/sdk-web-typescript
+      - HTTP APIs: https://github.com/XiansAiPlatform/XiansAi.Server/blob/main/XiansAi.Server.Src/docs/user-api/index.md
+    - Agent 2 User:
+      - Send Message: 2-agent-communication/2-messaging.md
+      - Manual Responding: 2-agent-communication/4-responding.md
+      - Skip LLM Response: 2-agent-communication/5-skip-llm-response.md
+    - Interceptors:
+      - Intercept Chat: 2-agent-communication/7-chat-interceptors.md
+    - Agent 2 Agent:
+      - Event Passing: 2-agent-communication/1-events.md
+      - Handoffs: 2-agent-communication/3-handoffs.md
+      - Forwarding: 2-agent-communication/6-forward-message.md
   - Agent Knowledge:
     - Managing Knowledge: 3-knowledge/1-using-portal.md
     - Accessing Knowledge: 3-knowledge/2-accessing-knowledge.md
@@ -59,9 +65,7 @@ nav:
     - Multi-flow Agents: n-encyclopedia/multi-flow-agents.md
     - Retry Policy: n-encyclopedia/retry-policy.md
     - Logging: n-encyclopedia/logging.md
-    - Unit Testing Activities: n-encyclopedia/unit-testing-activities.md
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
-    - Access Agents via WebSocket: n-encyclopedia/access-agents-via-websocket.md
   - Platform Development:
     - Start: platform-development/setup.md
 
