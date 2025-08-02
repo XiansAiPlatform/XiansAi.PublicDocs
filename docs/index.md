@@ -31,6 +31,7 @@ Learn how agents communicate with users and each other:
 
 - **[Introduction](2-agent-communication/0-index.md)** - Overview of agent communication patterns
 - **[Message Types](https://github.com/XiansAiPlatform/sdk-web-typescript/blob/main/docs/message-types.md)** - Chat & Data Types documentation
+- **[Handling Data Messages](2-agent-communication/8-handling-data-messages.md)** - Handling data messages
 
 ### User to Agent Communication
 - **[TypeScript SDK](https://github.com/XiansAiPlatform/sdk-web-typescript)** - Web SDK for user interactions
