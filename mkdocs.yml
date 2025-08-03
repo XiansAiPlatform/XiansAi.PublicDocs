@@ -25,7 +25,11 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+extra_javascript:
+  - javascripts/external-links.js
+
 nav:
+  - Home: index.md
   - Architecture:
     - Why Agentic Platforms: 0-architecture/1-why-xians-platform.md
     - Xians Platform Components: 0-architecture/2-platform-components.md
@@ -76,6 +80,7 @@ nav:
 markdown_extensions:
   - tables
   - admonition
+  - attr_list
   - pymdownx.details
   - pymdownx.superfences:
       custom_fences:

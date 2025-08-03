@@ -25,3 +25,25 @@
   --md-primary-bg-color--light: #ffffff;
 }
 
+/* External links styling - add small icon to indicate external link */
+a[href^="http"]:not([href*="localhost"]):not([href*="127.0.0.1"]):after {
+  content: " ↗";
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+/* Ensure site title is clickable and links to home */
+.md-header__title {
+  cursor: pointer;
+}
+
+.md-header__title .md-header__ellipsis {
+  font-weight: 600;
+}
+
+/* Make site title link more obvious on hover */
+.md-header__title:hover {
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
