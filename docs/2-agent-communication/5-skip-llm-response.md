@@ -86,6 +86,43 @@ public class ProcessingCapabilities
 }
 ```
 
+## Client-Side Handling
+
+When a response is skipped using `SkipResponse = true`, clients still receive a response from the bot, but with important characteristics that allow for proper handling:
+
+### What Clients Receive
+
+- **Text Content**: The client receives `null` as the text content instead of an actual message
+- **Response Structure**: The response still follows the normal bot response format, maintaining consistency
+- **Processing Signal**: This serves as a signal that the agent's processing is complete
+
+### Client Implementation
+
+Clients should check for `null` text content and handle it appropriately:
+
+```javascript
+// Example client-side handling
+function handleBotResponse(responseText) {
+    if (responseText === null) {
+        // Mark processing as complete
+        setProcessingComplete(true);
+        return;
+    } else {
+        // Normal response - render the message
+        displayMessage(responseText);
+    }
+}
+```
+
+### Why This Design
+
+This approach provides several benefits:
+
+1. **Processing Completion Signal**: Clients know when the agent has finished processing, even without a visible response
+2. **UI State Management**: Allows clients to properly hide typing indicators and loading states
+3. **Consistent Response Format**: Maintains the same response structure for easier client implementation
+4. **Silent Operations Support**: Enables smooth user experience for background operations and handoffs
+
 ## Usage Patterns
 
 ### 1. Silent Handoffs
