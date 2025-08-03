@@ -95,8 +95,9 @@ nav:
       - Adding Activities: 1-getting-started/5-adding-activities.md
   - Agent Communication:
     - Introduction: 2-agent-communication/0-index.md
-    - MessageTypes:
+    - Message Basics:
       - Chat & Data Types: https://github.com/XiansAiPlatform/sdk-web-typescript/blob/main/docs/message-types.md
+      - Threads & Scopes: 2-agent-communication/11-thread-and-scope.md
     - User 2 Agent:
       - TypeScript SDK: https://github.com/XiansAiPlatform/sdk-web-typescript
       - HTTP APIs: https://github.com/XiansAiPlatform/XiansAi.Server/blob/main/XiansAi.Server.Src/docs/user-api/index.md

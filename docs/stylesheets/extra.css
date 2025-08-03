@@ -716,8 +716,8 @@
   text-underline-offset: 0.2em;
 }
 
-/* External links styling */
-a[href^="http"]:not([href*="localhost"]):not([href*="127.0.0.1"]):after {
+/* External links styling - only show arrow for links that open in new tab */
+a[target="_blank"]:after {
   content: " ↗";
   font-size: 0.75em;
   opacity: 0.7;
