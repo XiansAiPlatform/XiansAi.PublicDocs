@@ -29,7 +29,7 @@ The repository provides:
 
 - The community edition is designed for **development and testing only**
 - Requires Docker and Docker Compose
-- Minimum 4GB RAM recommended
+- Minimum 8GB RAM recommended
 - Ensure you have an OpenAI API key for LLM capabilities
 
 Once your platform is running locally, you can proceed to create your first agent and begin developing agentic workflows.

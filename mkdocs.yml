@@ -1,32 +1,82 @@
 # mkdocs.yml
 site_name: Xians.ai Documentation
+site_description: Enterprise-grade Agent Development Kit for building, deploying, and orchestrating AI agents
+site_author: Xians.ai Team
+site_url: https://docs.xians.ai
+
+# Repository information
+repo_name: XiansAiPlatform/XiansAi.PublicDocs
+repo_url: https://github.com/XiansAiPlatform/XiansAi.PublicDocs
+edit_uri: edit/main/docs/
+
 theme:
   name: material
   features:
+    # Navigation features
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - navigation.tracking
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    
+    # Search features
     - search.suggest
     - search.highlight
+    - search.share
+    
+    # Content features
     - content.tabs.link
     - content.code.annotation
     - content.code.copy
+    - content.action.edit
+    - content.action.view
+    - content.tooltips
+    
+    # Header features
+    - header.autohide
+    - announce.dismiss
+    
+    # Table of contents
+    - toc.follow
+    
   palette:
-    primary: custom    # Using custom color
-    accent: purple    # Using predefined color
+    # Palette toggle for light mode
+    - scheme: default
+      primary: custom
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: custom
+      accent: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+        
   font:
-    text: Roboto
-    code: Roboto Mono
-  favicon: assets/favicon.png
+    text: Inter
+    code: JetBrains Mono
+    
+  favicon: assets/logo.png
   icon:
-    logo: material/book-open-page-variant
+    logo: material/robot
+    edit: material/pencil
+    view: material/eye
+    repo: fontawesome/brands/github
 
 extra_css:
   - stylesheets/extra.css
 
 extra_javascript:
   - javascripts/external-links.js
+  - javascripts/code-expand.js
 
 nav:
   - Home: index.md
@@ -78,10 +128,44 @@ nav:
     - Start: platform-development/setup.md
 
 markdown_extensions:
-  - tables
+  # Python Markdown
+  - abbr
   - admonition
   - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      permalink_title: Permalink to this section
+  - tables
+  - meta
+  
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
   - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      normalize_issue_symbols: true
+      repo_url_shorthand: true
+      user: XiansAiPlatform
+      repo: XiansAi.PublicDocs
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      check_paths: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -89,39 +173,85 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
-  - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
   - pymdownx.tasklist:
       custom_checkbox: true
+  - pymdownx.tilde
 
 plugins:
-  - search
+  - search:
+      separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - minify:
       minify_html: true
+      minify_css: true
+      minify_js: true
+      htmlmin_opts:
+        remove_comments: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: timeago
 
-
-# Directory structure:
-# .
-# ├── docs/
-# │   ├── index.md
-# │   ├── getting-started/
-# │   │   ├── quickstart.md
-# │   │   └── installation.md
-# │   ├── api/
-# │   │   ├── authentication.md
-# │   │   └── endpoints.md
-# │   └── guides/
-# │       └── best-practices.md
-# ├── mkdocs.yml
-# └── .github/workflows/deploy.yml
-
-# Update the homepage setting
-use_directory_urls: true
-
-extra:
-  generator: false
-
-# Force creation of .nojekyll file
+# Configuration
 use_directory_urls: true
 strict: true
+dev_addr: '127.0.0.1:8000'
+
+# Customization
+extra:
+  generator: false
+  
+  # Social links
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/XiansAiPlatform
+      name: GitHub Organization
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/xians
+      name: Discord Community
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/xiansai
+      name: Twitter
+    - icon: fontawesome/solid/globe
+      link: https://xians.ai
+      name: Official Website
+  
+  # Version information
+  version:
+    provider: mike
+    default: latest
+  
+  # Announcement banner
+  announcement: 
+    text: "🚀 Xians.ai v2.0 is now available! Check out the new features in our changelog."
+    
+  # Analytics (uncomment when ready)
+  # analytics:
+  #   provider: google
+  #   property: G-XXXXXXXXXX
+  #   feedback:
+  #     title: Was this page helpful?
+  #     ratings:
+  #       - icon: material/emoticon-happy-outline
+  #         name: This page was helpful
+  #         data: 1
+  #         note: >-
+  #           Thanks for your feedback!
+  #       - icon: material/emoticon-sad-outline
+  #         name: This page could be improved
+  #         data: 0
+  #         note: >-
+  #           Thanks for your feedback! Help us improve this page by
+  #           <a href="..." target="_blank" rel="noopener">telling us what you need</a>.
+
+# Hooks (uncomment when needed)
+# hooks:
+#   - scripts/external_link_checker.py
+
+copyright: |
+  &copy; 2024 <a href="https://xians.ai" target="_blank" rel="noopener">Xians.ai</a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="#__consent">Manage Cookies</a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://xians.ai/privacy" target="_blank" rel="noopener">Privacy Policy</a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://xians.ai/terms" target="_blank" rel="noopener">Terms of Service</a>

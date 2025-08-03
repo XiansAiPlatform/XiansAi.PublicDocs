@@ -6,22 +6,15 @@ document.addEventListener('DOMContentLoaded', function() {
             siteTitle.addEventListener('click', function(e) {
                 e.preventDefault();
                 
-                // Try to find the home page link from navigation
-                const homeLink = document.querySelector('nav a[href*="index"], nav a[title*="Home"], .md-nav__item:first-child a');
+                // Navigate to the site root (home page)
+                const currentPath = window.location.pathname;
                 
-                if (homeLink) {
-                    window.location.href = homeLink.getAttribute('href');
+                // If we're in a subdirectory, go to root
+                if (currentPath !== '/' && currentPath !== '/index.html') {
+                    window.location.href = '/';
                 } else {
-                    // Fallback: navigate to site root
-                    const currentPath = window.location.pathname;
-                    const pathParts = currentPath.split('/').filter(part => part !== '');
-                    
-                    // If we're in a subdirectory, go up to root
-                    if (pathParts.length > 0 && !pathParts[pathParts.length - 1].includes('.html')) {
-                        window.location.href = '../'.repeat(pathParts.length - 1) + './';
-                    } else {
-                        window.location.href = './';
-                    }
+                    // Already at root, just refresh
+                    window.location.href = '/';
                 }
             });
         }
