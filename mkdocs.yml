@@ -43,10 +43,13 @@ nav:
     - Introduction: 2-agent-communication/0-index.md
     - MessageTypes:
       - Chat & Data Types: https://github.com/XiansAiPlatform/sdk-web-typescript/blob/main/docs/message-types.md
-      - Handling Data Messages: 2-agent-communication/8-handling-data-messages.md
     - User 2 Agent:
       - TypeScript SDK: https://github.com/XiansAiPlatform/sdk-web-typescript
       - HTTP APIs: https://github.com/XiansAiPlatform/XiansAi.Server/blob/main/XiansAi.Server.Src/docs/user-api/index.md
+    - Data Passing:
+      - Overview: 2-agent-communication/9-data-exchange.md
+      - As Messages: 2-agent-communication/8-handling-data-messages.md
+      - AS RPC: 2-agent-communication/10-handling-data-rpc.md
     - Agent 2 User:
       - Send Message: 2-agent-communication/2-messaging.md
       - Manual Responding: 2-agent-communication/4-responding.md
