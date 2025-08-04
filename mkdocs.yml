@@ -125,6 +125,7 @@ nav:
     - Retry Policy: n-encyclopedia/retry-policy.md
     - Logging: n-encyclopedia/logging.md
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
+    - LLM Completion: n-encyclopedia/llm-completion.md
   - Platform Development:
     - Start: platform-development/setup.md
 

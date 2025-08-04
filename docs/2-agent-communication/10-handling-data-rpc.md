@@ -104,7 +104,7 @@ POST http://localhost:5000/api/user/rest/converse
 
 ### Query Parameters
 
-- `workflow` - Agent and flow name (format: "Agent Name:Flow Name")
+- `workflow` - Agent and workflow type or workflow ID
 - `apikey` - Your API key
 - `tenantId` - Tenant identifier (usually "default")
 - `type` - Must be "Data" for RPC calls
@@ -114,7 +114,7 @@ POST http://localhost:5000/api/user/rest/converse
 ### Example Request
 
 ```bash
-POST http://localhost:5000/api/user/rest/converse?workflow=Legal%20Contract%20Agent:Legal%20Contract%20Flow&apikey=sk-Xnai---&tenantId=default&type=Data&participantId=user@gmail.com&text=ProcessDocumentRequest
+POST <your-server-url>/api/user/rest/converse?workflow=Legal%20Contract%20Agent:Legal%20Contract%20Flow&apikey=sk-Xnai---&tenantId=default&type=Data&participantId=user@gmail.com&text=ProcessDocumentRequest
 
 Content-Type: application/json
 
@@ -124,6 +124,47 @@ Content-Type: application/json
   "ValidationType": "full"
 }
 ```
+
+### Response Format
+
+When a data processor method executes successfully, the response follows this format:
+
+```json
+{
+    "requestId": "f021cef9-da15-4160-a7fb-053c885ea84b",
+    "threadId": "688e4717d8636b0ffb690e18",
+    "response": {
+        "id": "689021145e6400caa55a9dd8",
+        "text": null,
+        "data": {
+            "Contract": {
+               ...
+            },
+            "Validations": [
+               ...
+            ]
+        },
+        "createdAt": "2025-08-04T02:55:16.583Z",
+        "direction": 1,
+        "messageType": 1,
+        "scope": null,
+        "hint": null
+    }
+}
+```
+
+**Response Fields:**
+
+- `requestId` - Unique identifier for the request
+- `threadId` - Thread identifier for the conversation
+- `response.id` - Message identifier
+- `response.text` - Usually null for data responses
+- `response.data` - The actual return value from your method (serialized as JSON)
+- `response.createdAt` - Timestamp when the response was created
+- `response.direction` - Message direction (1 = outbound)
+- `response.messageType` - Type of message (1 = data message)
+- `response.scope` - Execution scope
+- `response.hint` - Additional hints
 
 ## Parameter Passing
 

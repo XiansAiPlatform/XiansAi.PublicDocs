@@ -135,6 +135,112 @@ bot.SetChatInterceptor(new ChatInterceptor());
 await agent.RunAsync();
 ```
 
+## Advanced Use Case: LLM-Powered Response Analysis
+
+Here's a sophisticated real-world example that demonstrates combining LLM analysis with UI automation in the outgoing interceptor:
+
+```csharp
+using XiansAi.Flow;
+using XiansAi.Flow.Router;
+using XiansAi.Logging;
+using XiansAi.Messaging;
+
+public class ChatInterceptor : IChatInterceptor
+{
+    private readonly Logger<ChatInterceptor> _logger = Logger<ChatInterceptor>.For();
+
+    public Task<MessageThread> InterceptIncomingMessageAsync(MessageThread messageThread)
+    {
+        // Pre-processing: Pass through without modification in this example
+        return Task.FromResult(messageThread);
+    }
+
+    public Task<string?> InterceptOutgoingMessageAsync(MessageThread messageThread, string? response)
+    {
+        // Post-processing: Analyze response and trigger UI actions
+        // Fire-and-forget for better performance
+        _ = AnalyzeResponseAndTriggerUI(messageThread, response);
+        return Task.FromResult(response);
+    }
+
+    private async Task AnalyzeResponseAndTriggerUI(MessageThread messageThread, string? response)
+    {
+        var routerHub = new SemanticRouterHub();
+        string analysisPrompt = @"Analyze the following assistant message and determine ONLY if it contains 
+            an explicit, direct request to the user to enter, set, or change exactly one of these contract properties:
+            - Title
+            - Effective Date  
+            - Parties
+
+            Consider it a direct request only when the message asks a question or gives a clear instruction 
+            that expects immediate user input.
+
+            Return exactly the property name if there is a direct request. Otherwise, return null. 
+            Do not return any additional text.
+
+            Message: " + response;
+
+        try
+        {
+            // Use LLM to analyze the assistant's response
+            var propertyName = await routerHub.ChatCompletionAsync(analysisPrompt);
+            _logger.LogInformation($"Detected property request: {propertyName}");
+
+            // Trigger appropriate UI commands based on analysis
+            switch (propertyName?.Trim())
+            {
+                case "Effective Date":
+                    await messageThread.SendData(
+                        new UICommand(
+                            "Calendar",
+                            new Dictionary<string, object> { { "field", propertyName } }
+                        )
+                    );
+                    break;
+                case "Parties":
+                    await messageThread.SendData(
+                        new UICommand(
+                            "ContractParty", 
+                            new Dictionary<string, object> { { "command", "Add" } }
+                        )
+                    );
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in response analysis");
+        }
+    }
+}
+```
+
+### Key Features of This Approach
+
+**Post-Processing Intelligence:**
+
+- Uses `ChatCompletionAsync` to analyze the LLM's response with another LLM call
+- Classifies the response to determine if specific UI actions should be triggered
+- Operates asynchronously without blocking the main response flow
+
+**UI Command Integration:**
+
+- Automatically triggers relevant UI components (Calendar, ContractParty forms)
+- Enhances user experience by presenting contextual interfaces
+- Bridges the gap between conversational AI and structured data entry
+
+**Performance Optimization:**
+
+- Uses fire-and-forget pattern (`_ = AnalyzeResponseAndTriggerUI(...)`) for non-blocking execution
+- Keeps the main response flow fast while performing background analysis
+- Implements proper error handling to prevent UI command failures from affecting chat
+
+**Practical Benefits:**
+
+- Provides intelligent UI automation based on conversation context
+- Reduces user friction by anticipating needed actions
+- Maintains clean separation between chat logic and UI commands
+
 ## Important Notes
 
 - **Chat Message Type Only**: Chat interceptors only work with Chat message types and will not be triggered for other message types
