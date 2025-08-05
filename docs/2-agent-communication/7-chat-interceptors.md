@@ -165,7 +165,6 @@ public class ChatInterceptor : IChatInterceptor
 
     private async Task AnalyzeResponseAndTriggerUI(MessageThread messageThread, string? response)
     {
-        var routerHub = new SemanticRouterHub();
         string analysisPrompt = @"Analyze the following assistant message and determine ONLY if it contains 
             an explicit, direct request to the user to enter, set, or change exactly one of these contract properties:
             - Title
@@ -183,7 +182,7 @@ public class ChatInterceptor : IChatInterceptor
         try
         {
             // Use LLM to analyze the assistant's response
-            var propertyName = await routerHub.ChatCompletionAsync(analysisPrompt);
+            var propertyName = await SemanticRouterHub.ChatCompletionAsync(analysisPrompt);
             _logger.LogInformation($"Detected property request: {propertyName}");
 
             // Trigger appropriate UI commands based on analysis

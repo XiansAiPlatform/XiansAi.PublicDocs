@@ -1,6 +1,6 @@
 # Chat Completion
 
-The Xians platform provides a simple chat completion capability through the `SemanticRouterHub.ChatCompletionAsync` method. This functionality allows you to send a direct prompt to an LLM and receive a response without the complexity of system prompts or chat history.
+The Xians platform provides a simple chat completion capability through the `SemanticRouterHub.ChatCompletionAsync` static method. This functionality allows you to send a direct prompt to an LLM and receive a response without the complexity of system prompts or chat history.
 
 ## Overview
 
@@ -9,8 +9,7 @@ The `ChatCompletionAsync` method leverages Microsoft's SemanticKernel framework 
 ## Usage
 
 ```csharp
-var routerHub = new SemanticRouterHub();
-var response = await routerHub.ChatCompletionAsync(prompt, options);
+var response = await SemanticRouterHub.ChatCompletionAsync(prompt, options);
 ```
 
 ### Parameters
@@ -50,11 +49,10 @@ var options = new RouterOptions
 Here's a practical example from a chat interceptor that analyzes assistant messages:
 
 ```csharp
-var routerHub = new SemanticRouterHub();
 string prompt = @"Analyze the following assistant message and determine if it contains 
     a direct request for contract information: " + userMessage;
 
-var analysis = await routerHub.ChatCompletionAsync(prompt);
+var analysis = await SemanticRouterHub.ChatCompletionAsync(prompt);
 ```
 
 ## Key Characteristics
