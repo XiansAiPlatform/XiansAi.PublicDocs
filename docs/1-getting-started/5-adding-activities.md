@@ -1,4 +1,4 @@
-# Adding Activities to Your Flow
+# Adding Activities to Your Flow (deprecated)
 
 Activities are the individual steps in a business process flow. They are the building blocks of the flow. We will use the following activities in our flow:
 

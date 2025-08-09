@@ -1,6 +1,4 @@
-# Your First Business Process Flow (Deterministic)
-
-AI agent could have a multiple workflows. Now we will add a new Flow which is a business process flow.
+# Developing a Business Process Flow (Deterministic)
 
 ## What is a Deterministic Flow?
 
@@ -50,9 +48,7 @@ Env.Load();
 var agent = new Agent("News Reader Agent");
 
 var flow = agent.AddFlow<NewsReportFlow>();
-
-var bot = agent.AddBot<NewsReaderBot>();
-bot.AddCapabilities<Capabilities>();
+flow.AddActivities<Activities>(new Activities());
 
 await agent.RunAsync();
 ```
@@ -69,61 +65,31 @@ using XiansAi.Flow;
 [Workflow("News Agent:News Report Flow")]
 public class NewsReportFlow : FlowBase
 {
-    [WorkflowRun]
-    public async Task<string> Run(string newsUrl, string recipientEmail)
-    {
-      // TODO: Implement the news report flow
+  private int count = 0;
 
-      // TODO: Send the news report to the recipient
-
-      return "News report sent to " + recipientEmail;
-    }
+  [WorkflowRun]
+  public async Task<string> Run(string newsUrl, string recipientEmail)
+  {
+    count++;
+    Workflow.ExecuteActivityAsync(
+      (Activities a) => a.WriteToFile($"Hello, world {count}"),
+      new() { ScheduleToCloseTimeout = TimeSpan.FromMinutes(1) });
+  }
 }
 
+
+public class Activities
+{
+    [Activity]
+    public void WriteToFile(string message)
+    {
+        Console.WriteLine(message);
+        File.WriteAllText("user-request.txt", message);
+    }
+}
 ```
 
 Notes:
 
 - The Xians Flows are Temporal workflows. You can see more about the Temporal.io workflow engine [here](https://docs.temporal.io). You can simply use all the Temporal workflow features in your flows.
-
-## Visualizing the Flow's Logic
-
-Add the following in your .csproj file:
-
-```xml
-<Project Sdk="Microsoft.NET.Sdk">
-...
-
-  <ItemGroup>
-    ...
-    <!-- Embed the flow source files -->
-    <EmbeddedResource Include="NewsReportFlow.cs">
-        <LogicalName>%(Filename)%(Extension)</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
-
-</Project>
-
-```
-
-## Testing Your Setup
-
-Run the application requesting to test the configuration:
-
-```bash
-dotnet run
-```
-
-Your agent will now be deployed to the Xians.ai platform. You should be able to Activate this flow from Xians.ai Manager portal.
-
-![Activate](./img/4-activate.png)
-
-Now under the `Runs` tab you should be able to see a completed run.
-
-![Run](./img/4-observe.png)
-
-You can click on the run and see the details.
-
-## Next Steps
-
-- [Adding Activities](5-adding-activities.md)
+- More details about the Developing Business Process Flows with Xians engine can be found [here](../4-automation/0-introduction.md).
