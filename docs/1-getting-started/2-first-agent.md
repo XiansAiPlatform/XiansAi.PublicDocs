@@ -1,20 +1,6 @@
-# Your First Agent Flow (Non-Deterministic)
+# Your First Conversational Flow
 
 AI agent could have a multiple workflows. However in this example, we will create a simple agent with a single Flow which is a conversation bot.
-
-## What is a Non-Deterministic Flow?
-
-Non-deterministic flows don't follow a predefined path that executes the same way each time. Instead, the flow's execution is determined at runtime, leveraging AI models and available data to make decisions about next steps.
-Unlike deterministic processes where every step must be explicitly modeled beforehand, non-deterministic flows adapt dynamically. This approach offers several advantages:
-
-- Faster development: Reduced need for extensive process design and testing
-- Improved accessibility: Business users can automate processes without deep technical expertise
-- Enhanced personalization: Flows can adapt to individual user needs and contexts
-- Greater flexibility: The system can handle complex scenarios that would be difficult to model explicitly
-
-In deterministic systems, processes that can't be fully defined in advance typically require human intervention. Non-deterministic flows can increase automation in these scenarios, such as customer support, content generation, or decision-making tasks that traditionally needed human judgment.
-
-However, non-deterministic flows also present challenges, including less predictable behavior, potentially higher execution costs, and more complex auditing requirements. If the business process is well-known and requires repeatable results, then a deterministic flow is a better choice.
 
 ## Creating a Conversational Flow
 
@@ -146,6 +132,22 @@ You will see the `Visualize` button enabled in the portal.
 ![Visualize](./img/1-visualize.png)
 
 Click the `Visualize` button and you will see the flow's logic.
+
+## Conversational Flows are Non-Deterministic
+
+Non-deterministic flows don't follow a predefined path that executes the same way each time. Instead, the flow's execution is determined at runtime, leveraging AI models and available data to make decisions about next steps.
+Unlike deterministic processes where every step must be explicitly modeled beforehand, non-deterministic flows adapt dynamically. This approach offers several advantages:
+
+- Faster development: Reduced need for extensive process design and testing
+- Improved accessibility: Business users can automate processes without deep technical expertise
+- Enhanced personalization: Flows can adapt to individual user needs and contexts
+- Greater flexibility: The system can handle complex scenarios that would be difficult to model explicitly
+
+In deterministic systems, processes that can't be fully defined in advance typically require human intervention. Non-deterministic flows can increase automation in these scenarios, such as customer support, content generation, or decision-making tasks that traditionally needed human judgment.
+
+However, non-deterministic flows also present challenges, including less predictable behavior, potentially higher execution costs, and more complex auditing requirements. If the business process is well-known and requires repeatable results, then a deterministic flow is a better choice.
+
+To learn about deterministic flows, please refer to [Process Automation](../4-automation/0-introduction.md).
 
 ## Next Steps
 

@@ -115,6 +115,12 @@ nav:
       - Event Passing: 2-agent-communication/1-events.md
       - Handoffs: 2-agent-communication/3-handoffs.md
       - Forwarding: 2-agent-communication/6-forward-message.md
+  - Process Automation:
+    - Introduction: 4-automation/0-introduction.md
+    - External Triggers: 4-automation/1-external-triggers.md
+    - Scheduled Execution: 4-automation/2-scheduled-execution.md
+    - Fault Tolerance: 4-automation/3-fault-tolerance.md
+    - Long-Running Processes: 4-automation/4-long-running-processes.md
   - Agent Knowledge:
     - Managing Knowledge: 3-knowledge/1-using-portal.md
     - Accessing Knowledge: 3-knowledge/2-accessing-knowledge.md
