@@ -120,6 +120,7 @@ nav:
     - Scheduled Execution: 4-automation/2-scheduled-execution.md
     - Fault Tolerance: 4-automation/3-fault-tolerance.md
     - Long-Running Processes: 4-automation/4-long-running-processes.md
+    - Creating Sub-Flows: 4-automation/5-creating-sub-flows.md
   - Agent Knowledge:
     - Managing Knowledge: 3-knowledge/1-using-portal.md
     - Accessing Knowledge: 3-knowledge/2-accessing-knowledge.md
