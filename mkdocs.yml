@@ -132,6 +132,7 @@ nav:
     - Logging: n-encyclopedia/logging.md
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
     - LLM Completion: n-encyclopedia/llm-completion.md
+    - AgentContext: n-encyclopedia/agent-context.md
   - Platform Development:
     - Start: platform-development/setup.md
 
