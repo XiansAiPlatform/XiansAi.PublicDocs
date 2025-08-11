@@ -77,6 +77,7 @@
       <li><a href="2-agent-communication/4-responding.md"><strong>Manual Responding</strong></a> - Handle user interactions manually</li>
       <li><a href="2-agent-communication/5-skip-llm-response.md"><strong>Skip LLM Response</strong></a> - Bypass LLM for direct responses</li>
       <li><a href="2-agent-communication/7-chat-interceptors.md"><strong>Chat Interceptors</strong></a> - Modify or redirect chat messages</li>
+      <li><a href="2-agent-communication/12-welcome-msg.md"><strong>Welcome Message</strong></a> - Send the initial welcome message</li>
     </ul>
   </div>
 
