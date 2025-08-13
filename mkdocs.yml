@@ -108,6 +108,7 @@ nav:
       - Send Message: 2-agent-communication/2-messaging.md
       - Manual Responding: 2-agent-communication/4-responding.md
       - Skip LLM Response: 2-agent-communication/5-skip-llm-response.md
+      - Welcome Message: 2-agent-communication/12-welcome-msg.md
     - Interceptors:
       - Intercept Chat: 2-agent-communication/7-chat-interceptors.md
     - Agent 2 Agent:
