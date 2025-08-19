@@ -23,16 +23,20 @@ In your Xians AI server environment (if not already set), configure the encrypti
 }
 ```
 
-## Quick start (UI)
+## Quick start (Xians ai Portal)
 
 1. Open your tenant → Settings → Auth config
-2. Paste the JSON template below and adjust values for your identity providers
-3. Start with one provider, verify login, then add others if needed
-4. Keep `allowedProviders` minimal to explicitly whitelist providers
+2. Click on Create configuration
+3. Edit the JSON template that appear and adjust the values for your identity providers
+4. Start with one provider, verify login, then add others if needed
+5. Keep `allowedProviders` minimal to explicitly whitelist providers
+6. `issue` is mandatory for each provider and you can put `null` for other attributes if not needed.
 
 ## Recommended JSON template (secure defaults)
 
-Use this as a starting point. Replace placeholders with your values. Provider keys (`Auth0`, `Keycloak`, etc.) are identifiers you choose. If you set `allowedProviders`, only those keys can be used.
+Use this as a starting point. Replace placeholders with your values. Provider keys (`Auth0`, `Keycloak`, etc.) are identifiers you choose. If you set `allowedProviders`, only those keys can be used. 
+
+Example:
 
 ```json
 {
