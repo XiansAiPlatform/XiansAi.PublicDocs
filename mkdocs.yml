@@ -137,6 +137,7 @@ nav:
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
     - LLM Completion: n-encyclopedia/llm-completion.md
     - AgentContext: n-encyclopedia/agent-context.md
+    - Tenant Auth Configuration: n-encyclopedia/tenant-auth-config.md
   - Platform Development:
     - Start: platform-development/setup.md
 
