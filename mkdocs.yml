@@ -138,6 +138,7 @@ nav:
     - LLM Completion: n-encyclopedia/llm-completion.md
     - AgentContext: n-encyclopedia/agent-context.md
     - Tenant Auth Configuration: n-encyclopedia/tenant-auth-config.md
+    - Scaling Agent Flows: n-encyclopedia/scaling-agents.md
   - Platform Development:
     - Start: platform-development/setup.md
 

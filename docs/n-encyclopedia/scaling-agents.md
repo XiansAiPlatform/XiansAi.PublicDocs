@@ -1,35 +1,176 @@
-# Scaling Agents
+# Scaling Agent Flows
 
 ## Overview
 
-Explain the subsystems that has to be scaled to support a large number of agents.
+In Xians, scalability is achieved through distributed workflow execution using Temporal queues. Every Agent Workflow automatically creates a temporal queue that enables horizontal scaling by allowing multiple agent instances to share the workload seamlessly. This document explains how to configure and scale your agent flows for high-throughput scenarios.
 
-![Deployment Diagram](../images/deployment-overview.png)
+## Temporal Queue Architecture
 
-## Agent Workers
+Each Agent Workflow in Xians is backed by a Temporal queue that serves as the distribution mechanism for work items. When multiple agent instances are deployed, they all connect to the same temporal queue and automatically distribute the workload among themselves.
 
-The agent workers are responsible for executing the agents. They are stateless and can be scaled horizontally. They are DotNet command line applications that are running in container environment such as Docker or Kubernetes.
+### Key Benefits
 
-## Workflow Orchestrator (Temporal)
+- **Automatic Load Distribution**: Work is automatically distributed across all connected workers
+- **Fault Tolerance**: If one worker fails, others continue processing
+- **Dynamic Scaling**: Add or remove workers without service interruption
+- **Guaranteed Execution**: Temporal ensures all work items are processed exactly once
 
-The workflow orchestrator is responsible for orchestrating the agents. It is a Temporal server that is responsible for scheduling and executing the agents.
+## Configuring Worker Scalability
 
-Temporal is high-scale, distributed, durable, and highly available orchestration engine.
+### Default Configuration
 
-Understand temporal's architecture and concepts in the [A Practical Approach to Temporal Architecture](https://mikhail.io/2020/10/practical-approach-to-temporal-architecture/).
+By default, each Xians agent creates a **single worker** per workflow. This is suitable for development and low-throughput scenarios:
 
-Read about scaling Temporal in the [Temporal documentation](https://learn.temporal.io/scaling_temporal/).
+```csharp
+// Default single worker configuration
+var agent = new Agent("ERP Agent");
+var bot = agent.AddBot<OrderBot>(); // Creates 1 worker by default
+bot.AddCapabilities(typeof(OrderCapabilities));
+await agent.RunAsync();
+```
 
-Temporal Cluster Architecture:
+### Multi-Worker Configuration
 
-[Temporal Cluster Architecture](https://medium.com/@pratyaypandey/a-bottom-up-guide-to-temporal-cluster-architecture-74bdb455dc72)
+For production environments requiring higher throughput, you can configure multiple workers using the `numberOfWorkers` parameter:
 
-[Temporal at Scale](https://planetscale.com/blog/temporal-workflows-at-scale-sharding-in-production)
+```csharp
+// Multi-worker configuration for high throughput
+var agent = new Agent("ERP Agent");
 
-## Visualization Server
+// Configure 5 workers for the OrderBot workflow
+var bot = agent.AddBot<OrderBot>(numberOfWorkers: 5);
+bot.AddCapabilities(typeof(OrderCapabilities));
+await agent.RunAsync();
+```
 
-The visualization server is responsible for visualizing the agents and the workflows. It is a React application with a DotNet backend that is running in the browser.
+### Advanced Worker Configuration
 
-## Database
+You can configure different worker counts for different workflows within the same agent:
 
-The database is responsible for storing the data of the agents and the workflows. It is a PostgreSQL database that is running in the cloud.
+```csharp
+var agent = new Agent("Multi-Service Agent");
+
+// High-throughput order processing
+var orderBot = agent.AddBot<OrderBot>(numberOfWorkers: 10);
+orderBot.AddCapabilities(typeof(OrderCapabilities));
+
+// Moderate-throughput inventory management
+var inventoryBot = agent.AddBot<InventoryBot>(numberOfWorkers: 3);
+inventoryBot.AddCapabilities(typeof(InventoryCapabilities));
+
+// Low-throughput reporting
+var reportBot = agent.AddBot<ReportBot>(numberOfWorkers: 1);
+reportBot.AddCapabilities(typeof(ReportCapabilities));
+
+await agent.RunAsync();
+```
+
+## Scaling Strategies
+
+### Vertical Scaling (Per-Instance Workers)
+
+Increase the `numberOfWorkers` parameter to handle more concurrent workflows within a single agent instance:
+
+```csharp
+// Scale up workers within a single instance
+var agent = new Agent("High-Performance Agent");
+var bot = agent.AddBot<ProcessingBot>(numberOfWorkers: 20);
+```
+
+**When to use:**
+
+- Single deployment environment
+- Sufficient CPU and memory resources
+- Simplified deployment management
+
+### Horizontal Scaling (Multiple Instances)
+
+Combine both approaches for maximum throughput:
+
+```csharp
+// Multiple instances, each with multiple workers
+var agent = new Agent("Hybrid Scaled Agent");
+var bot = agent.AddBot<ProcessingBot>(numberOfWorkers: 8);
+```
+
+Deploy this configuration across multiple containers/servers for optimal scaling.
+
+## Performance Considerations
+
+### Optimal Worker Count
+
+The optimal number of workers depends on several factors:
+
+- **CPU Cores**: Generally 1-2 workers per CPU core
+- **I/O Operations**: More workers for I/O-heavy workflows
+- **Memory Usage**: Consider memory requirements per worker
+- **External Dependencies**: Account for rate limits and connection pools
+
+### Example Configurations
+
+```csharp
+// CPU-intensive workflows
+var cpuBot = agent.AddBot<DataProcessingBot>(numberOfWorkers: Environment.ProcessorCount);
+
+// I/O-intensive workflows (API calls, database operations)
+var ioBot = agent.AddBot<IntegrationBot>(numberOfWorkers: Environment.ProcessorCount * 2);
+
+// Memory-intensive workflows
+var memoryBot = agent.AddBot<AnalyticsBot>(numberOfWorkers: 2);
+```
+
+### Monitoring and Tuning
+
+Monitor these metrics to optimize worker configuration:
+
+- **Queue Depth**: High queue depth indicates need for more workers
+- **Worker Utilization**: Low utilization suggests over-provisioning
+- **Throughput**: Measure workflows completed per second
+- **Error Rates**: High error rates may indicate resource contention
+
+## Best Practices
+
+### 1. Start Conservative
+
+Begin with fewer workers and scale up based on monitoring data:
+
+```csharp
+// Start with moderate scaling
+var bot = agent.AddBot<NewWorkflowBot>(numberOfWorkers: 3);
+```
+
+### 2. Environment-Specific Configuration
+
+Use configuration files or environment variables for different environments:
+
+```csharp
+var workerCount = int.Parse(Environment.GetEnvironmentVariable("WORKER_COUNT") ?? "1");
+var bot = agent.AddBot<ProductionBot>(numberOfWorkers: workerCount);
+```
+
+### 3. Resource-Aware Scaling
+
+Consider available resources when setting worker counts:
+
+```csharp
+var maxWorkers = Math.Min(Environment.ProcessorCount * 2, 20);
+var bot = agent.AddBot<AdaptiveBot>(numberOfWorkers: maxWorkers);
+```
+
+### Monitoring Commands
+
+Use Temporal CLI to monitor queue performance:
+
+```bash
+# Check workflow queue status
+temporal workflow list --query "WorkflowType='YourWorkflowType'"
+
+# Monitor task queue
+temporal task-queue describe --task-queue your-task-queue
+```
+
+## Auto Scaling Based on Queue Metrics
+
+### Monitoring Queue Size for Auto Scaling
+
+For dynamic scaling scenarios, you can monitor the Temporal queue size to automatically adjust the number of workers. This approach enables responsive scaling based on actual workload demand.
