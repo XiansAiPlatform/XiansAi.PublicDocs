@@ -2,6 +2,45 @@
 
 Configure OpenID Connect (OIDC) authentication per tenant. These settings are encrypted at rest and enforced at runtime for both REST and WebSocket endpoints.
 
+## Authentication Priority
+
+**Important:** When both an API key and JWT token are provided in a request, the system gives **priority to the API key**. The JWT token will be ignored in favor of API key authentication.
+
+This means:
+
+- If you provide both `apikey` parameter and `Authorization: Bearer <jwt-token>` header, the API key takes precedence
+- JWT token validation (configured below) only applies when no API key is present
+- For API key generation and management, see Portal → Settings → API Keys
+
+## JWT Token Participant Validation
+
+**Important:** When using JWT token authentication, the system validates that the `participantId` sent in the request matches the user identity extracted from the token using `userIdClaim(s)`.
+
+### How it works
+
+1. **User Identity Extraction**: The system extracts the user identity from the JWT token using the configured `userIdClaim` or `userIdClaims` settings
+   - If `userIdClaim` is specified: uses that single claim (e.g., `"sub"`)
+   - If `userIdClaims` is specified: tries claims in order until one is found (e.g., `"sub,email"` tries `sub` first, then `email`)
+   - If neither is configured: defaults to standard claims like `sub` or `oid`
+
+2. **Participant Validation**: The extracted user identity must exactly match the `participantId` parameter sent in the request
+
+3. **Authentication Failure**: If the `participantId` doesn't match the token's user identity, authentication will fail
+
+### Example
+
+If your JWT token contains `"sub": "user123@company.com"` and you configure:
+
+```json
+"providerSpecificSettings": {
+  "userIdClaim": "sub"
+}
+```
+
+Then your API requests must use `participantId=user123@company.com`, otherwise authentication will fail.
+
+**Note:** This validation only applies when JWT tokens are used for authentication (not when API keys are used).
+
 ## Where to configure
 
 - Portal → Settings → Auth config (per tenant)
@@ -34,7 +73,7 @@ In your Xians AI server environment (if not already set), configure the encrypti
 
 ## Recommended JSON template (secure defaults)
 
-Use this as a starting point. Replace placeholders with your values. Provider keys (`Auth0`, `Keycloak`, etc.) are identifiers you choose. If you set `allowedProviders`, only those keys can be used. 
+Use this as a starting point. Replace placeholders with your values. Provider keys (`Auth0`, `Keycloak`, etc.) are identifiers you choose. If you set `allowedProviders`, only those keys can be used.
 
 Example:
 
@@ -228,5 +267,3 @@ Recommended hardening steps:
 - Constrain clients: require `azp` (authorized party) equals your expected client id
 - Prefer canonical user ids from stable claims (`sub`, `oid`) and, if needed, set `providerSpecificSettings.userIdClaim(s)`
 - Keep `allowedProviders` minimal; avoid listing providers you do not actively use
-
-
