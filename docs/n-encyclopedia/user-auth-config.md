@@ -1,4 +1,4 @@
-# Tenant OIDC Authentication Configuration
+# OIDC Authentication Configuration
 
 Configure OpenID Connect (OIDC) authentication per tenant. These settings are encrypted at rest and enforced at runtime for both REST and WebSocket endpoints.
 
