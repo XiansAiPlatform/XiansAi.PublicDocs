@@ -62,6 +62,12 @@ In your Xians AI server environment (if not already set), configure the encrypti
 }
 ```
 
+```.env
+EncryptionKeys__BaseSecret=<LONG_RANDOM_BASE_SECRET>
+EncryptionKeys__UniqueSecrets__ConversationMessageKey=mysecretkey2
+EncryptionKeys__UniqueSecrets__TenantOidcSecretKey=<LONG_RANDOM_UNIQUE_SECRET_FOR_TENANT_OIDC>
+```
+
 ## Quick start (Xians ai Portal)
 
 1. Open your tenant → Settings → Auth config
