@@ -140,6 +140,8 @@ nav:
     - User Auth Configuration: n-encyclopedia/user-auth-config.md
     - Scaling Agent Flows: n-encyclopedia/scaling-agents.md
     - Chat Message Encryption: n-encyclopedia/chat-message-encryption.md
+    - Workflow Utility: n-encyclopedia/workflow-identification-utility.md
+    - Agent Context Utility: n-encyclopedia/agent-context-utility.md
   - Platform Development:
     - Start: platform-development/setup.md
 
