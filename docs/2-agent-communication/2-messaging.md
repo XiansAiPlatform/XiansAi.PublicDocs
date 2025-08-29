@@ -2,7 +2,7 @@
 
 ## Sending Messages to Users
 
-Agents can send messages to users using the `_messageThread.SendChat` static method. This method is designed to be used within a workflow context where an agent needs to communicate with a user.
+Agents can send messages to users using the `_messageThread.SendChat` method. This method is designed to be used within a workflow context where an agent needs to communicate with a user.
 
 ### Method Signatures
 
@@ -61,46 +61,3 @@ The method returns a `Task<string?>` where the string value is the MessageThread
 var threadId = await _messageThread.SendChat("Hello!");
 _logger.LogInformation($"Message sent successfully. Thread ID: {threadId}");
 ```
-
-## Sending Messages as Another Workflow (Impersonation)
-
-In cases where you want to send a message on behalf of a specific workflow without having a `MessageThread` reference, use the methods in `MessageHub`:
-
-### Method Signatures
-
-```csharp
-public static async Task SendChatAs(
-    Type flowClassType,   // The flow class to impersonate
-    string participantId, // Target user's ID
-    string content,       // Message content
-    object? data = null,  // Optional structured data
-    string? requestId = null,
-    string? scope = null
-);
-
-public static async Task SendDataAs(
-    Type flowClassType,   // The flow class to impersonate
-    string participantId, // Target user's ID
-    string content,       // Optional message content to accompany data
-    object data,          // Structured data payload
-    string? requestId = null,
-    string? scope = null
-);
-```
-
-### Usage Example (Impersonation)
-
-```csharp
-// Send a chat message as a specific flow
-await MessageHub.SendChatAs(typeof(MyFlow), userId, "Hello from MyFlow!");
-
-// Send structured data (with optional content) as a specific flow
-var payload = new { action = "notify", level = "info" };
-await MessageHub.SendDataAs(typeof(MyFlow), userId, "FYI", payload);
-```
-
-### Notes
-
-1. No `MessageThread` reference is required by the sender.
-2. The message is sent using the workflow ID and type derived from `flowClassType`.
-3. `requestId` and `scope` are optional and can be used for correlation and scoping.

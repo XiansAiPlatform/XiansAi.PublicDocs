@@ -1,4 +1,4 @@
-# Message Threads and Scopes
+# Threads and Scopes
 
 Message threads and scopes provide organizational structure for conversations and context management within the Xians AI platform. They enable precise control over message flow, context isolation, and conversation history management.
 

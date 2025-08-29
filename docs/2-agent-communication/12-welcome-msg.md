@@ -1,4 +1,4 @@
-# Default Welcome Message from the Agent
+# Sending Welcome Message
 
 The Xians platform supports setting up a **default welcome message** (or initial message) for agents in a conversational flow.  
 This feature allows your agent to automatically greet the user with a predefined message when the conversation starts or after certain triggers.

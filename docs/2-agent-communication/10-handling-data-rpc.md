@@ -1,6 +1,8 @@
 # Handling Data as RPC
 
-The RPC (Remote Procedure Call) approach provides a simplified way to handle data messages through direct method invocation. This pattern is ideal for stateless, atomic operations that don't require Temporal workflow orchestration.
+This document explains how the Agent Flow can process data messages once received through the RPC (Remote Procedure Call) pattern.
+
+When an Agent Flow receives a data message, it can process it in two ways: through workflow activities or through direct RPC method invocation. The RPC approach provides a simplified way to handle data messages through direct method invocation, bypassing the workflow orchestration layer. This pattern is ideal for stateless, atomic operations that don't require Temporal workflow orchestration or complex state management.
 
 ## Setting Up Data Processor
 

@@ -2,6 +2,40 @@
 
 Agents can respond to users through the `MessageThread` interface, which provides methods for sending messages and managing conversations. This is particularly useful when implementing capabilities that need to send responses back to the user.
 
+Agents can send messages to users using the `_messageThread.SendChat` method. This method is designed to be used within a workflow context where an agent needs to communicate with a user.
+
+## Method Signatures
+
+```csharp
+// For plain text communication
+public static async Task<string?> SendChat(
+    string content,           // The message content to send
+    object? data = null   // Optional metadata to attach to the message
+)
+
+// For structured data communication
+public static async Task<string?> SendData(
+    object data,        // The metadata to send
+    string? content = null   // Optional message content to send
+)
+```
+
+### Usage Example
+
+```csharp
+private readonly MessageThread _messageThread;
+
+// Basic message sending
+await _messageThread.SendChat("Hello user!");
+
+// Sending a message with metadata
+var metadata = new { 
+    messageType = "notification",
+    priority = "high"
+};
+await _messageThread.SendData(metadata);
+```
+
 ## Scenario: Manual vs Automatic Responses
 
 The scenario covered in this section focuses on **manual responses** that you implement programmatically in your agent code, as opposed to the automatic responses that Semantic Kernel generates when processing user requests.

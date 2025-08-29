@@ -93,28 +93,27 @@ nav:
     - Deterministic:
       - Business Process Flows: 1-getting-started/4-new-business-process.md
   - Agent Communication:
-    - Introduction: 2-agent-communication/0-index.md
-    - Message Basics:
-      - Chat & Data Types: https://github.com/XiansAiPlatform/sdk-web-typescript/blob/main/docs/message-types.md
-      - Threads & Scopes: 2-agent-communication/11-thread-and-scope.md
+    - Chat & Data Types: 2-agent-communication/13-message-types.md
+    - Threads & Scopes: 2-agent-communication/11-thread-and-scope.md
     - User 2 Agent:
       - TypeScript SDK: https://github.com/XiansAiPlatform/sdk-web-typescript
       - HTTP APIs: https://github.com/XiansAiPlatform/XiansAi.Server/blob/main/XiansAi.Server.Src/docs/user-api/index.md
-    - Data Passing:
-      - Overview: 2-agent-communication/9-data-exchange.md
-      - As Messages: 2-agent-communication/8-handling-data-messages.md
-      - AS RPC: 2-agent-communication/10-handling-data-rpc.md
+    - Data Messages:
+      - Handle as RPC: 2-agent-communication/10-handling-data-rpc.md
     - Agent 2 User:
-      - Send Message: 2-agent-communication/2-messaging.md
-      - Manual Responding: 2-agent-communication/4-responding.md
+      - Responding to User: 2-agent-communication/4-responding.md
+      - Proactive Communication: 2-agent-communication/15-proactive-messages.md
       - Skip LLM Response: 2-agent-communication/5-skip-llm-response.md
       - Welcome Message: 2-agent-communication/12-welcome-msg.md
-    - Interceptors:
-      - Intercept Chat: 2-agent-communication/7-chat-interceptors.md
     - Agent 2 Agent:
-      - Event Passing: 2-agent-communication/1-events.md
+      - Synchronous RPC: 2-agent-communication/16-synchronous-messages.md
+      - Asynchronous Events: 2-agent-communication/1-events.md
       - Handoffs: 2-agent-communication/3-handoffs.md
       - Forwarding: 2-agent-communication/6-forward-message.md
+    - Advanced Topics:
+      - Data Events: 2-agent-communication/8-handling-data-messages.md
+      - Intercept Chat: 2-agent-communication/7-chat-interceptors.md
+
   - Process Automation:
     - Introduction: 4-automation/0-introduction.md
     - External Triggers: 4-automation/1-external-triggers.md
@@ -142,6 +141,7 @@ nav:
     - Chat Message Encryption: n-encyclopedia/chat-message-encryption.md
     - Workflow Utility: n-encyclopedia/workflow-identification-utility.md
     - Agent Context Utility: n-encyclopedia/agent-context-utility.md
+    - MCP Integration: n-encyclopedia/mcp-integration.md
   - Platform Development:
     - Start: platform-development/setup.md
 
