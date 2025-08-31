@@ -21,19 +21,7 @@ Implement the `IKernelModifier` interface to integrate your MCP server:
 public class PlayWriteMCP : IKernelModifier
 {
     private static List<KernelFunction>? functions;
-    private static List<string> arguments = new List<string>() {
-        "-y",
-        "@playwright/mcp@latest",
-        "--isolated",
-    };
 
-    public PlayWriteMCP(bool headless = true)
-    {
-        if (headless)
-        {
-           arguments.Add("--headless");
-        }
-    }
 
 #pragma warning disable SKEXP0001
     public async Task<Kernel> ModifyKernelAsync(Kernel kernel)
@@ -58,7 +46,12 @@ public class PlayWriteMCP : IKernelModifier
         {
             Name = "Playwright",
             Command = "npx",
-            Arguments = arguments,
+            Arguments = new List<string>() {
+                "-y",
+                "@playwright/mcp@latest",
+                "--isolated",
+                "--headless"
+            }
         });
 
         var client = await McpClientFactory.CreateAsync(clientTransport);
@@ -104,8 +97,6 @@ public class WebBot : FlowBase
     public async Task Run()
     {
         await InitConversation();
-        // MCP tools (like Playwright functions) are now available
-        // to the LLM during conversation processing
     }
 }
 ```
