@@ -1,4 +1,4 @@
-# Logging in XiansAi Workflows
+# Logging in Agent Flows
 
 This guide explains how to implement logging in your XiansAi workflows using the built-in logging framework.
 
@@ -31,7 +31,30 @@ The logging system can be configured through environment variables:
 ```bash
 # Set console log level (defaults to Debug if not set)
 CONSOLE_LOG_LEVEL=DEBUG  # Options: TRACE, DEBUG, INFORMATION/INFO, WARNING/WARN, ERROR, CRITICAL
+
+# Set API log level for database logging (defaults to Error if not set)
+API_LOG_LEVEL=ERROR      # Options: TRACE, DEBUG, INFORMATION/INFO, WARNING/WARN, ERROR, CRITICAL
 ```
+
+### Console vs API Logging
+
+It's important to understand the distinction between console logging and API logging:
+
+- **`CONSOLE_LOG_LEVEL`**: Controls which logs are displayed in the agent's console output. This is useful for local debugging and monitoring agent activity in real-time.
+
+- **`API_LOG_LEVEL`**: Controls which logs are sent to the server and stored in the database. By default, only logs with level `ERROR` and above are sent to the server for database storage.
+
+The API log level supports the following values:
+- `TRACE`: All log levels are sent to the database
+- `DEBUG`: Debug and above are sent to the database  
+- `INFORMATION` or `INFO`: Information and above are sent to the database
+- `WARNING` or `WARN`: Warning and above are sent to the database
+- `ERROR`: Only Error and Critical logs are sent to the database (default)
+- `CRITICAL`: Only Critical logs are sent to the database
+
+### Database Log Retention
+
+Logs stored in the database have a **Time-To-Live (TTL) of 15 days**. After this period, logs are automatically deleted from the database to manage storage efficiently. This retention policy ensures that recent logs are available for debugging and auditing while preventing unlimited storage growth.
 
 ## Step 3: Implement Logging
 

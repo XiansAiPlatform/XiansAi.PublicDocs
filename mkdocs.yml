@@ -98,6 +98,8 @@ nav:
     - User 2 Agent:
       - TypeScript SDK: https://github.com/XiansAiPlatform/sdk-web-typescript
       - HTTP APIs: https://github.com/XiansAiPlatform/XiansAi.Server/blob/main/XiansAi.Server.Src/docs/user-api/index.md
+    - Machine 2 Agent:
+      - Webhooks: 2-agent-communication/17-webhooks.md
     - Data Messages:
       - Handle as RPC: 2-agent-communication/10-handling-data-rpc.md
     - Agent 2 User:
@@ -130,18 +132,19 @@ nav:
     - Structured Objects:
       - Document Store: 3-knowledge/5-document-store.md
   - Encyclopedia:
-    - Multi-flow Agents: n-encyclopedia/multi-flow-agents.md
+    - MCP Integration: n-encyclopedia/mcp-integration.md
+    - User Auth Configuration: n-encyclopedia/user-auth-config.md
+    - Chat Message Encryption: n-encyclopedia/chat-message-encryption.md
+    - LLM Completion: n-encyclopedia/llm-completion.md
     - Retry Policy: n-encyclopedia/retry-policy.md
     - Logging: n-encyclopedia/logging.md
-    - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
-    - LLM Completion: n-encyclopedia/llm-completion.md
     - AgentContext: n-encyclopedia/agent-context.md
-    - User Auth Configuration: n-encyclopedia/user-auth-config.md
-    - Scaling Agent Flows: n-encyclopedia/scaling-agents.md
-    - Chat Message Encryption: n-encyclopedia/chat-message-encryption.md
     - Workflow Utility: n-encyclopedia/workflow-identification-utility.md
     - Agent Context Utility: n-encyclopedia/agent-context-utility.md
-    - MCP Integration: n-encyclopedia/mcp-integration.md
+    - Multi-flow Agents: n-encyclopedia/multi-flow-agents.md
+    - Scaling Agent Flows: n-encyclopedia/scaling-agents.md
+    - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
+
   - Platform Development:
     - Start: platform-development/setup.md
 

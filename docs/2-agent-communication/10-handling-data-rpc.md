@@ -96,6 +96,15 @@ public class DataProcessor
 
 ## Invoking Methods via REST API
 
+### Authentication
+
+The REST API supports two authentication methods:
+
+- **API Key Authentication**: Pass your API key using the `apikey` query parameter
+- **JWT Token Authentication**: Include a Bearer token in the `Authorization` header
+
+For more details, see the [REST API section here](https://github.com/XiansAiPlatform/sdk-web-typescript/blob/main/docs/authentication.md).
+
 ### API Endpoint Format
 
 e.g.,
