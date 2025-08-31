@@ -4,7 +4,7 @@
 
   <div style="margin-top: 2rem;">
     <a href="1-getting-started/0-platform-setup/" style="margin: 0.5rem; background: var(--xians-primary); border: 1px solid var(--xians-primary); color: white; text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 0.375rem; font-weight: 500; display: inline-block; transition: background-color 0.15s ease;">Get Started</a>
-    <a href="https://github.com/XiansAiPlatform/community-edition/tree/main/samples" style="margin: 0.5rem; background: transparent; border: 1px solid var(--xians-border-dark); color: var(--xians-text-primary); text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 0.375rem; font-weight: 500; display: inline-block; transition: border-color 0.15s ease;">View Examples</a>
+    <a href="https://github.com/XiansAiPlatform/samples" style="margin: 0.5rem; background: transparent; border: 1px solid var(--xians-border-dark); color: var(--xians-text-primary); text-decoration: none; padding: 0.75rem 1.5rem; border-radius: 0.375rem; font-weight: 500; display: inline-block; transition: border-color 0.15s ease;">View Examples</a>
   </div>
 </div>
 
