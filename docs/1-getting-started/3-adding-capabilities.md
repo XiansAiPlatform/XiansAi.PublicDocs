@@ -17,7 +17,7 @@ In this guide, we'll focus on the first approach: adding a capability through a 
 2. Implement the required functions for capabilities
 3. Describe the functions that will be available to the bot
 
-Here's an example of a simple capability class:
+Here's an example of a simple capability class using static methods:
 
 ```csharp
 using XiansAi.Flow.Router.Plugins;
@@ -71,9 +71,59 @@ public static class Capabilities
 }
 ```
 
+## Accessing MessageThread in Capabilities
+
+Often, you'll need access to the `MessageThread` of the conversation within your capability class. This is particularly useful when you need to:
+
+- Forward messages to other bots
+- Send responses back to the user
+- Access conversation context and history
+
+To access the `MessageThread`, implement a constructor in your capability class that accepts a `MessageThread` parameter:
+
+```csharp
+using XiansAi.Flow.Router.Plugins;
+using XiansAi.Messaging;
+
+public class AssistantBotCapabilities
+{    
+    private readonly MessageThread _messageThread;
+
+    public AssistantBotCapabilities(MessageThread messageThread)
+    {
+        this._messageThread = messageThread;
+    }
+
+    [Capability("Perform a web search")]
+    [Parameter("query", "Query to perform a web search")]
+    [Returns("Results of the web search")]
+    public async Task<string?> PerformWebSearch(string query)
+    {
+        var response = await _messageThread.ForwardMessage(typeof(WebBot), query);
+        return response.Text;
+    }
+
+    [Capability("Get user conversation history")]
+    [Parameter("count", "Number of recent messages to retrieve (default: 10)")]
+    [Returns("List of recent conversation messages")]
+    public async Task<List<object>> GetConversationHistory(int count = 10)
+    {
+        // Access message thread properties and methods
+        var messages = await _messageThread.GetRecentMessages(count);
+        return messages.Select(m => new { 
+            text = m.Text, 
+            timestamp = m.Timestamp,
+            sender = m.Sender 
+        }).ToList();
+    }
+}
+```
+
 ## Configure the Bot to Use the New Capability
 
-Register your capability class in your bot's configuration:
+Register your capability class in your bot's configuration.
+
+### For Static Capability Classes
 
 ```csharp
 using XiansAi.Flow;
@@ -90,6 +140,43 @@ bot.AddCapabilities(typeof(Capabilities));
 
 await agent.RunAsync();
 ```
+
+### For Non-Static Capability Classes (with MessageThread)
+
+When using capability classes that require `MessageThread` injection, use the generic method:
+
+```csharp
+using XiansAi.Flow;
+using DotNetEnv;
+
+// Load the environment variables from the .env file
+Env.Load();
+
+// name your agent
+var agent = new Agent("Assistant Agent");
+
+var bot = agent.AddBot<AssistantBot>();
+bot.AddCapabilities<AssistantBotCapabilities>();
+
+await agent.RunAsync();
+```
+
+The framework will automatically inject the `MessageThread` instance into your capability class constructor.
+
+### When to Use Each Approach
+
+**Use Static Methods when:**
+
+- Your capabilities don't need to interact with the conversation thread
+- You're performing simple data processing or calculations
+- You're calling external APIs without needing conversation context
+
+**Use MessageThread Injection when:**
+
+- You need to forward messages to other bots
+- You want to send responses back to the user from within the capability
+- You need access to conversation history or context
+- You're implementing complex conversational flows within capabilities
 
 ## Testing the New Capability
 

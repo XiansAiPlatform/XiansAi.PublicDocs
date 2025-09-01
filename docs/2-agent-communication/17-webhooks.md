@@ -43,7 +43,7 @@ Create a method in your workflow class decorated with the `[WorkflowUpdate]` att
 
 ```csharp
 [WorkflowUpdate("method-name")]
-public async Task<string> WebhookUpdateMethod(IDictionary<string, string> queryParams, string body)
+public async Task<WebhookResponse> WebhookUpdateMethod(IDictionary<string, string> queryParams, string body)
 {
     // Process the webhook data
     Console.WriteLine("Webhook received");
@@ -51,7 +51,9 @@ public async Task<string> WebhookUpdateMethod(IDictionary<string, string> queryP
     Console.WriteLine(body);
     
     // Return response to webhook caller
-    return "Webhook processed successfully";
+    var response = new WebhookResponse(HttpStatusCode.OK);
+    response.Content = "Webhook processed successfully";
+    return response;
 }
 ```
 
@@ -61,12 +63,44 @@ public async Task<string> WebhookUpdateMethod(IDictionary<string, string> queryP
 - **Parameters**:
   - `queryParams`: Contains all query parameters except `apikey` and `tenantId`
   - `body`: Contains the raw request body as a string
-- **Return Type**: Must return a `string` which will be sent back to the webhook caller in response body.
+- **Return Type**: Must return a `WebhookResponse` object which allows you to control the HTTP status code, content, and content type sent back to the webhook caller.
+
+### WebhookResponse Class
+
+The `WebhookResponse` class provides fine-grained control over the HTTP response sent back to the webhook caller:
+
+```csharp
+// Basic response with 200 OK status
+var response = new WebhookResponse(HttpStatusCode.OK);
+response.Content = "Success message";
+
+// Response with custom status code
+var errorResponse = new WebhookResponse(HttpStatusCode.BadRequest);
+errorResponse.Content = JsonSerializer.Serialize(new { error = "Invalid data" });
+
+// Response with custom content type
+var xmlResponse = new WebhookResponse(HttpStatusCode.OK, "<result>success</result>", "application/xml");
+
+// Plain text response (useful for validation tokens)
+var validationResponse = new WebhookResponse(HttpStatusCode.OK, "validation-token-123", "text/plain");
+```
+
+**Constructor Options:**
+
+- `WebhookResponse(HttpStatusCode statusCode)` - Basic response with status code
+- `WebhookResponse(HttpStatusCode statusCode, string content, string contentType)` - Full control over response
+
+**Properties:**
+
+- `StatusCode` - HTTP status code (200, 400, 500, etc.)
+- `Content` - Response body content
+- `ContentType` - MIME type (defaults to "application/json")
 
 ### 3. Complete Webhook Bot Example
 
 ```csharp
 using System.Text.Json;
+using System.Net;
 using Temporalio.Workflows;
 using XiansAi.Flow;
 
@@ -80,10 +114,16 @@ public class WebhookBot : FlowBase
     }
 
     [WorkflowUpdate("mail-received")]
-    public async Task<string> MailReceived(IDictionary<string, string> queryParams, string body)
+    public async Task<WebhookResponse> MailReceived(IDictionary<string, string> queryParams, string body)
     {
         // Optional: Add processing delay
         await Workflow.DelayAsync(TimeSpan.FromSeconds(1));
+        
+        // Handle validation token (for services like Microsoft Graph)
+        if (queryParams.TryGetValue("validationToken", out var validationToken))
+        {
+            return new WebhookResponse(HttpStatusCode.OK, validationToken, "text/plain");
+        }
         
         // Log webhook reception
         Console.WriteLine("Mail received");
@@ -94,11 +134,13 @@ public class WebhookBot : FlowBase
         // ... your business logic ...
         
         // Return response to caller
-        return body; // Echo back the received body
+        var response = new WebhookResponse(HttpStatusCode.OK);
+        response.Content = body; // Echo back the received body
+        return response;
     }
 
     [WorkflowUpdate("order-created")]
-    public async Task<string> OrderCreated(IDictionary<string, string> queryParams, string body)
+    public async Task<WebhookResponse> OrderCreated(IDictionary<string, string> queryParams, string body)
     {
         // Parse JSON body
         var orderData = JsonSerializer.Deserialize<OrderData>(body);
@@ -106,7 +148,9 @@ public class WebhookBot : FlowBase
         // Process order
         await ProcessOrder(orderData);
         
-        return JsonSerializer.Serialize(new { status = "processed", orderId = orderData.Id });
+        var response = new WebhookResponse(HttpStatusCode.OK);
+        response.Content = JsonSerializer.Serialize(new { status = "processed", orderId = orderData.Id });
+        return response;
     }
     
     private async Task ProcessOrder(OrderData order)
@@ -238,7 +282,7 @@ curl -X POST \
 
 ```csharp
 [WorkflowUpdate("email-received")]
-public async Task<string> EmailReceived(IDictionary<string, string> queryParams, string body)
+public async Task<WebhookResponse> EmailReceived(IDictionary<string, string> queryParams, string body)
 {
     var emailData = JsonSerializer.Deserialize<EmailData>(body);
     
@@ -251,7 +295,9 @@ public async Task<string> EmailReceived(IDictionary<string, string> queryParams,
         $"New email from {emailData.From}: {emailData.Subject}"
     );
     
-    return "Email processed";
+    var response = new WebhookResponse(HttpStatusCode.OK);
+    response.Content = "Email processed";
+    return response;
 }
 ```
 
@@ -259,7 +305,7 @@ public async Task<string> EmailReceived(IDictionary<string, string> queryParams,
 
 ```csharp
 [WorkflowUpdate("payment-completed")]
-public async Task<string> PaymentCompleted(IDictionary<string, string> queryParams, string body)
+public async Task<WebhookResponse> PaymentCompleted(IDictionary<string, string> queryParams, string body)
 {
     var payment = JsonSerializer.Deserialize<PaymentNotification>(body);
     
@@ -273,7 +319,9 @@ public async Task<string> PaymentCompleted(IDictionary<string, string> queryPara
         "ProcessFulfillment"
     );
     
-    return JsonSerializer.Serialize(new { status = "processed" });
+    var response = new WebhookResponse(HttpStatusCode.OK);
+    response.Content = JsonSerializer.Serialize(new { status = "processed" });
+    return response;
 }
 ```
 
@@ -281,7 +329,7 @@ public async Task<string> PaymentCompleted(IDictionary<string, string> queryPara
 
 ```csharp
 [WorkflowUpdate("system-alert")]
-public async Task<string> SystemAlert(IDictionary<string, string> queryParams, string body)
+public async Task<WebhookResponse> SystemAlert(IDictionary<string, string> queryParams, string body)
 {
     var alert = JsonSerializer.Deserialize<SystemAlert>(body);
     
@@ -297,7 +345,9 @@ public async Task<string> SystemAlert(IDictionary<string, string> queryParams, s
     // Log alert
     Console.WriteLine($"Alert received: {alert.Message}");
     
-    return "Alert acknowledged";
+    var response = new WebhookResponse(HttpStatusCode.OK);
+    response.Content = "Alert acknowledged";
+    return response;
 }
 ```
 
@@ -307,23 +357,32 @@ public async Task<string> SystemAlert(IDictionary<string, string> queryParams, s
 
 ```csharp
 [WorkflowUpdate("process-data")]
-public async Task<string> ProcessData(IDictionary<string, string> queryParams, string body)
+public async Task<WebhookResponse> ProcessData(IDictionary<string, string> queryParams, string body)
 {
     try
     {
         var data = JsonSerializer.Deserialize<MyData>(body);
         await ProcessBusinessLogic(data);
-        return JsonSerializer.Serialize(new { status = "success" });
+        
+        var response = new WebhookResponse(HttpStatusCode.OK);
+        response.Content = JsonSerializer.Serialize(new { status = "success" });
+        return response;
     }
     catch (JsonException ex)
     {
         Console.WriteLine($"JSON parsing error: {ex.Message}");
-        return JsonSerializer.Serialize(new { status = "error", message = "Invalid JSON format" });
+        
+        var errorResponse = new WebhookResponse(HttpStatusCode.BadRequest);
+        errorResponse.Content = JsonSerializer.Serialize(new { status = "error", message = "Invalid JSON format" });
+        return errorResponse;
     }
     catch (Exception ex)
     {
         Console.WriteLine($"Processing error: {ex.Message}");
-        return JsonSerializer.Serialize(new { status = "error", message = "Processing failed" });
+        
+        var errorResponse = new WebhookResponse(HttpStatusCode.InternalServerError);
+        errorResponse.Content = JsonSerializer.Serialize(new { status = "error", message = "Processing failed" });
+        return errorResponse;
     }
 }
 ```
@@ -332,7 +391,7 @@ public async Task<string> ProcessData(IDictionary<string, string> queryParams, s
 
 ```csharp
 [WorkflowUpdate("long-running-task")]
-public async Task<string> LongRunningTask(IDictionary<string, string> queryParams, string body)
+public async Task<WebhookResponse> LongRunningTask(IDictionary<string, string> queryParams, string body)
 {
     // Start async processing
     _ =  Workflow.RunTaskAsync(async () =>
@@ -341,7 +400,9 @@ public async Task<string> LongRunningTask(IDictionary<string, string> queryParam
     });
     
     // Return immediate response
-    return JsonSerializer.Serialize(new { status = "accepted", message = "Task queued for processing" });
+    var response = new WebhookResponse(HttpStatusCode.Accepted);
+    response.Content = JsonSerializer.Serialize(new { status = "accepted", message = "Task queued for processing" });
+    return response;
 }
 ```
 
@@ -349,23 +410,30 @@ public async Task<string> LongRunningTask(IDictionary<string, string> queryParam
 
 ```csharp
 [WorkflowUpdate("validate-and-process")]
-public async Task<string> ValidateAndProcess(IDictionary<string, string> queryParams, string body)
+public async Task<WebhookResponse> ValidateAndProcess(IDictionary<string, string> queryParams, string body)
 {
     // Validate required parameters
     if (!queryParams.ContainsKey("source"))
     {
-        return JsonSerializer.Serialize(new { status = "error", message = "Missing 'source' parameter" });
+        var errorResponse = new WebhookResponse(HttpStatusCode.BadRequest);
+        errorResponse.Content = JsonSerializer.Serialize(new { status = "error", message = "Missing 'source' parameter" });
+        return errorResponse;
     }
     
     // Validate body
     if (string.IsNullOrEmpty(body))
     {
-        return JsonSerializer.Serialize(new { status = "error", message = "Empty request body" });
+        var errorResponse = new WebhookResponse(HttpStatusCode.BadRequest);
+        errorResponse.Content = JsonSerializer.Serialize(new { status = "error", message = "Empty request body" });
+        return errorResponse;
     }
     
     // Process valid request
     await ProcessValidRequest(queryParams["source"], body);
-    return JsonSerializer.Serialize(new { status = "success" });
+    
+    var response = new WebhookResponse(HttpStatusCode.OK);
+    response.Content = JsonSerializer.Serialize(new { status = "success" });
+    return response;
 }
 ```
 
@@ -375,7 +443,7 @@ public async Task<string> ValidateAndProcess(IDictionary<string, string> queryPa
 
 ```csharp
 [WorkflowUpdate("user-action")]
-public async Task<string> UserAction(IDictionary<string, string> queryParams, string body)
+public async Task<WebhookResponse> UserAction(IDictionary<string, string> queryParams, string body)
 {
     var action = JsonSerializer.Deserialize<UserAction>(body);
     
@@ -385,7 +453,9 @@ public async Task<string> UserAction(IDictionary<string, string> queryParams, st
         $"We received your {action.ActionType} request and are processing it now."
     );
     
-    return "Action acknowledged";
+    var response = new WebhookResponse(HttpStatusCode.OK);
+    response.Content = "Action acknowledged";
+    return response;
 }
 ```
 
@@ -393,7 +463,7 @@ public async Task<string> UserAction(IDictionary<string, string> queryParams, st
 
 ```csharp
 [WorkflowUpdate("external-event")]
-public async Task<string> ExternalEvent(IDictionary<string, string> queryParams, string body)
+public async Task<WebhookResponse> ExternalEvent(IDictionary<string, string> queryParams, string body)
 {
     var eventData = JsonSerializer.Deserialize<ExternalEvent>(body);
     
@@ -416,7 +486,9 @@ public async Task<string> ExternalEvent(IDictionary<string, string> queryParams,
             break;
     }
     
-    return "Event routed successfully";
+    var response = new WebhookResponse(HttpStatusCode.OK);
+    response.Content = "Event routed successfully";
+    return response;
 }
 ```
 

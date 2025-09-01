@@ -9,6 +9,7 @@ The `ForwardMessage` feature enables seamless communication between different bo
 Throughout this documentation, we'll use a comprehensive HR Management System to illustrate inter-bot communication. This system consists of:
 
 **System Components:**
+
 - **Router Bot**: Central coordinator that analyzes user queries and routes them to appropriate specialized bots
 - **HireBot**: Expert recruiter handling job openings, applications, interviews, and onboarding processes
 - **PayBot**: Payroll specialist managing salary information, deductions, reimbursements, and tax queries  
