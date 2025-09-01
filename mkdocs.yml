@@ -108,10 +108,11 @@ nav:
       - Skip LLM Response: 2-agent-communication/5-skip-llm-response.md
       - Welcome Message: 2-agent-communication/12-welcome-msg.md
     - Agent 2 Agent:
-      - Synchronous RPC: 2-agent-communication/16-synchronous-messages.md
+      - Synchronous Chat: 2-agent-communication/16-synchronous-chat.md
+      - Forwarding: 2-agent-communication/6-forward-message.md
+      - Synchronous Data RPC: 2-agent-communication/16-synchronous-data-rpc.md
       - Asynchronous Events: 2-agent-communication/1-events.md
       - Handoffs: 2-agent-communication/3-handoffs.md
-      - Forwarding: 2-agent-communication/6-forward-message.md
     - Advanced Topics:
       - Data Events: 2-agent-communication/8-handling-data-messages.md
       - Intercept Chat: 2-agent-communication/7-chat-interceptors.md

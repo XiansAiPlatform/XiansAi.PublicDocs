@@ -124,7 +124,8 @@ public class AskBotCapabilitiesForRouterBot
     [Returns("Response from Care Bot")]
     public async Task<string> AskFromCareBot(string routerBotMessage)
     {
-        return await _messageThread.ForwardMessage(typeof(CareBot), routerBotMessage);
+        var response = await _messageThread.ForwardMessage(typeof(CareBot), routerBotMessage);
+        return response.Text;
     }
 
     [Capability("Ask from Hire Bot")]
@@ -132,7 +133,8 @@ public class AskBotCapabilitiesForRouterBot
     [Returns("Response from Hire Bot")]
     public async Task<string> AskFromHireBot(string routerBotMessage)
     {
-        return await _messageThread.ForwardMessage(typeof(HireBot), routerBotMessage);
+        var response = await _messageThread.ForwardMessage(typeof(HireBot), routerBotMessage);
+        return response.Text;
     }
 
     [Capability("Ask from Pay Bot")]
@@ -140,7 +142,8 @@ public class AskBotCapabilitiesForRouterBot
     [Returns("Response from Pay Bot")]
     public async Task<string> AskFromPayBot(string routerBotMessage)
     {
-        return await _messageThread.ForwardMessage(typeof(PayBot), routerBotMessage);
+        var response = await _messageThread.ForwardMessage(typeof(PayBot), routerBotMessage);
+        return response.Text;
     }
 }
 ```
@@ -156,6 +159,19 @@ var response = await _messageThread.ForwardMessage(typeof(TargetBot), message);
 - `typeof(TargetBot)`: The type of the destination bot
 - `message`: The message content to be forwarded
 
+**Return Value:**
+- Returns a `MessageResponse` object containing:
+  - `Text`: The response message text
+  - `Data`: Optional structured data
+  - `Id`: Message identifier
+  - `Timestamp`: When the message was created
+  - `Direction`: Message direction (incoming/outgoing)
+  - `MessageType`: Type of message
+  - `Scope`: Message scope
+  - `Hint`: Optional hint information
+  - `RequestId`: Request identifier
+  - `ThreadId`: Thread identifier
+
 **Process Flow:**
 1. Router Bot receives user request
 2. Analyzes request and determines appropriate specialized bot
@@ -165,12 +181,54 @@ var response = await _messageThread.ForwardMessage(typeof(TargetBot), message);
 6. Response returns through message thread
 7. Router Bot synthesizes final response
 
-
-**Best Practices:**
+**Best Practices:
 - Use descriptive parameter names
 - Explain parameter content and format
 - Document return value expectations
 - Include context and requirements
+
+### Working with MessageResponse
+
+The `ForwardMessage` method returns a `MessageResponse` object that contains both the text response and additional metadata:
+
+```csharp
+[Capability("Advanced Web Search")]
+[Parameter("query", "Search query")]
+[Returns("Search results with metadata")]
+public async Task<string> AdvancedWebSearch(string query)
+{
+    var response = await _messageThread.ForwardMessage(typeof(WebBot), query);
+    
+    // Access the text response
+    var searchResults = response.Text;
+    
+    // Access additional metadata if needed
+    var messageId = response.Id;
+    var timestamp = response.Timestamp;
+    var threadId = response.ThreadId;
+    
+    // Access structured data if the bot returns it
+    if (response.Data != null)
+    {
+        // Process structured data
+        var structuredData = response.Data;
+    }
+    
+    return searchResults;
+}
+```
+
+**Available Properties:**
+- `Text`: The main response message text
+- `Data`: Optional structured data (can be any object)
+- `Id`: Unique message identifier
+- `Timestamp`: When the message was created
+- `Direction`: Message direction indicator
+- `MessageType`: Type classification of the message
+- `Scope`: Message scope information
+- `Hint`: Optional hint or context information
+- `RequestId`: Associated request identifier
+- `ThreadId`: Thread identifier for conversation tracking
 
 ## Communication Patterns
 
@@ -204,7 +262,8 @@ public async Task<string> BroadcastQuery(string query)
     };
     
     var responses = await Task.WhenAll(tasks);
-    return string.Join("\n---\n", responses);
+    var responseTexts = responses.Select(r => r.Text);
+    return string.Join("\n---\n", responseTexts);
 }
 ```
 
@@ -233,14 +292,14 @@ public async Task<string> SmartRoute(string query)
 [Returns("Fully processed result")]
 public async Task<string> PipelineProcess(string inputData)
 {
-    var stage1 = await _messageThread.ForwardMessage(typeof(HireBot), 
+    var stage1Response = await _messageThread.ForwardMessage(typeof(HireBot), 
         $"Validate and prepare: {inputData}");
-    var stage2 = await _messageThread.ForwardMessage(typeof(PayBot), 
-        $"Process data: {stage1}");
-    var stage3 = await _messageThread.ForwardMessage(typeof(CareBot), 
-        $"Format final output: {stage2}");
+    var stage2Response = await _messageThread.ForwardMessage(typeof(PayBot), 
+        $"Process data: {stage1Response.Text}");
+    var stage3Response = await _messageThread.ForwardMessage(typeof(CareBot), 
+        $"Format final output: {stage2Response.Text}");
     
-    return stage3;
+    return stage3Response.Text;
 }
 ```
 
@@ -257,19 +316,27 @@ public async Task<string> HandleEvent(string eventType, string eventData)
     switch (eventType)
     {
         case "NewEmployee":
-            responses.Add(await _messageThread.ForwardMessage(typeof(HireBot), 
-                $"Process new employee: {eventData}"));
-            responses.Add(await _messageThread.ForwardMessage(typeof(PayBot), 
-                $"Setup payroll for: {eventData}"));
-            responses.Add(await _messageThread.ForwardMessage(typeof(CareBot), 
-                $"Schedule orientation for: {eventData}"));
+            var hireResponse = await _messageThread.ForwardMessage(typeof(HireBot), 
+                $"Process new employee: {eventData}");
+            responses.Add(hireResponse.Text);
+            
+            var payResponse = await _messageThread.ForwardMessage(typeof(PayBot), 
+                $"Setup payroll for: {eventData}");
+            responses.Add(payResponse.Text);
+            
+            var careResponse = await _messageThread.ForwardMessage(typeof(CareBot), 
+                $"Schedule orientation for: {eventData}");
+            responses.Add(careResponse.Text);
             break;
             
         case "SalaryReview":
-            responses.Add(await _messageThread.ForwardMessage(typeof(PayBot), 
-                $"Review salary: {eventData}"));
-            responses.Add(await _messageThread.ForwardMessage(typeof(CareBot), 
-                $"Schedule review meeting: {eventData}"));
+            var payReviewResponse = await _messageThread.ForwardMessage(typeof(PayBot), 
+                $"Review salary: {eventData}");
+            responses.Add(payReviewResponse.Text);
+            
+            var careMeetingResponse = await _messageThread.ForwardMessage(typeof(CareBot), 
+                $"Schedule review meeting: {eventData}");
+            responses.Add(careMeetingResponse.Text);
             break;
     }
     
@@ -291,7 +358,7 @@ public async Task<string> SafeForwardMessage(Type botType, string message)
     try
     {
         var response = await _messageThread.ForwardMessage(botType, message);
-        return response ?? "No response received";
+        return response?.Text ?? "No response received";
     }
     catch (Exception ex)
     {
