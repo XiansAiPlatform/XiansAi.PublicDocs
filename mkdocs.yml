@@ -100,8 +100,7 @@ nav:
       - HTTP APIs: https://github.com/XiansAiPlatform/XiansAi.Server/blob/main/XiansAi.Server.Src/docs/user-api/index.md
     - Machine 2 Agent:
       - Webhooks: 2-agent-communication/17-webhooks.md
-    - Data Messages:
-      - Handle as RPC: 2-agent-communication/10-handling-data-rpc.md
+      - Data RPC via REST: 2-agent-communication/10-handling-data-rpc.md
     - Agent 2 User:
       - Responding to User: 2-agent-communication/4-responding.md
       - Proactive Communication: 2-agent-communication/15-proactive-messages.md
