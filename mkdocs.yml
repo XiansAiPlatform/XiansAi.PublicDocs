@@ -115,20 +115,20 @@ nav:
     - Advanced Topics:
       - Data Events: 2-agent-communication/8-handling-data-messages.md
       - Intercept Chat: 2-agent-communication/7-chat-interceptors.md
-  - Business Processes:
+  - Agent Automation:
     - Introduction: 4-automation/0-introduction.md
     - External Triggers: 4-automation/1-external-triggers.md
     - Scheduled Execution: 4-automation/2-scheduled-execution.md
     - Fault Tolerance: 4-automation/3-fault-tolerance.md
     - Long-Running Processes: 4-automation/4-long-running-processes.md
     - Creating Sub-Flows: 4-automation/5-creating-sub-flows.md
-  - Agent Evolution:
-    - Knowledge:
+  - Agent Memory:
+    - Knowledge Prompts:
       - Managing Knowledge: 3-knowledge/1-using-portal.md
       - Accessing Knowledge: 3-knowledge/2-accessing-knowledge.md
       - Capabilities as Knowledge: 3-knowledge/3-capabilities.md
       - Local Development: 3-knowledge/4-local-dev.md
-    - Structured Objects:
+    - Structured Memory:
       - Document Store: 3-knowledge/5-document-store.md
   - Encyclopedia:
     - MCP Integration: n-encyclopedia/mcp-integration.md

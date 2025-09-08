@@ -53,15 +53,11 @@ public class MyCapabilitiesTests
 ### Required .env Variables
 
 ```bash
-OPENAI_API_KEY=your_openai_key
 LOCAL_KNOWLEDGE_FOLDER=./local_knowledge  # Reduces server dependencies
+...
 ```
 
-### Benefits of LOCAL_KNOWLEDGE_FOLDER
-
-- Reduces external server dependencies during testing
-- Enables offline testing with cached knowledge
-- Faster test execution
+Benefits of LOCAL_KNOWLEDGE_FOLDER is that it reduces external server dependencies during testing. See [Local Development](../3-knowledge/4-local-dev.md) for more details.
 
 ## Test Categories
 
@@ -81,28 +77,10 @@ public async Task MyMethod_WithValidInput_ShouldReturnExpectedOutput(string inpu
 }
 ```
 
-### Integration Tests
-
-```csharp
-[Theory]
-[Trait("Category", "Integration")]
-[InlineData("https://example.com", 100)]
-public async Task MyMethod_WithRealData_ShouldReturnValidResult(string url, int minLength)
-{
-    // Act
-    var result = await new MyCapabilities(routerOptions).ExtractContent(new Uri(url));
-    
-    // Assert
-    Assert.NotNull(result);
-    Assert.True(result.Length >= minLength);
-}
-```
-
-## Agent-to-Agent Communication
+### Testing Agent-to-Agent Communication
 
 Agent2Agent chat message passing works seamlessly in unit tests when both agents are in the same .NET process. No special configuration needed.
 
-### Example Capability with Agent-to-Agent Call
 
 ```csharp
 public class MyCapabilities
@@ -114,65 +92,25 @@ public class MyCapabilities
         _routerOptions = routerOptions;
     }
     
-    [KernelFunction("generate_and_convert_report")]
-    [Description("Generates a markdown report and converts it to PDF")]
-    public async Task<string> GenerateAndConvertReport(string companyName, string data)
-    {
-        // Step 1: Generate markdown report using semantic router
-        var router = new SemanticRouter(_routerOptions);
-        var markdownContent = await router.RouteAsync(
-            $"Generate a professional report for {companyName} with this data: {data}",
-            "WebBot"
-        );
-        
-        // Step 2: Agent-to-Agent call to convert to PDF
-        var pdfPath = await router.RouteAsync(
-            $"Convert this markdown to PDF: {markdownContent}",
-            "ReporterBot"
-        );
-        
-        return pdfPath;
-    }
-}
-```
-
-### Testing Agent-to-Agent Communication
-
-```csharp
-[Theory]
-[Trait("Category", "Integration")]
-[InlineData("Acme Corp", "Revenue: $1M, Employees: 50, Founded: 2020")]
-public async Task GenerateAndConvertReport_WithValidData_ShouldReturnPdfPath(
-    string companyName, 
-    string companyData)
-{
-    // Arrange
-    var capability = new MyCapabilities(routerOptions);
     
-    // Act
-    var result = await capability.GenerateAndConvertReport(companyName, companyData);
-    
-    try
-    {
-        // Assert
-        Assert.NotNull(result);
-        Assert.NotEmpty(result);
-        Assert.EndsWith(".pdf", result, StringComparison.OrdinalIgnoreCase);
-        Assert.True(File.Exists(result), $"PDF file should exist at: {result}");
-        
-        Console.WriteLine($"Generated PDF: {result}");
-        
-        // Verify PDF is not empty
-        var fileInfo = new FileInfo(result);
-        Assert.True(fileInfo.Length > 0, "PDF should not be empty");
-    }
-    finally
-    {
-        // Cleanup
-        if (File.Exists(result))
+    [Capability("Determine if a company is a software product company (ISV) and is a small or medium enterprise (SME)")]
+    [Parameter("companyWebsite", "Website of the company to determine if it is a software product company (ISV)")]
+    [Returns("True if the company is a software product company (ISV), false otherwise")]
+    public async Task<bool> IsSMEProductCompany(Uri companyWebsite) {
+        var instruction = @$"
+            Url: {companyWebsite}
+            Read the content of the above url and return the content in markdown format.
+            Return the content in English.
+            Do not return any other text.
+            First try/retry with scraping tools. If fails try web automation tools. If still fails return text 'ERROR: <reason>'.
+        ";
+        // Call WebBot Agent to extract the content
+        var siteContent = await MessageHub.Agent2Agent.SendChat(typeof(WebBot), instruction);
+        if (string.IsNullOrEmpty(siteContent.Text) || siteContent.Text.StartsWith("ERROR"))
         {
-            File.Delete(result);
+            throw new Exception($"Error occurred in reading page content from: {companyWebsite}: {siteContent.Text}");
         }
+        return await IsSMEProductCompany(siteContent.Text);
     }
 }
 ```
@@ -187,35 +125,3 @@ dotnet test --filter "FullyQualifiedName~MyMethod_WithValidInput"
 dotnet test --filter "Category=Unit"
 dotnet test --filter "Category=Integration"
 ```
-
-## Best Practices
-
-1. **Static Constructor**: Use static constructor for one-time setup per test class
-2. **Router Options**: Pass `RouterOptions` to capabilities for LLM configuration
-3. **Test Categories**: Use `[Trait("Category", "Unit|Integration")]` to separate test types
-4. **Cleanup**: Use try/finally blocks for file cleanup in tests that create temporary files
-5. **Assertions**: Include descriptive error messages in assertions
-6. **Console Output**: Use `Console.WriteLine()` for debugging test results
-
-## Example Test Structure
-
-```csharp
-[Theory]
-[Trait("Category", "Integration")]
-[InlineData("input", "expected")]
-public async Task MethodName_WithCondition_ShouldExpectedBehavior(string input, string expected)
-{
-    // Arrange
-    var capability = new MyCapabilities(routerOptions);
-    
-    // Act
-    var result = await capability.MyMethod(input);
-    
-    // Assert
-    Assert.NotNull(result);
-    Assert.Equal(expected, result);
-    Console.WriteLine($"Result: {result}");
-}
-```
-
-This setup ensures your capability tests can leverage the full power of the Xians semantic router while maintaining fast, reliable test execution.
