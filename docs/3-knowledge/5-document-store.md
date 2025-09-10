@@ -6,6 +6,8 @@ Agents can save structured information through the Xians server. It should not b
 
 The Document Store provides a simple interface for agents to save, retrieve, and manage JSON documents. Documents are typed objects with metadata and support operations like create, read, update, delete, and query.
 
+**Important:** Documents have a default Time-to-Live (TTL) of 30 days and will be automatically deleted after this period unless explicitly configured otherwise.
+
 ## Interface
 
 The `IDocumentStore` interface provides the following operations:
@@ -218,11 +220,13 @@ public class DocumentOptions
 {
     /// <summary>
     /// Time-to-live in minutes. Document will be automatically deleted after this time.
+    /// Default is 43,200 minutes (30 days).
     /// </summary>
-    public int? TtlMinutes { get; set; }
+    public int? TtlMinutes { get; set; } = 43200; // 30 days default
 
     /// <summary>
     /// Whether to overwrite if a document with the same ID exists.
+    /// Default is false.
     /// </summary>
     public bool Overwrite { get; set; } = false;
 
@@ -230,6 +234,7 @@ public class DocumentOptions
     /// When true, uses the combination of Type and Key as the unique identifier.
     /// If a document with the same Type and Key exists, it will be updated.
     /// Requires both Type and Key to be set on the document.
+    /// Default is false.
     /// </summary>
     public bool UseKeyAsIdentifier { get; set; } = false;
 }
@@ -237,7 +242,7 @@ public class DocumentOptions
 
 ### TtlMinutes (Time-to-Live)
 
-Automatically delete documents after a specified time period:
+Automatically delete documents after a specified time period. **Default is 30 days (43,200 minutes)** if not specified.
 
 ```csharp
 var options = new DocumentOptions {
