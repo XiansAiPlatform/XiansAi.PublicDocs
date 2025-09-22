@@ -145,6 +145,7 @@ nav:
     - Scaling Agent Flows: n-encyclopedia/scaling-agents.md
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
     - Unit Testing: n-encyclopedia/unit-testing.md
+    - Agent Deployment: n-encyclopedia/deployment-options.md
 
   - Platform Development:
     - Start: platform-development/setup.md
