@@ -1,7 +1,7 @@
     using Temporalio.Workflows;
-    using XiansAi.Flow;
+    using Agentri.Flow;
     using ConversiveAgent;
-    using XiansAi.Messaging;
+    using Agentri.Messaging;
 
     [Workflow("Conversing Flow")]
     public class ConversingFlow: FlowBase

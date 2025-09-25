@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Temporalio.Workflows;
-using XiansAi.Flow;
+using Agentri.Flow;
 
 public class NewsReportRequest
 {

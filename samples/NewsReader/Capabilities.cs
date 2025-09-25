@@ -1,5 +1,5 @@
-using XiansAi.Events;
-using XiansAi.Flow.Router.Plugins;
+using Agentri.Events;
+using Agentri.Flow.Router.Plugins;
 
 public static class Capabilities
 {

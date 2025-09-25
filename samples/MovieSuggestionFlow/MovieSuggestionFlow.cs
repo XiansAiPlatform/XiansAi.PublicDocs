@@ -1,6 +1,6 @@
 using Temporalio.Workflows;
 using Temporalio.Activities;
-using XiansAi.Flow;
+using Agentri.Flow;
 
 [Workflow("Movie Suggestion Flow")]
 public class MovieSuggestionFlow: FlowBase

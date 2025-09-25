@@ -1,7 +1,7 @@
 using Temporalio.Activities;
 using Temporalio.Workflows;
-using XiansAi.Activity;
-using XiansAi.Flow;
+using Agentri.Activity;
+using Agentri.Flow;
 using System.Text.Json.Serialization;
 
 [Workflow("LinkedIn Reader")]
@@ -21,7 +21,7 @@ public class LinkedInReaderFlow: FlowBase
     }
 }
 
-[Agent("XiansAi.Agent.GoogleSearch", AgentType.Package)]
+[Agent("Agentri.Agent.GoogleSearch", AgentType.Package)]
 public interface IUrlSearchActivity
 {
     [Activity]

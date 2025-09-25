@@ -1,5 +1,5 @@
 using Temporalio.Workflows;
-using XiansAi.Flow;
+using Agentri.Flow;
 
 [Workflow("My News Reader 2:News Bot")]
 public class NewsReaderBot : FlowBase

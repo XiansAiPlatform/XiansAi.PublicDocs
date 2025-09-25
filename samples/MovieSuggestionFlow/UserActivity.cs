@@ -1,5 +1,5 @@
 using System.Text.Json;
-using XiansAi.Activity;
+using Agentri.Activity;
 
 public class UserActivity : ActivityBase, IUserActivity
 {

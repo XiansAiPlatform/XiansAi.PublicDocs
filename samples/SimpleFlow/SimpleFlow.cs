@@ -1,5 +1,5 @@
 using Temporalio.Workflows;
-using XiansAi.Flow;
+using Agentri.Flow;
 
 [Workflow("Simple Flow 49")]
 public class SimpleFlow: FlowBase
