@@ -38,7 +38,7 @@ Update your Program.cs:
 `Program.cs >`
 
 ```csharp
-using XiansAi.Flow;
+using Agentri.Flow;
 using DotNetEnv;
 
 // Load the environment variables from the .env file
@@ -60,7 +60,7 @@ await agent.RunAsync();
 ```csharp
 using Microsoft.Extensions.Logging;
 using Temporalio.Workflows;
-using XiansAi.Flow;
+using Agentri.Flow;
 
 [Workflow("News Agent:News Report Flow")]
 public class NewsReportFlow : FlowBase

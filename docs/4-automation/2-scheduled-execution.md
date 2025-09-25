@@ -21,7 +21,7 @@ The schedule processor is configured using the `SetScheduleProcessor` method on 
 
 ```csharp
 using Temporalio.Workflows;
-using XiansAi.Flow;
+using Agentri.Flow;
 
 [Workflow("Invoice Agent:User Request Flow")]
 public class UserRequestFlow : FlowBase
@@ -63,7 +63,7 @@ public class ScheduledProcessor
 To connect your workflow with a schedule processor, configure it in your `Program.cs`:
 
 ```csharp
-using XiansAi.Flow;
+using Agentri.Flow;
 using DotNetEnv;
 
 // Load environment configuration

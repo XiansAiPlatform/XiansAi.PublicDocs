@@ -16,7 +16,7 @@ XiansAi provides a robust logging system built on top of Microsoft.Extensions.Lo
 To use logging in your workflow or activity, first initialize a static logger instance:
 
 ```csharp
-using XiansAi.Logging;
+using Agentri.Logging;
 
 public class YourWorkflow : FlowBase
 {
@@ -62,8 +62,8 @@ Logs stored in the database have a **Time-To-Live (TTL) of 15 days**. After this
 
 ```csharp
 using Temporalio.Workflows;
-using XiansAi.Flow;
-using XiansAi.Logging;
+using Agentri.Flow;
+using Agentri.Logging;
 
 [Workflow("Example Workflow")]
 public class ExampleWorkflow : FlowBase
@@ -103,7 +103,7 @@ public class ExampleWorkflow : FlowBase
 
 ```csharp
 using Temporalio.Activities;
-using XiansAi.Logging;
+using Agentri.Logging;
 
 public interface IExampleActivity
 {

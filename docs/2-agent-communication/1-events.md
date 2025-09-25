@@ -15,7 +15,7 @@ Events in XiansAI allow flows to:
 To send an event from one flow to another, use the `MessageHub.SendFlowMessage` method. Here's how to implement it:
 
 ```csharp
-using XiansAi.Messaging;
+using Agentri.Messaging;
 
 // Define an event payload class
 public class NewsReportRequest
@@ -42,7 +42,7 @@ MessageHub.SendFlowMessage(
 To receive events in a flow, subscribe to them in the flow's constructor using the `_messageHub.SubscribeFlowMessageHandler` method:
 
 ```csharp
-using XiansAi.Flow;
+using Agentri.Flow;
 
 public class NewsReportFlow : FlowBase
 {
@@ -69,7 +69,7 @@ Here's a complete example showing how two flows can communicate using events:
 
 ```csharp
 using XiansAi.Flow.Router.Plugins;
-using XiansAi.Messaging;
+using Agentri.Messaging;
 
 [Capability("Send summary report")]
 [Parameter("url", "URL of the news article")]
@@ -88,8 +88,8 @@ public static string SendSummaryReport(string url, string recipientEmail)
 2. **Receiving Flow (NewsReportFlow.cs)**:
 
 ```csharp
-using XiansAi.Flow;
-using XiansAi.Messaging;
+using Agentri.Flow;
+using Agentri.Messaging;
 
 [Workflow("News Report Flow")]
 public class NewsReportFlow : FlowBase

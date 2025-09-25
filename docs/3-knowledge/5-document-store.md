@@ -24,7 +24,7 @@ The `IDocumentStore` interface provides the following operations:
 ### Saving Documents
 
 ```csharp
-using XiansAi.Memory;
+using Agentri.Memory;
 using System.Text.Json;
 
 // Object to be saved

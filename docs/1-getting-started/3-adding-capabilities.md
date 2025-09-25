@@ -20,7 +20,7 @@ In this guide, we'll focus on the first approach: adding a capability through a 
 Here's an example of a simple capability class using static methods:
 
 ```csharp
-using XiansAi.Flow.Router.Plugins;
+using Agentri.Flow.Router.Plugins;
 
 public static class Capabilities
 {    
@@ -82,8 +82,8 @@ Often, you'll need access to the `MessageThread` of the conversation within your
 To access the `MessageThread`, implement a constructor in your capability class that accepts a `MessageThread` parameter:
 
 ```csharp
-using XiansAi.Flow.Router.Plugins;
-using XiansAi.Messaging;
+using Agentri.Flow.Router.Plugins;
+using Agentri.Messaging;
 
 public class AssistantBotCapabilities
 {    
@@ -126,7 +126,7 @@ Register your capability class in your bot's configuration.
 ### For Static Capability Classes
 
 ```csharp
-using XiansAi.Flow;
+using Agentri.Flow;
 using DotNetEnv;
 
 // Load the environment variables from the .env file
@@ -146,7 +146,7 @@ await agent.RunAsync();
 When using capability classes that require `MessageThread` injection, use the generic method:
 
 ```csharp
-using XiansAi.Flow;
+using Agentri.Flow;
 using DotNetEnv;
 
 // Load the environment variables from the .env file

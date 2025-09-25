@@ -20,7 +20,7 @@ cd <Agent-Name>
 Add the Xians.ai SDK to your project:
 
 ```bash
-dotnet add package XiansAi.Lib
+dotnet add package Agentri.SDK
 ```
 
 ## Agent Configuration
@@ -38,7 +38,7 @@ In your program.cs file, you can configure the platform by setting the following
 `Program.cs >`
 
 ```csharp
-using XiansAi;
+using Agentri;
 
 // manually set the app server url and api key
 PlatformConfig.APP_SERVER_URL = "https://api.xians.ai";

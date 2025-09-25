@@ -8,7 +8,7 @@ Update your Program.cs:
 `Program.cs >`
 
 ```csharp
-using XiansAi.Flow;
+using Agentri.Flow;
 using DotNetEnv;
 
 // Load the environment variables from the .env file
@@ -32,7 +32,7 @@ To add a conversation bot to the agent, you need to add a new class to the agent
 
 ```csharp
 using Temporalio.Workflows;
-using XiansAi.Flow;
+using Agentri.Flow;
 
 [Workflow("News Agent:News Reader Bot")]
 public class NewsReaderBot : FlowBase
@@ -59,7 +59,7 @@ Notes:
 
 - The `[WorkflowRun]` and `[Workflow]` attributes are required to mark the method as the entry points for the workflow. You can see more about the Temporal.io workflow engine [here](https://docs.temporal.io).
 
-- InitConversation is a method that initializes the conversation with the user. It is a method that is provided by the XiansAi.Flow library.
+- InitConversation is a method that initializes the conversation with the user. It is a method that is provided by the Agentri.Flow library.
 
 - The InitConversation function is designed for flexibility and supports two usage patterns:
     -   Providing a system prompt (string): Users can directly pass a system prompt to define the initial context or instructions for the conversation.

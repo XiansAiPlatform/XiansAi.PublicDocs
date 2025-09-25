@@ -79,7 +79,7 @@ Use Temporal.io Workflow.ExecuteActivityAsync to call the above activities from 
 ```csharp
 using Microsoft.Extensions.Logging;
 using Temporalio.Workflows;
-using XiansAi.Flow;
+using Agentri.Flow;
 
 [Workflow("News Report Flow")]
 public class NewsReportFlow : FlowBase
@@ -124,7 +124,7 @@ Update `Program.cs` to include the activities:
 `Program.cs >`
 
 ```csharp
-using XiansAi.Flow;
+using Agentri.Flow;
 using DotNetEnv;
 
 // Load the environment variables from the .env file
