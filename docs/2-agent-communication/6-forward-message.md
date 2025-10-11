@@ -60,16 +60,16 @@ using DotNetEnv;
 
 Env.Load();
 
-var agent = new Agent("HR Agent");
+var agent = new AgentTeam("HR Agent");
 
 // Router Bot - Central communication hub
-var RouteBot = agent.AddBot<RouterBot>();
+var RouteBot = agent.AddAgent<RouterBot>();
 RouteBot.AddCapabilities<AskBotCapabilitiesForRouterBot>();
 
 // Specialized Bots
-var CareBot = agent.AddBot<CareBot>();
-var HireBot = agent.AddBot<HireBot>();
-var PayBot = agent.AddBot<PayBot>();
+var CareBot = agent.AddAgent<CareBot>();
+var HireBot = agent.AddAgent<HireBot>();
+var PayBot = agent.AddAgent<PayBot>();
 
 await agent.RunAsync();
 ```
@@ -370,8 +370,8 @@ public async Task<string> SafeForwardMessage(Type botType, string message)
 ### Configuration
 Ensure proper bot registration and capability assignment:
 ```csharp
-var agent = new Agent("Your Agent Name");
-var routerBot = agent.AddBot<RouterBot>();
+var agent = new AgentTeam("Your Agent Name");
+var routerBot = agent.AddAgent<RouterBot>();
 routerBot.AddCapabilities<InterBotCommunicationCapabilities>();
 ```
 

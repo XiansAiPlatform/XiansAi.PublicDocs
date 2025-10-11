@@ -40,17 +40,17 @@ public class MyCapabilitiesTests
         };
 
         // Create agent and add capabilities
-        var agent = new Agent("TestAgent");
+        var agent = new AgentTeam("TestAgent");
         
         // Add web bot with capabilities
-        var webBot = agent.AddBot<WebBot>(numberOfWorkers: 3);
+        var webBot = agent.AddAgent<WebBot>(numberOfWorkers: 3);
         webBot.AddCapabilities(typeof(MyCapability));
         webBot.AddCapabilities(typeof(FirecrawlCapability));
         webBot.AddCapabilities(typeof(GoogleSearchCapability));
         webBot.AddKernelModifier(new PlayWrightMCP());
 
         // Add reporter bot with kernel modifiers
-        var reporterBot = agent.AddBot<ReporterBot>();
+        var reporterBot = agent.AddAgent<ReporterBot>();
         reporterBot.AddKernelModifier(new MicrosoftO365MCP());
         reporterBot.AddKernelModifier(new PdfGeneratorMCP());
     }

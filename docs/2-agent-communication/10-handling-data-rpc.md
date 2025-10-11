@@ -33,10 +33,10 @@ public class DataProcessor
 Register the data processor with your flow in `Program.cs`:
 
 ```csharp
-var agent = new Agent("Legal Contract Agent");
+var agent = new AgentTeam("Legal Contract Agent");
 
 // Add flow
-var flow = agent.AddFlow<LegalContractFlow>();
+var flow = agent.AddAgent<LegalContractFlow>();
 flow.SetDataProcessor<DataProcessor>();  // Register the data processor
 
 await agent.RunAsync();

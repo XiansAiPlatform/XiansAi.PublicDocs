@@ -66,15 +66,15 @@ using Sensing.ConsultantNotes;
 Env.Load();
 
 // name your agent
-var agent = new Agent("Consultation Assist Agent");
+var agent = new AgentTeam("Consultation Assist Agent");
 
 // Configure Consultation Bot
-var consultationBot = agent.AddBot<ConsultationBot>();
+var consultationBot = agent.AddAgent<ConsultationBot>();
 consultationBot.AddCapabilities<UploadCapability>();
 consultationBot.AddCapabilities<HandoverCapabilities>();
 
 // Configure Medicine Info Bot
-var medicineInfoBot = agent.AddBot<MedicineInfoBot>();
+var medicineInfoBot = agent.AddAgent<MedicineInfoBot>();
 medicineInfoBot.AddCapabilities<FdaInfoCapabilities>();
 medicineInfoBot.AddCapabilities<HandoverCapabilities>();
 

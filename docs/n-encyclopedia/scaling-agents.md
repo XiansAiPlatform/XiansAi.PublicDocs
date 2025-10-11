@@ -23,8 +23,8 @@ By default, each Xians agent creates a **single worker** per workflow. This is s
 
 ```csharp
 // Default single worker configuration
-var agent = new Agent("ERP Agent");
-var bot = agent.AddBot<OrderBot>(); // Creates 1 worker by default
+var agent = new AgentTeam("ERP Agent");
+var bot = agent.AddAgent<OrderBot>(); // Creates 1 worker by default
 bot.AddCapabilities(typeof(OrderCapabilities));
 await agent.RunAsync();
 ```
@@ -35,10 +35,10 @@ For production environments requiring higher throughput, you can configure multi
 
 ```csharp
 // Multi-worker configuration for high throughput
-var agent = new Agent("ERP Agent");
+var agent = new AgentTeam("ERP Agent");
 
 // Configure 5 workers for the OrderBot workflow
-var bot = agent.AddBot<OrderBot>(numberOfWorkers: 5);
+var bot = agent.AddAgent<OrderBot>(numberOfWorkers: 5);
 bot.AddCapabilities(typeof(OrderCapabilities));
 await agent.RunAsync();
 ```
@@ -48,18 +48,18 @@ await agent.RunAsync();
 You can configure different worker counts for different workflows within the same agent:
 
 ```csharp
-var agent = new Agent("Multi-Service Agent");
+var agent = new AgentTeam("Multi-Service Agent");
 
 // High-throughput order processing
-var orderBot = agent.AddBot<OrderBot>(numberOfWorkers: 10);
+var orderBot = agent.AddAgent<OrderBot>(numberOfWorkers: 10);
 orderBot.AddCapabilities(typeof(OrderCapabilities));
 
 // Moderate-throughput inventory management
-var inventoryBot = agent.AddBot<InventoryBot>(numberOfWorkers: 3);
+var inventoryBot = agent.AddAgent<InventoryBot>(numberOfWorkers: 3);
 inventoryBot.AddCapabilities(typeof(InventoryCapabilities));
 
 // Low-throughput reporting
-var reportBot = agent.AddBot<ReportBot>(numberOfWorkers: 1);
+var reportBot = agent.AddAgent<ReportBot>(numberOfWorkers: 1);
 reportBot.AddCapabilities(typeof(ReportCapabilities));
 
 await agent.RunAsync();
@@ -73,8 +73,8 @@ Increase the `numberOfWorkers` parameter to handle more concurrent workflows wit
 
 ```csharp
 // Scale up workers within a single instance
-var agent = new Agent("High-Performance Agent");
-var bot = agent.AddBot<ProcessingBot>(numberOfWorkers: 20);
+var agent = new AgentTeam("High-Performance Agent");
+var bot = agent.AddAgent<ProcessingBot>(numberOfWorkers: 20);
 ```
 
 **When to use:**
@@ -89,8 +89,8 @@ Combine both approaches for maximum throughput:
 
 ```csharp
 // Multiple instances, each with multiple workers
-var agent = new Agent("Hybrid Scaled Agent");
-var bot = agent.AddBot<ProcessingBot>(numberOfWorkers: 8);
+var agent = new AgentTeam("Hybrid Scaled Agent");
+var bot = agent.AddAgent<ProcessingBot>(numberOfWorkers: 8);
 ```
 
 Deploy this configuration across multiple containers/servers for optimal scaling.
@@ -110,13 +110,13 @@ The optimal number of workers depends on several factors:
 
 ```csharp
 // CPU-intensive workflows
-var cpuBot = agent.AddBot<DataProcessingBot>(numberOfWorkers: Environment.ProcessorCount);
+var cpuBot = agent.AddAgent<DataProcessingBot>(numberOfWorkers: Environment.ProcessorCount);
 
 // I/O-intensive workflows (API calls, database operations)
-var ioBot = agent.AddBot<IntegrationBot>(numberOfWorkers: Environment.ProcessorCount * 2);
+var ioBot = agent.AddAgent<IntegrationBot>(numberOfWorkers: Environment.ProcessorCount * 2);
 
 // Memory-intensive workflows
-var memoryBot = agent.AddBot<AnalyticsBot>(numberOfWorkers: 2);
+var memoryBot = agent.AddAgent<AnalyticsBot>(numberOfWorkers: 2);
 ```
 
 ### Monitoring and Tuning
@@ -136,7 +136,7 @@ Begin with fewer workers and scale up based on monitoring data:
 
 ```csharp
 // Start with moderate scaling
-var bot = agent.AddBot<NewWorkflowBot>(numberOfWorkers: 3);
+var bot = agent.AddAgent<NewWorkflowBot>(numberOfWorkers: 3);
 ```
 
 ### 2. Environment-Specific Configuration
@@ -145,7 +145,7 @@ Use configuration files or environment variables for different environments:
 
 ```csharp
 var workerCount = int.Parse(Environment.GetEnvironmentVariable("WORKER_COUNT") ?? "1");
-var bot = agent.AddBot<ProductionBot>(numberOfWorkers: workerCount);
+var bot = agent.AddAgent<ProductionBot>(numberOfWorkers: workerCount);
 ```
 
 ### 3. Resource-Aware Scaling
@@ -154,7 +154,7 @@ Consider available resources when setting worker counts:
 
 ```csharp
 var maxWorkers = Math.Min(Environment.ProcessorCount * 2, 20);
-var bot = agent.AddBot<AdaptiveBot>(numberOfWorkers: maxWorkers);
+var bot = agent.AddAgent<AdaptiveBot>(numberOfWorkers: maxWorkers);
 ```
 
 ### Monitoring Commands

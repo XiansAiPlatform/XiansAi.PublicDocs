@@ -131,12 +131,12 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agent = new Agent("News Reader Agent");
+var agent = new AgentTeam("News Reader Agent");
 
-var flow = agent.AddFlow<NewsReportFlow>();
+var flow = agent.AddAgent<NewsReportFlow>();
 flow.AddActivities<INewsActivities, NewsActivities>();
 
-var bot = agent.AddBot<NewsReaderBot>();
+var bot = agent.AddAgent<NewsReaderBot>();
 bot.AddCapabilities(typeof(Capabilities));
 
 await agent.RunAsync();

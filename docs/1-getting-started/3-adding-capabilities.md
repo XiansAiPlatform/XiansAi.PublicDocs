@@ -133,9 +133,9 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agent = new Agent("News Reader Agent");
+var agent = new AgentTeam("News Reader Agent");
 
-var bot = agent.AddBot<NewsReaderBot>();
+var bot = agent.AddAgent<NewsReaderBot>();
 bot.AddCapabilities(typeof(Capabilities));
 
 await agent.RunAsync();
@@ -153,9 +153,9 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agent = new Agent("Assistant Agent");
+var agent = new AgentTeam("Assistant Agent");
 
-var bot = agent.AddBot<AssistantBot>();
+var bot = agent.AddAgent<AssistantBot>();
 bot.AddCapabilities<AssistantBotCapabilities>();
 
 await agent.RunAsync();

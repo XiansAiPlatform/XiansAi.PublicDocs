@@ -5,12 +5,12 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agent = new Agent("My News Reader 2");
+var agent = new AgentTeam("My News Reader 2");
 
-var flow = agent.AddFlow<NewsReportFlow>();
+var flow = agent.AddAgent<NewsReportFlow>();
 flow.AddActivities<INewsActivities, NewsActivities>();
 
-var bot = agent.AddBot<NewsReaderBot>();
+var bot = agent.AddAgent<NewsReaderBot>();
 bot.AddCapabilities<CapabilitiesInstance>();
 
 await agent.RunAsync();

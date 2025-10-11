@@ -70,10 +70,10 @@ using DotNetEnv;
 Env.Load();
 
 // Create agent
-var agent = new Agent("Scheduled Processing Agent");
+var agent = new AgentTeam("Scheduled Processing Agent");
 
 // Add flow and configure schedule processor
-var flow = agent.AddFlow<UserRequestFlow>();
+var flow = agent.AddAgent<UserRequestFlow>();
 flow.SetScheduleProcessor<ScheduledProcessor>();
 
 // Run the agent
@@ -199,7 +199,7 @@ Controls whether schedules begin executing immediately when the workflow starts:
 
 ```csharp
 // Simple scheduled tasks with default settings
-var flow = agent.AddFlow<UserRequestFlow>();
+var flow = agent.AddAgent<UserRequestFlow>();
 flow.SetScheduleProcessor<ScheduledProcessor>();
 ```
 
@@ -207,7 +207,7 @@ flow.SetScheduleProcessor<ScheduledProcessor>();
 
 ```csharp
 // Complex orchestration with manual control
-var flow = agent.AddFlow<UserRequestFlow>();
+var flow = agent.AddAgent<UserRequestFlow>();
 flow.SetScheduleProcessor<ScheduledProcessor>(
     processInWorkflow: true,     // Enable workflow features
     startAutomatically: false    // Manual schedule control
@@ -218,7 +218,7 @@ flow.SetScheduleProcessor<ScheduledProcessor>(
 
 ```csharp
 // Financial processing that requires workflow capabilities
-var flow = agent.AddFlow<FinancialWorkflow>();
+var flow = agent.AddAgent<FinancialWorkflow>();
 flow.SetScheduleProcessor<FinancialProcessor>(
     processInWorkflow: true,     // Need timers and signals for approvals
     startAutomatically: false    // Start only after compliance checks

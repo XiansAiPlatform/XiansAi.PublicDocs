@@ -15,9 +15,9 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agent = new Agent("News Agent");
+var agent = new AgentTeam("News Agent");
 
-var bot = agent.AddBot<NewsReaderBot>();
+var bot = agent.AddAgent<NewsReaderBot>();
 
 await agent.RunAsync();
 ```

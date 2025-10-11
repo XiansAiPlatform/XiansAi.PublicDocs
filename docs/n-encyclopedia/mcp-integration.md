@@ -72,10 +72,10 @@ using DotNetEnv;
 Env.Load();
 
 // Create your agent
-var agent = new Agent("A2A Agent Team");
+var agent = new AgentTeam("A2A Agent Team");
 
 // Create and configure your bot
-var webBot = agent.AddBot<WebBot>();
+var webBot = agent.AddAgent<WebBot>();
 webBot.AddKernelModifier(new PlayWriteMCP());
 
 await agent.RunAsync();

@@ -66,9 +66,9 @@ using DotNetEnv;
 Env.Load();
 
 // name your agent
-var agent = new Agent("Your Agent Name");
+var agent = new AgentTeam("Your Agent Name");
 
-var bot = agent.AddBot<YourBot>();
+var bot = agent.AddAgent<YourBot>();
 bot.AddCapabilities<HandoffCapabilities>();
 
 await agent.RunAsync();

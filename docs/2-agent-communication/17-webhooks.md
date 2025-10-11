@@ -238,10 +238,10 @@ using DotNetEnv;
 Env.Load();
 
 // Create agent
-var agent = new Agent("Agent Team");
+var agent = new AgentTeam("Agent Team");
 
 // Add webhook bot
-var webhookBot = agent.AddBot<WebhookBot>();
+var webhookBot = agent.AddAgent<WebhookBot>();
 
 // Run agent
 await agent.RunAsync();

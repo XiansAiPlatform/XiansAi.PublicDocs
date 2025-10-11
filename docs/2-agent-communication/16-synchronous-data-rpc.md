@@ -112,8 +112,8 @@ public class DocumentDataProcessor
 Register the processor with your flow:
 
 ```csharp
-var agent = new Agent("Document Processor Agent");
-var flow = agent.AddFlow<DocumentProcessorFlow>();
+var agent = new AgentTeam("Document Processor Agent");
+var flow = agent.AddAgent<DocumentProcessorFlow>();
 flow.SetDataProcessor<DocumentDataProcessor>();  // Enable RPC handling
 await agent.RunAsync();
 ```

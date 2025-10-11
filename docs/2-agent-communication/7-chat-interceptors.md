@@ -124,9 +124,9 @@ using Agents.LegalContract;
 Env.Load();
 Console.WriteLine("Starting Legal Contract Agent...\n");
 
-var agent = new Agent("Legal Contract Agent");
+var agent = new AgentTeam("Legal Contract Agent");
 
-var bot = agent.AddBot<LegalContractBot>();
+var bot = agent.AddAgent<LegalContractBot>();
 bot.AddCapabilities(typeof(GeneralCapabilities));
 
 // Set the chat interceptor

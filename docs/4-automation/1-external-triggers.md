@@ -76,8 +76,8 @@ Workflows receive Data messages using RPC-style method invocation:
 Configure data processing in your workflow:
 
 ```csharp
-var agent = new Agent("Document Agent");
-var flow = agent.AddFlow<DocumentFlow>();
+var agent = new AgentTeam("Document Agent");
+var flow = agent.AddAgent<DocumentFlow>();
 
 // Option 1: Process in Temporal Activity (default)
 flow.SetDataProcessor<DocumentProcessor>();
