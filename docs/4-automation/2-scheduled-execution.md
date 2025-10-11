@@ -1,8 +1,13 @@
-# Scheduled Execution
+# Scheduled Execution (Alternative Method)
 
 ## Overview
 
-The XiansAi platform provides powerful scheduling capabilities that enable AI agents to execute workflows automatically at predetermined times or intervals. Built on Temporal's robust workflow engine, scheduled execution is essential for automating routine business processes, generating reports, performing maintenance operations, and ensuring time-sensitive tasks execute reliably.
+This document describes an alternative method for scheduling agent workflows using schedule attributes and processors. **This approach is less recommended due to stability concerns** and should only be used for specific use cases where the standard Temporal scheduling features are not suitable.
+
+!!! warning "Recommended Approach"
+    For most scheduling use cases, use [Flow Scheduling](2-flow-scheduling.md) instead, which leverages Temporal's native scheduling features and provides better stability and reliability.
+
+This alternative method enables AI agents to execute workflows automatically at predetermined times or intervals using schedule attributes within the workflow itself. While functional, it does not utilize Temporal's native scheduling infrastructure and may have limitations in terms of robustness and fault tolerance.
 
 ## How Scheduled Execution Works
 
@@ -429,4 +434,24 @@ public void MonthEndProcessing()
 }
 ```
 
-Scheduled execution in XiansAi provides a powerful foundation for building reliable, time-based automation that keeps your business processes running smoothly around the clock. The combination of various schedule attributes, knowledge-based configuration, and robust workflow engine ensures your scheduled tasks execute reliably and can adapt to changing business needs.
+## When to Use This Approach
+
+This alternative scheduling method may be appropriate for:
+
+- Legacy systems being migrated to the XiansAi platform
+- Specialized scheduling requirements not supported by Temporal's native features
+- Experimental or prototype workflows
+
+For production systems and standard scheduling needs, **use [Flow Scheduling](2-flow-scheduling.md)** instead, which provides better stability, reliability, and leverages Temporal's proven scheduling infrastructure.
+
+## Comparison with Flow Scheduling
+
+| Feature | Flow Scheduling (Recommended) | Scheduled Execution (Alternative) |
+|---------|-------------------------------|----------------------------------|
+| **Stability** | High - Uses Temporal's native scheduling | Lower - Custom implementation |
+| **Reliability** | Production-ready with proven fault tolerance | May have limitations |
+| **Ease of Use** | Simple setup with `SetScheduleAsync` | Requires processor configuration |
+| **Maintenance** | Managed by Temporal | Requires additional oversight |
+| **Use Case** | Recommended for all production scenarios | Specific legacy or edge cases |
+
+For most use cases, the schedule attributes and processor configuration described in this document should be replaced with the simpler and more reliable [Flow Scheduling](2-flow-scheduling.md) approach.

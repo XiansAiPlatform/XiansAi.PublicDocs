@@ -118,7 +118,10 @@ nav:
   - Agent Automation:
     - Introduction: 4-automation/0-introduction.md
     - External Triggers: 4-automation/1-external-triggers.md
-    - Scheduled Execution: 4-automation/2-scheduled-execution.md
+    - Scheduling:
+      - Flow Scheduling: 4-automation/2-flow-scheduling.md
+      - Scheduling SDK: 4-automation/2-scheduling-sdk.md
+      - Scheduled Execution: 4-automation/2-scheduled-execution.md
     - Fault Tolerance: 4-automation/3-fault-tolerance.md
     - Long-Running Processes: 4-automation/4-long-running-processes.md
     - Creating Sub-Flows: 4-automation/5-creating-sub-flows.md
