@@ -146,6 +146,7 @@ nav:
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
     - Unit Testing: n-encyclopedia/unit-testing.md
     - Agent Deployment: n-encyclopedia/deployment-options.md
+    - System-Scoped Agents: n-encyclopedia/system-scoped-agents.md
 
   - Platform Development:
     - Start: platform-development/setup.md
