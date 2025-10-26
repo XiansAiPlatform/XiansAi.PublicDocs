@@ -16,7 +16,7 @@ Webhooks in XiansAI allow external systems to:
 All webhook requests follow this standardized URL format:
 
 ```http
-POST <server-url>/api/user/webhooks/{workflow}/{methodName}?tenantId={tenantId}&apikey={apikey}&[additional-params]
+POST <server-url>/api/user/webhooks/{workflow}/{methodName}?apikey={apikey}&[additional-params]
 ```
 
 ### URL Parameters
@@ -25,12 +25,20 @@ POST <server-url>/api/user/webhooks/{workflow}/{methodName}?tenantId={tenantId}&
 |-----------|-------------|----------|
 | `workflow` | Either the WorkflowId or the WorkflowType | ✅ Yes |
 | `methodName` | Name of the Temporal Update method to invoke | ✅ Yes |
-| `tenantId` | Valid tenant identifier | ✅ Yes |
-| `apikey` | Valid API key for the tenant | ✅ Yes |
+| `apikey` | Valid API key for authentication | ✅ Yes |
+| `tenantId` | Tenant identifier (automatically derived from API key if not provided) | ❌ Optional* |
 | `additional-params` | Custom query parameters passed to the method | ❌ Optional |
 
-### Example URL
+*The tenant is automatically determined from the API key. You can optionally provide `tenantId` for backward compatibility, but it must match the API key's tenant.
 
+### Example URLs
+
+**Recommended (secure):**
+```http
+POST http://localhost:5000/api/user/webhooks/A2A%20Agent%20Team%3A%20Webhook%20Bot/mail-received?apikey=sk-Xnai-jJlpoIrOxiAhrOwOsB1xuO96TfEfZYmJa2u6xMqXjZg&param=param-value
+```
+
+**Legacy (with explicit tenantId):**
 ```http
 POST http://localhost:5000/api/user/webhooks/A2A%20Agent%20Team%3A%20Webhook%20Bot/mail-received?apikey=sk-Xnai-jJlpoIrOxiAhrOwOsB1xuO96TfEfZYmJa2u6xMqXjZg&tenantId=default&param=param-value
 ```
@@ -61,7 +69,7 @@ public async Task<WebhookResponse> WebhookUpdateMethod(IDictionary<string, strin
 
 - **Update Name**: Must match the `methodName` in the webhook URL
 - **Parameters**:
-  - `queryParams`: Contains all query parameters except `apikey` and `tenantId`
+  - `queryParams`: Contains all query parameters except `apikey` (and `tenantId` if provided)
   - `body`: Contains the raw request body as a string
 - **Return Type**: Must return a `WebhookResponse` object which allows you to control the HTTP status code, content, and content type sent back to the webhook caller.
 
@@ -257,13 +265,15 @@ All webhook requests must include a valid API key in the query parameters:
 ?apikey=<your-api-key>
 ```
 
+The API key provides both authentication and authorization. The system automatically extracts the tenant information from the authenticated API key, ensuring secure tenant isolation.
+
 ### Tenant Isolation
 
-Webhooks are tenant-scoped using the `tenantId` parameter:
+Webhooks are automatically tenant-scoped based on the authenticated API key. The tenant associated with the API key is used to identify and route the webhook to the correct workflow instance.
 
-```http
-?tenantId=default
-```
+**Security Best Practice:** Do not include the `tenantId` parameter in your webhook URLs. Let the system derive it from your API key to prevent potential security issues.
+
+**Legacy Support:** If you need to include `tenantId` for backward compatibility, it must exactly match the tenant associated with your API key, otherwise the request will be rejected.
 
 ## Testing Webhooks
 
@@ -273,8 +283,10 @@ Webhooks are tenant-scoped using the `tenantId` parameter:
 curl -X POST \
   -H "Content-Type: application/json" \
   -d '{"message": "Test message", "timestamp": "2024-01-15T10:30:00Z"}' \
-  "http://localhost:5000/api/user/webhooks/WebhookBot/mail-received?apikey=your-api-key&tenantId=default&source=email"
+  "http://localhost:5000/api/user/webhooks/WebhookBot/mail-received?apikey=your-api-key&source=email"
 ```
+
+**Note:** The tenant is automatically derived from your API key. You don't need to include `tenantId` in the URL.
 
 ## Common Use Cases
 
