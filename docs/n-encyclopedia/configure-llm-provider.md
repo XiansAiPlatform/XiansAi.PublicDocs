@@ -62,15 +62,16 @@ AgentContext.RouterOptions = new RouterOptions
 ### Example Implementation
 
 ```csharp
-// Configure Azure OpenAI for this agent
-AgentContext.RouterOptions = new RouterOptions
-{
-    ProviderName = "azureopenai",
-    ApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY"),
-    ModelName = "gpt-4",
-    DeploymentName = "gpt-4-deployment",
-    Endpoint = "https://your-resource.openai.azure.com/"
-};
+    Env.Load(".env")
+    // Configure Azure OpenAI for this agent
+    AgentContext.RouterOptions = new RouterOptions
+    {
+        ProviderName = "azureopenai",
+        ApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY"),
+        ModelName = "gpt-4",
+        DeploymentName = "gpt-4-deployment",
+        Endpoint = "https://your-resource.openai.azure.com/"
+    };
 ```
 
 ## Method 2: Server-Level Configuration
