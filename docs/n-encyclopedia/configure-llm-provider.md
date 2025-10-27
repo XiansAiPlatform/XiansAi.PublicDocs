@@ -90,13 +90,6 @@ public class MyWorkflow : FlowBase
 }
 ```
 
-### Security Best Practices
-
-1. **Never hardcode credentials**: Use secure storage or environment variables
-2. **Use separate deployments**: Different environments (dev, staging, production) should use different deployments
-3. **Rotate keys regularly**: Implement a key rotation strategy
-4. **Implement least privilege**: Grant only necessary permissions
-
 ## Method 2: Server-Level Configuration
 
 Configure Azure OpenAI at the XiansAi.Server level using environment variables. This approach centralizes LLM configuration and applies it globally to all agents.
