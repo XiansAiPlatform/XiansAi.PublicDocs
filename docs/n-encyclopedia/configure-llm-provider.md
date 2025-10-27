@@ -192,52 +192,6 @@ To obtain the necessary credentials:
 3. **Note your endpoint**: Found in the Azure OpenAI resource overview
 4. **Get your API key**: Available in the "Keys and Endpoint" section
 
-## Troubleshooting
-
-### Common Issues
-
-#### Authentication Errors
-- **Issue**: "Incorrect API key provided"
-- **Solution**: Verify your `LLM_API_KEY` or `ApiKey` is correct and has proper permissions
-
-#### Endpoint Errors
-- **Issue**: "Connection refused" or "Invalid endpoint"
-- **Solution**: Ensure your `LLM_ENDPOINT` is in the correct format and includes the trailing slash
-
-#### Model Not Available
-- **Issue**: "Model not found" or "Deployment not found"
-- **Solution**: Verify your deployment name matches the one in Azure Portal
-
-#### Regional Restrictions
-- **Issue**: Model availability issues
-- **Solution**: Ensure your Azure OpenAI resource is in a supported region with model availability
-
-## Best Practices
-
-### 1. Security
-- Use environment variables for sensitive data
-- Implement key rotation procedures
-- Use Azure Key Vault for production deployments
-- Never commit credentials to version control
-
-### 2. Performance
-- Choose appropriate models for your use case
-- Monitor token usage and costs
-- Implement rate limiting if needed
-- Use caching where applicable
-
-### 3. Reliability
-- Configure retry policies for transient failures
-- Implement proper error handling
-- Monitor API usage and quotas
-- Use deployment slots for different environments
-
-### 4. Cost Management
-- Monitor token usage through Azure Portal
-- Implement spending limits
-- Use appropriate models for the task complexity
-- Leverage caching to reduce API calls
-
 ## Next Steps
 
 - Learn about [retry policies](retry-policy.md) for LLM operations
