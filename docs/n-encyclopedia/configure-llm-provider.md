@@ -62,32 +62,15 @@ AgentContext.RouterOptions = new RouterOptions
 ### Example Implementation
 
 ```csharp
-using XiansAi.Flow;
-using XiansAi.Common;
-
-[Workflow("My Workflow")]
-public class MyWorkflow : FlowBase
+// Configure Azure OpenAI for this agent
+AgentContext.RouterOptions = new RouterOptions
 {
-    public MyWorkflow()
-    {
-        // Configure Azure OpenAI for this agent
-        AgentContext.RouterOptions = new RouterOptions
-        {
-            ProviderName = "azureopenai",
-            ApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY"),
-            ModelName = "gpt-4",
-            DeploymentName = "gpt-4-deployment",
-            Endpoint = "https://your-resource.openai.azure.com/"
-        };
-    }
-
-    [WorkflowRun]
-    public async Task<string> Run(string input)
-    {
-        // Your workflow logic here
-        return "Completed";
-    }
-}
+    ProviderName = "azureopenai",
+    ApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY"),
+    ModelName = "gpt-4",
+    DeploymentName = "gpt-4-deployment",
+    Endpoint = "https://your-resource.openai.azure.com/"
+};
 ```
 
 ## Method 2: Server-Level Configuration
