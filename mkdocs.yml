@@ -153,6 +153,7 @@ nav:
 
   - Platform Development:
     - Start: platform-development/setup.md
+    - Learning Path: platform-development/learning-path.md
 
 markdown_extensions:
   # Python Markdown
