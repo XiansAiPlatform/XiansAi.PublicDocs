@@ -114,7 +114,6 @@ nav:
       - Handoffs: 2-agent-communication/3-handoffs.md
     - Advanced Topics:
       - Data Events: 2-agent-communication/8-handling-data-messages.md
-      - Intercept Chat: 2-agent-communication/7-chat-interceptors.md
   - Agent Automation:
     - Introduction: 4-automation/0-introduction.md
     - External Triggers: 4-automation/1-external-triggers.md
@@ -133,13 +132,15 @@ nav:
       - Local Development: 3-knowledge/4-local-dev.md
     - Structured Memory:
       - Document Store: 3-knowledge/5-document-store.md
-  - Encyclopedia:
-    - MCP Integration: n-encyclopedia/mcp-integration.md
-    - User Auth Configuration: n-encyclopedia/user-auth-config.md
-    - Chat Message Encryption: n-encyclopedia/chat-message-encryption.md
+  - LLM Inference:
     - LLM Completion: n-encyclopedia/llm-completion.md
     - Configure LLM Provider: n-encyclopedia/configure-llm-provider.md
+    - MCP Integration: n-encyclopedia/mcp-integration.md
     - Limiting Token Usage: n-encyclopedia/limiting-chat-router-tokens.md
+    - Intercept Chat: 2-agent-communication/7-chat-interceptors.md
+  - Encyclopedia:
+    - User Auth Configuration: n-encyclopedia/user-auth-config.md
+    - Chat Message Encryption: n-encyclopedia/chat-message-encryption.md
     - Retry Policy: n-encyclopedia/retry-policy.md
     - Logging: n-encyclopedia/logging.md
     - AgentContext: n-encyclopedia/agent-context.md
@@ -151,7 +152,6 @@ nav:
     - Unit Testing: n-encyclopedia/unit-testing.md
     - Agent Deployment: n-encyclopedia/deployment-options.md
     - System-Scoped Agents: n-encyclopedia/system-scoped-agents.md
-
   - Platform Development:
     - Start: platform-development/setup.md
     - Learning Path: platform-development/learning-path.md
@@ -246,11 +246,6 @@ extra:
     - icon: fontawesome/solid/globe
       link: https://xians.ai
       name: Official Website
-  
-  # Version information
-  version:
-    provider: mike
-    default: latest
   
   # Announcement banner
   announcement: 

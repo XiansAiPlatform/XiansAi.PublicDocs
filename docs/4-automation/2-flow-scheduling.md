@@ -115,7 +115,3 @@ Flow scheduling is ideal for:
 ## Additional Resources
 
 For more detailed information on Temporal scheduling features and advanced configuration options, refer to the [Temporal Schedules documentation](https://docs.temporal.io/develop/dotnet/schedules).
-
-
-
-
