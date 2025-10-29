@@ -187,7 +187,7 @@ To obtain the necessary credentials:
 
 ## Next Steps
 
-- Learn about [retry policies](retry-policy.md) for LLM operations
+- Learn about [retry policies](../n-encyclopedia/retry-policy.md) for LLM operations
 - Explore [LLM completion options](llm-completion.md)
-- Review [deployment options](deployment-options.md) for production
+- Review [deployment options](../n-encyclopedia/deployment-options.md) for production
 

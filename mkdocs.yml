@@ -92,6 +92,7 @@ nav:
       - Adding Capabilities: 1-getting-started/3-adding-capabilities.md
     - Deterministic:
       - Business Process Flows: 1-getting-started/4-new-business-process.md
+      - Adding Activities (Deprecated): 1-getting-started/5-adding-activities.md
   - Agent Interactions:
     - Chat & Data Types: 2-agent-communication/13-message-types.md
     - Threads & Scopes: 2-agent-communication/11-thread-and-scope.md
@@ -102,6 +103,7 @@ nav:
       - Webhooks: 2-agent-communication/17-webhooks.md
       - Data RPC via REST: 2-agent-communication/10-handling-data-rpc.md
     - Agent 2 User:
+      - Sending Messages: 2-agent-communication/2-messaging.md
       - Responding to User: 2-agent-communication/4-responding.md
       - Proactive Communication: 2-agent-communication/15-proactive-messages.md
       - Skip LLM Response: 2-agent-communication/5-skip-llm-response.md
@@ -125,6 +127,7 @@ nav:
     - Long-Running Processes: 4-automation/4-long-running-processes.md
     - Creating Sub-Flows: 4-automation/5-creating-sub-flows.md
   - Agent Memory:
+    - Types of Memory: 3-knowledge/6-types-of-memory.md
     - Knowledge Prompts:
       - Managing Knowledge: 3-knowledge/1-using-portal.md
       - Accessing Knowledge: 3-knowledge/2-accessing-knowledge.md
@@ -133,11 +136,12 @@ nav:
     - Structured Memory:
       - Document Store: 3-knowledge/5-document-store.md
   - LLM Inference:
-    - LLM Completion: n-encyclopedia/llm-completion.md
-    - Configure LLM Provider: n-encyclopedia/configure-llm-provider.md
-    - MCP Integration: n-encyclopedia/mcp-integration.md
-    - Limiting Token Usage: n-encyclopedia/limiting-chat-router-tokens.md
-    - Intercept Chat: 2-agent-communication/7-chat-interceptors.md
+    - Orchestrator Selection: 5-inference/orchestrator-selection.md
+    - LLM Completion: 5-inference/llm-completion.md
+    - Configure LLM Provider: 5-inference/configure-llm-provider.md
+    - MCP Integration: 5-inference/mcp-integration.md
+    - Limiting Token Usage: 5-inference/limiting-chat-router-tokens.md
+    - Intercept Chat: 5-inference/7-chat-interceptors.md
   - Encyclopedia:
     - User Auth Configuration: n-encyclopedia/user-auth-config.md
     - Chat Message Encryption: n-encyclopedia/chat-message-encryption.md
@@ -150,8 +154,10 @@ nav:
     - Scaling Agent Flows: n-encyclopedia/scaling-agents.md
     - Workflow Best Practices: n-encyclopedia/wf-best-practices.md
     - Unit Testing: n-encyclopedia/unit-testing.md
+    - Unit Testing Activities: n-encyclopedia/unit-testing-activities.md
     - Agent Deployment: n-encyclopedia/deployment-options.md
     - System-Scoped Agents: n-encyclopedia/system-scoped-agents.md
+    - WebSocket Access: n-encyclopedia/access-agents-via-websocket.md
   - Platform Development:
     - Start: platform-development/setup.md
     - Learning Path: platform-development/learning-path.md
@@ -222,6 +228,8 @@ plugins:
   - git-revision-date-localized:
       enable_creation_date: true
       type: timeago
+      fallback_to_build_date: true
+      enable_git_follow: false
 
 # Configuration
 use_directory_urls: true
