@@ -42,7 +42,16 @@ pip install -r requirements.txt
 ```
 
 ### Run the server
-
 ```bash
 mkdocs serve
+```
+or
+```bash
+python -m mkdocs serve -a 127.0.0.1:8000
+```
+
+If the above doesn’t work in Git Bash on Windows, try:
+
+```bash
+py -3.13 -m mkdocs serve -a 127.0.0.1:8000
 ```

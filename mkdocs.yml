@@ -161,6 +161,8 @@ nav:
   - Platform Development:
     - Start: platform-development/setup.md
     - Learning Path: platform-development/learning-path.md
+    - Experiences: platform-development/experiences.md
+    - Design Patterns: platform-development/experiences.md
 
 markdown_extensions:
   # Python Markdown
