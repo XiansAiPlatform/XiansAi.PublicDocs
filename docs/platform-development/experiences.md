@@ -3,9 +3,6 @@ title: Knowledge Document
 summary: Consolidated insights and learnings from monthly knowledge-sharing sessions, organized by key knowledge areas.
 ---
 
-# Knowledge Document
-
-This document consolidates insights and learnings from monthly knowledge-sharing sessions, organized into chapters by key knowledge areas. Each chapter captures relevant solutions, challenges, and learnings from various projects to facilitate cross-team learning and future reference.
 
 ## Chapter 1: Data Processing and Token Management
 
