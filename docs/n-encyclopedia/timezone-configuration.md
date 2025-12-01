@@ -11,7 +11,7 @@ By default, agents are configured to use **UTC** timezone. You can override this
 
 Both methods are recommended and can be used together for maximum control.
 
-## 1. Configuring Timezone via RunnerOptions
+## Configuring Timezone via RunnerOptions
 
 Configure the timezone in your `Program.cs` file using `RunnerOptions`. This sets the default timezone that the agent will initially see (take as Local Time).
 
@@ -51,7 +51,7 @@ var options = new RunnerOptions
 };
 ```
 
-## 2. Setting Guardrails in System Prompt
+## Setting Guardrails in System Prompt
 
 Regardless of the timezone set in `RunnerOptions`, you can add explicit instructions in your agent's system prompt to enforce specific timezone behavior. This provides fine-grained control and helps prevent the agent from using unauthorized timezones.
 
