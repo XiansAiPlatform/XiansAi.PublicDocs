@@ -18,6 +18,9 @@ Configure the timezone in your `Program.cs` file using `RunnerOptions`. This set
 ### Default Configuration (UTC)
 
 ```csharp
+using XiansAi.Flow;
+using XiansAi.Models;
+
 var options = new RunnerOptions
 {
     SystemScoped = false,
@@ -31,6 +34,7 @@ To use the timezone of the server/hosted environment:
 
 ```csharp
 using XiansAi.Flow;
+using XiansAi.Models;
 
 var options = new RunnerOptions
 {
@@ -44,6 +48,9 @@ var options = new RunnerOptions
 You can set the agent to any specific timezone by selecting from the available `Timezone` enum values:
 
 ```csharp
+using XiansAi.Flow;
+using XiansAi.Models;
+
 var options = new RunnerOptions
 {
     SystemScoped = false,
@@ -115,6 +122,7 @@ Here's a complete example combining both methods:
 **Program.cs:**
 ```csharp
 using XiansAi.Flow;
+using XiansAi.Models;
 
 var options = new RunnerOptions
 {
