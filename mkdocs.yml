@@ -145,6 +145,7 @@ nav:
   - Encyclopedia:
     - User Auth Configuration: n-encyclopedia/user-auth-config.md
     - Chat Message Encryption: n-encyclopedia/chat-message-encryption.md
+    - Timezone Configuration: n-encyclopedia/timezone-configuration.md
     - Retry Policy: n-encyclopedia/retry-policy.md
     - Logging: n-encyclopedia/logging.md
     - AgentContext: n-encyclopedia/agent-context.md
