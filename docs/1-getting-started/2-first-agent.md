@@ -14,8 +14,12 @@ using DotNetEnv;
 // Load the environment variables from the .env file
 Env.Load();
 
+var options = new RunnerOptions {
+   SystemScoped = true
+}; 
+
 // name your agent
-var agent = new AgentTeam("News Agent");
+var agent = new AgentTeam("News Agent", options);
 
 var bot = agent.AddAgent<NewsReaderBot>();
 
